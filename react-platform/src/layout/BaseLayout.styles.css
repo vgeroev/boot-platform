@@ -1,0 +1,12 @@
+.header {
+  text-align: "";
+  color: #fff;
+  height: 64;
+  padding-inline: 50;
+  line-height: "64px";
+  background-color: "#7dbcea";
+}
+
+.content {
+  height: "100vh";
+}

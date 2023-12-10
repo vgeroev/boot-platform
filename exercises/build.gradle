@@ -1,0 +1,8 @@
+
+ext.moduleName = 'org.vmalibu.module.exercises'
+
+dependencies {
+    implementation project(":modules")
+    implementation project(":security")
+
+}

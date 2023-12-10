@@ -1,0 +1,48 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.10.7-management
+    container_name: "rabbitmq"
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+  keycloak:
+    image: quay.io/keycloak/keycloak:20.0.0
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_DATABASE: boot_platform
+      KC_DB_PASSWORD: password
+      KC_DB_USERNAME: username
+      KC_DB_SCHEMA: public
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - keycloak_dev_network
+
+  postgres:
+    image: postgres:14.7
+    command: postgres -c 'max_connections=100'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: boot_platform
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+    healthcheck:
+      test: "exit 0"
+    ports:
+      - "5432:5432"
+    networks:
+      - keycloak_dev_network
+volumes:
+  pgdata:
+networks:
+  keycloak_dev_network:
+    driver: bridge

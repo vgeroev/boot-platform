@@ -1,0 +1,17 @@
+
+ext.moduleName = 'org.vmalibu.module.security'
+
+dependencies {
+    implementation project(":modules")
+
+    api 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.security:spring-security-oauth2-resource-server'
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-jwt
+//    implementation 'org.springframework.security.oauth:spring-security-oauth2'
+    // https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-jose
+    implementation 'org.springframework.security:spring-security-oauth2-jose'
+
+
+    testImplementation 'org.springframework.security:spring-security-test'
+    
+}
