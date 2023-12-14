@@ -8,12 +8,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.vmalibu.module.exercises.database.dao.ExerciseSourceAccessRepository;
-import org.vmalibu.module.exercises.database.dao.ExerciseSourceListElementRow;
 import org.vmalibu.module.exercises.database.dao.ExerciseSourceRepository;
-import org.vmalibu.module.exercises.database.domainobject.DbExercise;
 import org.vmalibu.module.exercises.database.domainobject.DbExerciseSource;
 import org.vmalibu.module.exercises.database.domainobject.DbExerciseSourceAccess;
-import org.vmalibu.module.exercises.service.exercise.ExerciseSolutionStatus;
 import org.vmalibu.module.security.access.AccessOp;
 import org.vmalibu.module.security.database.converter.AccessOpsConverter;
 import org.vmalibu.modules.database.paging.DefaultDomainObjectPagination;
@@ -32,7 +29,7 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
 
     private final ExerciseSourceRepository exerciseSourceRepository;
     private final ExerciseSourceAccessRepository exerciseSourceAccessRepository;
-    private final DomainObjectPagination<DbExerciseSourceAccess, ExerciseSourceListElement> domainObjectPagination;
+    private final DomainObjectPagination<DbExerciseSource, ExerciseSourceListElement> domainObjectPagination;
 
     @Autowired
     public ExerciseSourceServiceImpl(@NonNull ExerciseSourceRepository exerciseSourceRepository,
@@ -40,7 +37,7 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
         this.exerciseSourceRepository = exerciseSourceRepository;
         this.exerciseSourceAccessRepository = exerciseSourceAccessRepository;
         this.domainObjectPagination = new DefaultDomainObjectPagination<>(
-                exerciseSourceAccessRepository, ExerciseSourceListElement::from);
+                exerciseSourceRepository, ExerciseSourceListElement::from);
     }
 
     @Override
@@ -92,7 +89,7 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
                                                                     int pageSize,
                                                                     @Nullable ExerciseSourceSortField sortField,
                                                                     @Nullable SortDirection direction,
-                                                                    @NonNull OptionalField<String> userIdFilter,
+                                                                    @NonNull String userIdFilter,
                                                                     @NonNull OptionalField<Set<AccessOp>> accessOpsFilter,
                                                                     @NonNull OptionalField<String> nameFilter) {
         return domainObjectPagination.findAll(
@@ -103,64 +100,68 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
     public @NonNull PaginatedDto<ExerciseSourceListElement> findAll(@Nullable Integer limit,
                                                                     @Nullable ExerciseSourceSortField sortField,
                                                                     @Nullable SortDirection direction,
-                                                                    @NonNull OptionalField<String> userIdFilter,
+                                                                    @NonNull String userIdFilter,
                                                                     @NonNull OptionalField<Set<AccessOp>> accessOpsFilter,
                                                                     @NonNull OptionalField<String> nameFilter) {
         return domainObjectPagination.findAll(
                 limit, direction, sortField, buildSpecification(userIdFilter, accessOpsFilter, nameFilter));
     }
 
-    @Override
-    public @NonNull List<ExerciseSourceListElement> findAll(@NonNull String userId,
-                                                            @NonNull Set<AccessOp> accessOpsFilter) {
-        AccessOpsConverter accessOpsConverter = new AccessOpsConverter();
-        Integer accessOps = accessOpsConverter.convertToDatabaseColumn(accessOpsFilter);
-        List<ExerciseSourceListElementRow> listElementRows = exerciseSourceRepository.listWithStats(userId, accessOps);
-
-        Map<Long, Map<ExerciseSolutionStatus, Integer>> solutionStatuses = mergeSolutionStatuses(listElementRows);
-
-        Map<Long, ExerciseSourceListElement> listElements = new HashMap<>();
-        for (ExerciseSourceListElementRow listElementRow : listElementRows) {
-            listElements.computeIfAbsent(
-                    listElementRow.getId(),
-                    id -> ExerciseSourceListElement.builder()
-                            .accessOps(accessOpsConverter.convertToEntityAttribute(listElementRow.getAccessOps()))
-                            .exerciseSource(
-                                    ExerciseSourceDto.builder()
-                                            .id(id)
-                                            .name(listElementRow.getName())
-                                            .ownerId(listElementRow.getOwnerId())
-                                            .build()
-                            ).stats(
-                                    ExerciseSourceStats.builder()
-                                            .solutionStatusesStats(solutionStatuses.get(id))
-                                            .build()
-                            ).build()
-            );
-        }
-
-        return new ArrayList<>(listElements.values());
-    }
-
-    private static Map<Long, Map<ExerciseSolutionStatus, Integer>> mergeSolutionStatuses(List<ExerciseSourceListElementRow> listElementRows) {
-        Map<Long, Map<ExerciseSolutionStatus, Integer>> solutionStatuses = new HashMap<>();
-        for (ExerciseSourceListElementRow listElementRow : listElementRows) {
-            solutionStatuses.compute(listElementRow.getId(), (k, v) -> {
-                ExerciseSolutionStatus solutionStatus = ExerciseSolutionStatus.from(listElementRow.getSolutionStatus());
-                if (solutionStatus == null) {
-                    return null;
-                }
-
-                if (v == null) {
-                    v = new EnumMap<>(ExerciseSolutionStatus.class);
-                }
-
-                v.put(solutionStatus, listElementRow.getSolutionCount());
-                return v;
-            });
-        }
-        return solutionStatuses;
-    }
+//    @Override
+//    public @NonNull List<ExerciseSourceListElement> findAll(@NonNull String userId,
+//                                                            @NonNull Set<AccessOp> accessOpsFilter) {
+//        AccessOpsConverter accessOpsConverter = new AccessOpsConverter();
+//        Integer accessOps = accessOpsConverter.convertToDatabaseColumn(accessOpsFilter);
+//        List<ExerciseSourceListElementRow> listElementRows = exerciseSourceRepository.listWithStats(userId, accessOps);
+//
+//        Map<Long, Map<ExerciseSolutionStatus, Integer>> solutionStatuses = mergeSolutionStatuses(listElementRows);
+//
+//        List<ExerciseSourceListElement> result = new ArrayList<>();
+//        Set<Long> alreadyPlacedElementIds = new HashSet<>();
+//        for (ExerciseSourceListElementRow listElementRow : listElementRows) {
+//            long elementId = listElementRow.getId();
+//            if (!alreadyPlacedElementIds.contains(elementId)) {
+//                alreadyPlacedElementIds.add(elementId);
+//                result.add(
+//                        ExerciseSourceListElement.builder()
+//                                .accessOps(accessOpsConverter.convertToEntityAttribute(listElementRow.getAccessOps()))
+//                                .exerciseSource(
+//                                        ExerciseSourceDto.builder()
+//                                                .id(elementId)
+//                                                .name(listElementRow.getName())
+//                                                .ownerId(listElementRow.getOwnerId())
+//                                                .build()
+//                                ).stats(
+//                                        ExerciseSourceStats.builder()
+//                                                .solutionStatusesStats(solutionStatuses.get(elementId))
+//                                                .build()
+//                                ).build()
+//                );
+//            }
+//        }
+//
+//        return result;
+//    }
+//
+//    private static Map<Long, Map<ExerciseSolutionStatus, Integer>> mergeSolutionStatuses(List<ExerciseSourceListElementRow> listElementRows) {
+//        Map<Long, Map<ExerciseSolutionStatus, Integer>> solutionStatuses = new HashMap<>();
+//        for (ExerciseSourceListElementRow listElementRow : listElementRows) {
+//            solutionStatuses.compute(listElementRow.getId(), (k, v) -> {
+//                ExerciseSolutionStatus solutionStatus = ExerciseSolutionStatus.from(listElementRow.getSolutionStatus());
+//                if (solutionStatus == null) {
+//                    return null;
+//                }
+//
+//                if (v == null) {
+//                    v = new EnumMap<>(ExerciseSolutionStatus.class);
+//                }
+//
+//                v.put(solutionStatus, listElementRow.getSolutionCount());
+//                return v;
+//            });
+//        }
+//        return solutionStatuses;
+//    }
 
     private void assignFullAccess(DbExerciseSource exerciseSource) {
         DbExerciseSourceAccess exerciseSourceAccess = new DbExerciseSourceAccess();
@@ -196,21 +197,20 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
         exerciseSource.setOwnerId(ownerId);
     }
 
-    private static Specification<DbExerciseSourceAccess> buildSpecification(
-            OptionalField<String> userIdFilter,
+    private static Specification<DbExerciseSource> buildSpecification(
+            String userIdFilter,
             OptionalField<Set<AccessOp>> accessOpsFilter,
             OptionalField<String> nameFilter
     ) {
         return (root, query, cb) -> {
+            Objects.requireNonNull(userIdFilter);
             List<Predicate> predicates = new ArrayList<>();
-            root.fetch(DbExercise.Fields.exerciseSource);
 
-            if (userIdFilter.isPresent()) {
-                predicates.add(getUserIdFilterPredicate(root, cb, userIdFilter.get()));
-            }
+            Join<DbExerciseSource, DbExerciseSourceAccess> join = root.join(DbExerciseSource.Fields.exerciseSourceAccesses);
+            predicates.add(getUserIdFilterPredicate(join, cb, userIdFilter));
 
             if (accessOpsFilter.isPresent()) {
-                predicates.add(getAccessOpsFilterPredicate(root, cb, accessOpsFilter.get()));
+                predicates.add(getAccessOpsFilterPredicate(join, cb, accessOpsFilter.get()));
             }
 
             if (nameFilter.isPresent()) {
@@ -221,15 +221,17 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
         };
     }
 
-    private static Predicate getUserIdFilterPredicate(Root<DbExerciseSourceAccess> root, CriteriaBuilder cb, String userId) {
-        Path<Object> userIdPath = root.get(DbExerciseSourceAccess.Fields.userId);
+    private static Predicate getUserIdFilterPredicate(Join<DbExerciseSource, DbExerciseSourceAccess> join,
+                                                      CriteriaBuilder cb,
+                                                      String userId) {
+        Path<Object> userIdPath = join.get(DbExerciseSourceAccess.Fields.userId);
         return userId != null ? cb.equal(userIdPath, userId) : cb.isNull(userIdPath);
     }
 
-    private static Predicate getAccessOpsFilterPredicate(Root<DbExerciseSourceAccess> root,
+    private static Predicate getAccessOpsFilterPredicate(Join<DbExerciseSource, DbExerciseSourceAccess> join,
                                                          CriteriaBuilder cb,
                                                          Set<AccessOp> accessOps) {
-        Path<String> accessOpsPath = root.get(DbExerciseSourceAccess.Fields.accessOps);
+        Path<String> accessOpsPath = join.get(DbExerciseSourceAccess.Fields.accessOps);
         if (accessOps == null) {
             return cb.isNull(accessOpsPath);
         } else {
@@ -241,12 +243,10 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
         }
     }
 
-    private static Predicate getNameFilter(Root<DbExerciseSourceAccess> root,
+    private static Predicate getNameFilter(Root<DbExerciseSource> root,
                                            CriteriaBuilder cb,
                                            String name) {
-        Path<String> namePath = root
-                .get(DbExerciseSourceAccess.Fields.exerciseSource)
-                .get(DbExerciseSource.Fields.name);
+        Path<String> namePath = root.get(DbExerciseSource.Fields.name);
         return name != null
                 ? cb.like(cb.upper(namePath), "%" + name.toUpperCase() + "%")
                 : cb.isNull(namePath);

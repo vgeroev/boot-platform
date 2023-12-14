@@ -7,8 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.DynamicUpdate;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.vmalibu.module.exercises.ExercisesModuleConsts;
 import org.vmalibu.modules.database.domainobject.DomainObject;
+
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(
@@ -23,6 +29,7 @@ import org.vmalibu.modules.database.domainobject.DomainObject;
         }
 )
 @DynamicUpdate
+@EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
 @AllArgsConstructor
@@ -33,10 +40,20 @@ public class DbExerciseSource extends DomainObject {
     public static final String FIELD_NAME = "name";
     public static final String FIELD_OWNER_ID = "owner_id";
 
+    @CreatedDate
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Date createdAt;
+
+    @LastModifiedDate
+    @Column(name = "updated_at")
+    private Date updatedAt;
+
     @Column(name = FIELD_NAME, nullable = false)
     private String name;
 
     @Column(name = FIELD_OWNER_ID, nullable = false)
     private String ownerId;
 
+    @OneToMany(mappedBy = DbExerciseSourceAccess.Fields.exerciseSource)
+    private List<DbExerciseSourceAccess> exerciseSourceAccesses;
 }

@@ -1,24 +1,24 @@
 package org.vmalibu.module.exercises.service.exercisesource;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.springframework.data.domain.Sort;
 import org.vmalibu.module.exercises.database.domainobject.DbExerciseSource;
-import org.vmalibu.module.exercises.database.domainobject.DbExerciseSourceAccess;
 import org.vmalibu.modules.database.paging.SortField;
 
 public enum ExerciseSourceSortField implements SortField {
 
-    NAME(getInnerProperty(DbExerciseSourceAccess.Fields.exerciseSource, DbExerciseSource.Fields.name));
+    CREATED_AT(Sort.by(DbExerciseSource.Fields.createdAt)),
+    UPDATED_AT(Sort.by(DbExerciseSource.Fields.updatedAt));
 
-    private final String name;
-    ExerciseSourceSortField(String name) {
-        this.name = name;
+    private final Sort sort;
+    ExerciseSourceSortField(Sort sort) {
+        this.sort = sort;
     }
 
     @Override
-    public String getFieldName() {
-        return name;
+    public @NonNull Sort getSort() {
+        return sort;
     }
 
-    private static String getInnerProperty(String name, String innerName) {
-        return "%s.%s".formatted(name, innerName);
-    }
+
 }

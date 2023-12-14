@@ -12,7 +12,6 @@ public record ExerciseListElement(long id,
                                   Date createdAt,
                                   Date updatedAt,
                                   String problemName,
-                                  String problem,
                                   ExerciseSolutionStatus solutionStatus) {
 
     public static ExerciseListElement from(DbExercise exercise) {
@@ -25,7 +24,6 @@ public record ExerciseListElement(long id,
                 .createdAt(exercise.getCreatedAt())
                 .updatedAt(exercise.getUpdatedAt())
                 .problemName(exercise.getProblemName())
-                .problem(exercise.getProblem())
                 .solutionStatus(exercise.getSolutionStatus())
                 .build();
     }

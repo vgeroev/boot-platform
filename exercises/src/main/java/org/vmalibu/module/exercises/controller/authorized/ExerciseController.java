@@ -1,6 +1,5 @@
 package org.vmalibu.module.exercises.controller.authorized;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -19,39 +18,62 @@ import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.database.paging.PaginationForm;
 import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
 import org.vmalibu.modules.module.exception.PlatformException;
+import org.vmalibu.modules.utils.EnumUtils;
 import org.vmalibu.modules.utils.OptionalField;
 
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping(ExercisesModuleConsts.REST_AUTHORIZED_PREFIX + "/exercise-source")
-public class ExerciseSourceController {
+@RequestMapping(ExercisesModuleConsts.REST_AUTHORIZED_PREFIX)
+public class ExerciseController {
 
     private final ExerciseSourceService exerciseSourceService;
     private final ExerciseSourceAccessService exerciseSourceAccessService;
     private final ExerciseService exerciseService;
 
     @Autowired
-    public ExerciseSourceController(@NonNull ExerciseSourceService exerciseSourceService,
-                                    @NonNull ExerciseSourceAccessService exerciseSourceAccessService,
-                                    @NonNull ExerciseService exerciseService) {
+    public ExerciseController(@NonNull ExerciseSourceService exerciseSourceService,
+                              @NonNull ExerciseSourceAccessService exerciseSourceAccessService,
+                              @NonNull ExerciseService exerciseService) {
         this.exerciseSourceService = exerciseSourceService;
         this.exerciseSourceAccessService = exerciseSourceAccessService;
         this.exerciseService = exerciseService;
     }
 
-    @GetMapping("/list")
+    @GetMapping("/exercise-source/list")
     @ResponseStatus(HttpStatus.OK)
-    public List<ExerciseSourceListElement> list(
-            final UserSource userSource
-    ) {
-        String userId = userSource.getUserId();
-        return exerciseSourceService.findAll(userId, EnumSet.of(AccessOp.READ));
+    public PaginatedDto<ExerciseSourceListElement> list(
+            final UserSource userSource,
+            @RequestParam(required = false) final Map<String, String> params
+    ) throws PlatformException {
+        ExerciseSourcePaginationForm form = new ExerciseSourcePaginationForm(params);
+
+        Integer pageSize = form.pageSize;
+        if (pageSize != null) {
+            return exerciseSourceService.findAll(
+                    form.page,
+                    pageSize,
+                    form.sortField,
+                    form.sortDirection,
+                    userSource.getUserId(),
+                    OptionalField.of(EnumSet.of(AccessOp.READ)),
+                    form.nameFilter
+            );
+        } else {
+            return exerciseSourceService.findAll(
+                    null,
+                    form.sortField,
+                    form.sortDirection,
+                    userSource.getUserId(),
+                    OptionalField.of(EnumSet.of(AccessOp.READ)),
+                    form.nameFilter
+            );
+        }
+
     }
 
-    @PostMapping
+    @PostMapping("/exercise-source")
     @ResponseStatus(HttpStatus.CREATED)
     public ExerciseSourceDto create(
             @RequestBody final CreationForm form,
@@ -64,7 +86,7 @@ public class ExerciseSourceController {
         );
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/exercise-source/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ExerciseSourceDto update(
             @PathVariable(name = "id") final long id,
@@ -75,7 +97,7 @@ public class ExerciseSourceController {
         return exerciseSourceService.update(id, new ExerciseSourceBuilder().name(form.name));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/exercise-source/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(
             @PathVariable(name = "id") final long id,
@@ -147,7 +169,7 @@ public class ExerciseSourceController {
             throw GeneralExceptionBuilder.buildNotFoundDomainObjectException(DbExercise.class, id);
         }
 
-        checkUserAccess(userSource.getUserId(), exercise.getExerciseSourceId(), AccessOp.READ);
+        checkUserAccess(userSource.getUserId(), exercise.exerciseSourceId(), AccessOp.READ);
         return exercise;
     }
 
@@ -163,7 +185,7 @@ public class ExerciseSourceController {
             throw GeneralExceptionBuilder.buildNotFoundDomainObjectException(DbExercise.class, id);
         }
 
-        checkUserAccess(userSource.getUserId(), exercise.getExerciseSourceId(), AccessOp.WRITE);
+        checkUserAccess(userSource.getUserId(), exercise.exerciseSourceId(), AccessOp.WRITE);
         ExerciseBuilder builder = new ExerciseBuilder();
         form.problemName.ifPresent(builder::problemName);
         form.problem.ifPresent(builder::problem);
@@ -185,18 +207,27 @@ public class ExerciseSourceController {
 
         static final String JSON_NAME_FILTER = "nameFilter";
 
+        final ExerciseSourceSortField sortField;
+        final OptionalField<String> nameFilter;
+
         public ExerciseSourcePaginationForm(@NonNull Map<String, String> params) throws PlatformException {
             super(params);
-        }
 
-        @JsonProperty(JSON_SORT_FIELD)
-        ExerciseSourceSortField sortField;
-        @JsonIgnore
-        OptionalField<String> nameFilter = OptionalField.empty();
+            if (params.containsKey(JSON_SORT_FIELD)) {
+                this.sortField = EnumUtils.parseOrThrow(
+                        ExerciseSourceSortField.class,
+                        params.get(JSON_SORT_FIELD),
+                        () -> GeneralExceptionBuilder.buildInvalidArgumentException(JSON_SORT_FIELD)
+                );
+            } else {
+                this.sortField = null;
+            }
 
-        @JsonProperty(JSON_NAME_FILTER)
-        void setNameFilter(String nameFilter) {
-            this.nameFilter = OptionalField.of(nameFilter);
+            if (params.containsKey(JSON_NAME_FILTER)) {
+                this.nameFilter = OptionalField.of(params.get(JSON_NAME_FILTER));
+            } else {
+                this.nameFilter = OptionalField.empty();
+            }
         }
 
     }
@@ -233,7 +264,11 @@ public class ExerciseSourceController {
             super(params);
 
             if (params.containsKey(JSON_SORT_FIELD)) {
-                this.sortField = ExerciseSortField.valueOf(params.get(JSON_SORT_FIELD));
+                this.sortField = EnumUtils.parseOrThrow(
+                        ExerciseSortField.class,
+                        params.get(JSON_SORT_FIELD),
+                        () -> GeneralExceptionBuilder.buildInvalidArgumentException(JSON_SORT_FIELD)
+                );
             } else {
                 this.sortField = null;
             }

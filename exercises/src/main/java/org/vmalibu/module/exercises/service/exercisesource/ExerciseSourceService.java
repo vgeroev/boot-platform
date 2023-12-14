@@ -9,7 +9,6 @@ import org.vmalibu.modules.database.paging.SortDirection;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
 
-import java.util.List;
 import java.util.Set;
 
 public interface ExerciseSourceService {
@@ -31,7 +30,7 @@ public interface ExerciseSourceService {
                                                              int pageSize,
                                                              @Nullable ExerciseSourceSortField sortField,
                                                              @Nullable SortDirection direction,
-                                                             @NonNull OptionalField<String> userIdFilter,
+                                                             @NonNull String userIdFilter,
                                                              @NonNull OptionalField<Set<AccessOp>> accessOpsFilter,
                                                              @NonNull OptionalField<String> nameFilter);
 
@@ -39,11 +38,9 @@ public interface ExerciseSourceService {
     @NonNull PaginatedDto<ExerciseSourceListElement> findAll(@Nullable Integer limit,
                                                              @Nullable ExerciseSourceSortField sortField,
                                                              @Nullable SortDirection direction,
-                                                             @NonNull OptionalField<String> userIdFilter,
+                                                             @NonNull String userIdFilter,
                                                              @NonNull OptionalField<Set<AccessOp>> accessOpsFilter,
                                                              @NonNull OptionalField<String> nameFilter);
 
-    @NonNull List<ExerciseSourceListElement> findAll(@NonNull String userId,
-                                                     @NonNull Set<AccessOp> accessOpsFilter);
 
 }
