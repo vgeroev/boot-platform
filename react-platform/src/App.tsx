@@ -11,7 +11,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/home" element={<BaseLayout component={<Home />} />} />
-        <Routes
+        <Route
           path="/exercises/exercise-source-list"
           element={<BaseLayout component={<ExerciseSourceList />} />}
         />
