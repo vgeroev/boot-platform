@@ -9,6 +9,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -47,7 +48,9 @@ public class DomainObjectPagination<Domain extends DomainObject, Dto> {
     }
 
     private static Sort resolveSort(SortField sortField, SortDirection direction) {
-        Sort sort = sortField != null ? Sort.by(sortField.getFieldName()) : Sort.unsorted();
+        Sort sort = Optional.ofNullable(sortField)
+                .map(SortField::getSort)
+                .orElse(Sort.unsorted());
         return direction == SortDirection.DESC ? sort.descending() : sort.ascending();
     }
 }

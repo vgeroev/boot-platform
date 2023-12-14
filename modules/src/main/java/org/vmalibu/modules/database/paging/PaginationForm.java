@@ -3,6 +3,7 @@ package org.vmalibu.modules.database.paging;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.utils.EnumUtils;
 
 import java.util.Map;
 
@@ -10,7 +11,7 @@ public class PaginationForm {
 
     public static final String JSON_SORT_DIRECTION = "sortDirection";
     public static final String JSON_PAGE = "page";
-    public static final String JSON_PAGE_SIZE = "page_size";
+    public static final String JSON_PAGE_SIZE = "pageSize";
     public static final String JSON_SORT_FIELD = "sortField";
 
     public final SortDirection sortDirection;
@@ -21,7 +22,11 @@ public class PaginationForm {
 
     protected PaginationForm(@NonNull Map<String, String> params) throws PlatformException {
         if (params.containsKey(JSON_SORT_DIRECTION)) {
-            sortDirection = SortDirection.valueOf(params.get(JSON_SORT_DIRECTION));
+            sortDirection = EnumUtils.parseOrThrow(
+                    SortDirection.class,
+                    params.get(JSON_SORT_DIRECTION),
+                    () -> GeneralExceptionBuilder.buildInvalidArgumentException(JSON_SORT_DIRECTION)
+            );
         } else {
             sortDirection = SortDirection.ASC;
         }
