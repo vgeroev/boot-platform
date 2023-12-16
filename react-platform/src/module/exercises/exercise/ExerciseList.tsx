@@ -3,7 +3,6 @@ import axios from "axios";
 import React from "react";
 import { AuthState, useAuth } from "react-oidc-context";
 import { useNavigate, useParams } from "react-router-dom";
-import { getAuthorizedExercisesUrl } from "../exercisesource";
 import ExerciseCard from "./ExerciseCard";
 
 interface PaginatedDto<T> {
@@ -20,7 +19,7 @@ interface ExcerciseListElement {
   solutionStatus: "UNSOLVED" | "SOLVED" | "UNSURE";
 }
 
-interface ExercisePaginated extends PaginatedDto<ExcerciseListElement> {}
+interface ExercisePaginated extends PaginatedDto<ExcerciseListElement> { }
 
 const ExerciseList: React.FC<{}> = () => {
   const { exerciseSourceId } = useParams();
@@ -29,34 +28,34 @@ const ExerciseList: React.FC<{}> = () => {
     ExercisePaginated | undefined
   >(undefined);
   const auth: AuthState = useAuth();
-  React.useEffect(() => {
-    (async () => {
-      try {
-        const token = auth.user?.access_token;
-        if (!token) {
-          return;
-        }
-
-        await axios
-          .get<any, ExercisePaginated>(
-            getAuthorizedExercisesUrl(
-              `/exercise-source/${exerciseSourceId}/exercise/list`,
-            ),
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            },
-          )
-          .then((response: any) => {
-            setExcercises(response.data as ExercisePaginated);
-          });
-      } catch (e) {
-        console.error(e);
-      }
-    })();
-  }, [exerciseSourceId, auth]);
-
+  // React.useEffect(() => {
+  //   (async () => {
+  //     try {
+  //       const token = auth.user?.access_token;
+  //       if (!token) {
+  //         return;
+  //       }
+  //
+  //       await axios
+  //         .get<any, ExercisePaginated>(
+  //           getAuthorizedExercisesUrl(
+  //             `/exercise-source/${exerciseSourceId}/exercise/list`,
+  //           ),
+  //           {
+  //             headers: {
+  //               Authorization: `Bearer ${token}`,
+  //             },
+  //           },
+  //         )
+  //         .then((response: any) => {
+  //           setExcercises(response.data as ExercisePaginated);
+  //         });
+  //     } catch (e) {
+  //       console.error(e);
+  //     }
+  //   })();
+  // }, [exerciseSourceId, auth]);
+  //
   if (!excercises) {
     return <Spin></Spin>;
   }

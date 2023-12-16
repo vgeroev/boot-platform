@@ -1,9 +1,9 @@
-import Layout, { Content, Footer, Header } from "antd/es/layout/layout";
+import Layout, { Content, Footer } from "antd/es/layout/layout";
 import BaseHeader from "./BaseHeader";
-import "./BaseLayout.styles.css";
 
 const contentProperties: React.CSSProperties = {
   height: "100vh",
+  color: "#F3F3F3",
 };
 
 export interface BaseLayoutProps {

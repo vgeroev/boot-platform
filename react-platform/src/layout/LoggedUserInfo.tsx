@@ -1,9 +1,12 @@
-import { Spin } from "antd";
-import { useAuth } from "react-oidc-context";
+import { UserOutlined } from "@ant-design/icons";
+import { Button } from "antd";
 
-const LoggedUserInfo: React.FC<{}> = () => {
-  const auth = useAuth();
+interface Props {
+  username: string;
+  onLogout: () => void;
+}
 
+const LoggedUserInfo: React.FC<Props> = ({ username, onLogout }: Props) => {
   // switch (auth.activeNavigator) {
   //   case "signinSilent":
   //     return <div>Signing you in...</div>;
@@ -11,28 +14,31 @@ const LoggedUserInfo: React.FC<{}> = () => {
   //     return <div>Signing you out...</div>;
   // }
   //
-  if (auth.isLoading || auth.error) {
-    return <Spin></Spin>;
-  }
+
   //
   // if (auth.error) {
   //   return <div>Oops... {auth.error.message}</div>;
   // }
+  //
 
-  if (auth.isAuthenticated) {
-    return (
-      <div>
-        {auth.user?.profile.preferred_username}{" "}
-        <button onClick={() => void auth.removeUser()}>Log out</button>
-      </div>
-    );
-  } else {
-    return (
-      <div>
-        <button onClick={() => void auth.signinRedirect()}>Log in</button>;
-      </div>
-    );
-  }
+  return (
+    <div
+      style={{
+        margin: "0 auto",
+        display: "flex",
+        gap: "10px",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+      }}
+    >
+      <UserOutlined />
+      {username}
+      <Button type="primary" onClick={onLogout}>
+        Log out
+      </Button>
+    </div>
+  );
 };
 
 export default LoggedUserInfo;

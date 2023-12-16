@@ -1,8 +1,3 @@
-import {
-  CheckCircleTwoTone,
-  EyeTwoTone,
-  SyncOutlined,
-} from "@ant-design/icons";
 import { Card, Row } from "antd";
 import React from "react";
 import Latex from "react-latex";
