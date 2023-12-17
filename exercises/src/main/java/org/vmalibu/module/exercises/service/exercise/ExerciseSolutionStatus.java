@@ -7,7 +7,8 @@ public enum ExerciseSolutionStatus implements BaseEnum {
 
     UNSOLVED(1),
     SOLVED(2),
-    UNSURE(3);
+    UNSURE(3),
+    PARTIALLY_SOLVED(4);
 
     private final int id;
     ExerciseSolutionStatus(int id) {
