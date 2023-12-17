@@ -19,7 +19,7 @@ import { HttpRequest } from "../../../utils/HttpUtils";
 import { PaginatedDto, Paging } from "../../../utils/Paging";
 import {
   EXCERCISE_SOURCE_CREATE_HTTP_REQUEST,
-  EXCERISE_SOURCE_LIST_HTTP_REQUEST,
+  EXCERCISE_SOURCE_LIST_HTTP_REQUEST,
 } from "../utils/ExercisesHttpUtils";
 import ExerciseSourceListElement from "./ExerciseSourceListElement";
 
@@ -36,7 +36,7 @@ interface ExerciseSourceListElementDto {
 }
 
 interface ExerciseSourcePaginatedDto
-  extends PaginatedDto<ExerciseSourceListElementDto> {}
+  extends PaginatedDto<ExerciseSourceListElementDto> { }
 
 async function createExSource(
   auth: AuthState,
@@ -81,7 +81,7 @@ async function list(
       throw new Error("Failed to get token");
     }
 
-    const httpRequest: HttpRequest = EXCERISE_SOURCE_LIST_HTTP_REQUEST;
+    const httpRequest: HttpRequest = EXCERCISE_SOURCE_LIST_HTTP_REQUEST;
 
     let params: any = {
       page: pagingWithFilter.page,
