@@ -23,7 +23,7 @@ type SortField =
   | "PROBLEM_NAME"
   | "SOLUTION_STATUS";
 
-interface ExcerciseListElement {
+interface ExerciseListElement {
   id: number;
   createdAt: string;
   updatedAt: string;
@@ -31,7 +31,7 @@ interface ExcerciseListElement {
   solutionStatus: SolutionStatus;
 }
 
-interface ExercisePaginatedDto extends PaginatedDto<ExcerciseListElement> { }
+interface ExercisePaginatedDto extends PaginatedDto<ExerciseListElement> { }
 
 interface PagingWithFilter extends Paging {
   problemNameFilter?: string;
@@ -77,7 +77,7 @@ async function list(
       })
       .then((response: any) => {
         const data = response.data;
-        let listElements: Array<ExcerciseListElement> = [];
+        let listElements: Array<ExerciseListElement> = [];
         data.result.forEach((element: any) => {
           listElements.push({
             id: element.id as number,
@@ -117,7 +117,7 @@ function getSolutionTagColor(status: SolutionStatus): string {
   }
 }
 
-function getColumns(): ColumnsType<ExcerciseListElement> {
+function getColumns(): ColumnsType<ExerciseListElement> {
   return [
     {
       title: "Created",
@@ -273,11 +273,11 @@ const ExerciseList: React.FC<{}> = () => {
           pagination: TablePaginationConfig,
           filters: Record<string, FilterValue | null>,
           sorter:
-            | SorterResult<ExcerciseListElement>
-            | SorterResult<ExcerciseListElement>[],
-          extra: TableCurrentDataSource<ExcerciseListElement>,
+            | SorterResult<ExerciseListElement>
+            | SorterResult<ExerciseListElement>[],
+          extra: TableCurrentDataSource<ExerciseListElement>,
         ) => {
-          const castedSorted = sorter as SorterResult<ExcerciseListElement>;
+          const castedSorted = sorter as SorterResult<ExerciseListElement>;
           const directionGetter = (d: string | null | undefined) =>
             d === "descend" ? "DESC" : "ASC";
           switch (castedSorted.field) {
