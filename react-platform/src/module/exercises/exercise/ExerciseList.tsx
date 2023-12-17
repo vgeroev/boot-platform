@@ -1,4 +1,4 @@
-import { Col, Divider, Input, Row, Table, Tag } from "antd";
+import { Col, Divider, Input, Row, Select, Table, Tag } from "antd";
 import React from "react";
 import { AuthState, useAuth } from "react-oidc-context";
 import { useNavigate, useParams } from "react-router-dom";
@@ -35,6 +35,7 @@ interface ExercisePaginatedDto extends PaginatedDto<ExerciseListElement> { }
 
 interface PagingWithFilter extends Paging {
   problemNameFilter?: string;
+  solutionStatusFilter?: SolutionStatus;
   searching?: boolean;
 }
 
@@ -60,6 +61,9 @@ async function list(
     };
     if (pagingWithFilter.problemNameFilter) {
       params.problemNameFilter = pagingWithFilter.problemNameFilter.trim();
+    }
+    if (pagingWithFilter.solutionStatusFilter) {
+      params.solutionStatusFilter = pagingWithFilter.solutionStatusFilter;
     }
     if (sorter) {
       params.sortField = sorter.field;
@@ -202,50 +206,6 @@ const ExerciseList: React.FC<{}> = () => {
   return (
     <>
       <Row gutter={16} style={{ paddingTop: "30px" }}>
-        {/* <Col> */}
-        {/*   <Button type="primary" onClick={() => setModalOpen(true)}> */}
-        {/*     Create exercise  */}
-        {/*   </Button> */}
-        {/**/}
-        {/*   <Modal */}
-        {/*     title="Create exercise source" */}
-        {/*     open={modalOpen} */}
-        {/*     onOk={() => { */}
-        {/*       form.submit(); */}
-        {/*       setModalOpen(false); */}
-        {/*     }} */}
-        {/*     onCancel={() => { */}
-        {/*       setModalOpen(false); */}
-        {/*       form.resetFields(); */}
-        {/*     }} */}
-        {/*   > */}
-        {/*     {contextHolder} */}
-        {/*     <Form */}
-        {/*       form={form} */}
-        {/*       onFinish={(values) => { */}
-        {/*         createExSource( */}
-        {/*           auth, */}
-        {/*           values, */}
-        {/*           (response) => */}
-        {/*             list(auth, paging, (result) => setListElements(result)), */}
-        {/*           (error) => { */}
-        {/*             const errorCode = error.response?.data?.moduleError?.code; */}
-        {/*             if (errorCode === "not_unique_domain_object") { */}
-        {/*               messageApi.error({ content: "Not unique name" }); */}
-        {/*             } else { */}
-        {/*               messageApi.error({ content: "Unknown error" }); */}
-        {/*             } */}
-        {/*           }, */}
-        {/*         ); */}
-        {/*       }} */}
-        {/*     > */}
-        {/*       <Form.Item name="name" label="Name" rules={[{ required: true }]}> */}
-        {/*         <Input defaultValue="" /> */}
-        {/*       </Form.Item> */}
-        {/*     </Form> */}
-        {/*   </Modal> */}
-        {/* </Col> */}
-
         <Col>
           <Input
             placeholder="Search"
@@ -257,6 +217,38 @@ const ExerciseList: React.FC<{}> = () => {
                 searching: true,
               });
             }}
+          />
+        </Col>
+
+        <Col>
+          <Select
+            defaultValue={undefined}
+            style={{ width: 120 }}
+            onChange={(value) => {
+              setPaging({
+                ...paging,
+                page: 0,
+                solutionStatusFilter: value,
+              });
+            }}
+            options={[
+              {
+                value: "UNSOLVED",
+                label: "UNSOLVED",
+              },
+              {
+                value: "SOLVED",
+                label: "SOLVED",
+              },
+              {
+                value: "UNSURE",
+                label: "UNSURE",
+              },
+              {
+                value: "PARTIALLY_SOLVED",
+                label: "PARTIALLY SOLVED",
+              },
+            ]}
           />
         </Col>
       </Row>
