@@ -51,6 +51,13 @@ public class DomainObjectPagination<Domain extends DomainObject, Dto> {
         Sort sort = Optional.ofNullable(sortField)
                 .map(SortField::getSort)
                 .orElse(Sort.unsorted());
-        return direction == SortDirection.DESC ? sort.descending() : sort.ascending();
+
+        if(direction == SortDirection.ASC) {
+            return sort.ascending();
+        } else if (direction == SortDirection.DESC) {
+            return sort.descending();
+        }
+
+        return sort;
     }
 }

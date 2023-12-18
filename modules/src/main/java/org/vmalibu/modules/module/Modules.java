@@ -3,6 +3,7 @@ package org.vmalibu.modules.module;
 import com.google.common.collect.Lists;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
@@ -26,7 +27,7 @@ public class Modules {
 
     private boolean isInitialized;
     private boolean isDestroyed;
-    private List<? extends AbstractModule<?>> modules = new ArrayList<>();
+    private List<? extends AbstractModule<?>> modules;
 
     @Autowired(required = false)
     public Modules(List<? extends AbstractModule<?>> modules) {
@@ -77,6 +78,10 @@ public class Modules {
 
         isDestroyed = true;
         log.info("All modules are destroyed...");
+    }
+
+    public @NonNull List<? extends AbstractModule<?>> getModules() {
+        return modules;
     }
 
     private void checkAndSortModuleDependencies() {
