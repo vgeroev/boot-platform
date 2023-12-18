@@ -2,7 +2,7 @@ import { Card } from "antd";
 import dayjs from "dayjs";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { getExerciseListPath } from "../route/ExcercisesRouteGetter";
+import { getExerciseListPath } from "../route/ExercisesRouteGetter";
 
 interface Props {
   id: number;

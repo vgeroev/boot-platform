@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./component/home/Home";
 import BaseLayout from "./layout/BaseLayout";
-import { moduleRoutes as exerciseModuleRoutes } from "./module/exercises/route/ExcercisesRouteGetter";
+import { moduleRoutes as exerciseModuleRoutes } from "./module/exercises/route/ExercisesRouteGetter";
 import { ModuleRoute } from "./route/ModuleRoute";
 
 function getModuleRoutes(

@@ -1,9 +1,9 @@
-import { Alert, Button, Spin } from "antd";
+import { Alert, Button } from "antd";
 import React from "react";
 import { Header } from "antd/es/layout/layout";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import LoggedUserInfo from "./LoggedUserInfo";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Spinner from "../component/spinner/Spinner";
 
 const hStyle: React.CSSProperties = {
@@ -67,7 +67,7 @@ const BaseHeader: React.FC<{}> = () => {
 
   return (
     <Header style={hStyle}>
-      {getHeaderTitle(pathname)}
+      <Link to="/home">{getHeaderTitle(pathname)}</Link>
       <div
         style={{
           float: "right",

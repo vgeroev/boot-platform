@@ -3,7 +3,9 @@ import ApplicationList from "../application/ApplicationList";
 const Home: React.FC<{}> = () => {
   return (
     <>
-      <ApplicationList />
+      <div style={{ height: "100vh" }}>
+        <ApplicationList />
+      </div>
     </>
   );
 };

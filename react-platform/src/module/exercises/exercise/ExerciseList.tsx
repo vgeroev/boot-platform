@@ -1,8 +1,8 @@
-import { Col, Divider, Input, Row, Select, Table, Tag } from "antd";
+import { Button, Col, Divider, Input, Row, Select, Table, Tag } from "antd";
 import React from "react";
 import { AuthState, useAuth } from "react-oidc-context";
 import { useNavigate, useParams } from "react-router-dom";
-import { PaginatedDto, Paging, Sorter } from "../../../utils/Paging";
+import { PaginatedDto, Sorter } from "../../../utils/Paging";
 import Spinner from "../../../component/spinner/Spinner";
 import { getExerciseListHttpRequest } from "../utils/ExercisesHttpUtils";
 import { HttpRequest } from "../../../utils/HttpUtils";
@@ -15,8 +15,12 @@ import {
   TableCurrentDataSource,
   TablePaginationConfig,
 } from "antd/es/table/interface";
+import { SolutionStatus } from "../utils/BasicTypes";
+import {
+  getCreateExercisePath,
+  getExercisePath,
+} from "../route/ExercisesRouteGetter";
 
-type SolutionStatus = "UNSOLVED" | "SOLVED" | "UNSURE" | "PARTIALLY_SOLVED";
 type SortField =
   | "CREATED_AT"
   | "UPDATED_AT"
@@ -33,7 +37,7 @@ interface ExerciseListElement {
 
 interface ExercisePaginatedDto extends PaginatedDto<ExerciseListElement> { }
 
-interface PagingWithFilter extends Paging {
+interface PagingWithFilter {
   problemNameFilter?: string;
   solutionStatusFilter?: SolutionStatus;
   searching?: boolean;
@@ -55,10 +59,7 @@ async function list(
     const httpRequest: HttpRequest =
       getExerciseListHttpRequest(exerciseSourceId);
 
-    let params: any = {
-      page: pagingWithFilter.page,
-      pageSize: pagingWithFilter.pageSize,
-    };
+    let params: any = {};
     if (pagingWithFilter.problemNameFilter) {
       params.problemNameFilter = pagingWithFilter.problemNameFilter.trim();
     }
@@ -88,8 +89,8 @@ async function list(
             createdAt: dayjs(element.createdAt)
               .format("DD/MM/YYYY HH:mm")
               .toString(),
-            updatedAt: element.updateAt
-              ? dayjs(element.updateAt).format("DD/MM/YYYY HH:mm").toString()
+            updatedAt: element.updatedAt
+              ? dayjs(element.updatedAt).format("DD/MM/YYYY HH:mm").toString()
               : "-",
             problemName: element.problemName as string,
             solutionStatus: element.solutionStatus as SolutionStatus,
@@ -108,7 +109,7 @@ async function list(
   }
 }
 
-function getSolutionTagColor(status: SolutionStatus): string {
+function getSolutionStatusTagColor(status: SolutionStatus): string {
   switch (status) {
     case "SOLVED":
       return "green";
@@ -118,6 +119,19 @@ function getSolutionTagColor(status: SolutionStatus): string {
       return "blue";
     case "PARTIALLY_SOLVED":
       return "yellow";
+  }
+}
+
+function getSolutionStatusTagValue(status: SolutionStatus): string {
+  switch (status) {
+    case "SOLVED":
+      return "SOLVED";
+    case "UNSOLVED":
+      return "UNSOLVED";
+    case "UNSURE":
+      return "UNSURE";
+    case "PARTIALLY_SOLVED":
+      return "PARTIALLY SOLVED";
   }
 }
 
@@ -141,7 +155,7 @@ function getColumns(): ColumnsType<ExerciseListElement> {
     },
     {
       title: "Problem name",
-      width: 100,
+      width: 750,
       dataIndex: "problemName",
       key: "problemName",
       fixed: "left",
@@ -149,15 +163,15 @@ function getColumns(): ColumnsType<ExerciseListElement> {
     },
     {
       title: "Solution status",
-      width: 25,
+      width: 10,
       dataIndex: "solutionStatus",
       key: "solutionStatus",
       fixed: "left",
       sorter: true,
       render: (value: SolutionStatus) => (
         <>
-          <Tag color={getSolutionTagColor(value)} key={value}>
-            {value}
+          <Tag color={getSolutionStatusTagColor(value)} key={value}>
+            {getSolutionStatusTagValue(value)}
           </Tag>
         </>
       ),
@@ -170,23 +184,20 @@ const ExerciseList: React.FC<{}> = () => {
   const { exerciseSourceId } = useParams();
   const exerciseSourceIdNumber: number = Number(exerciseSourceId);
 
-  const [paging, setPaging] = React.useState<PagingWithFilter>({
-    page: 0,
-    pageSize: 24,
-  });
+  const [paging, setPaging] = React.useState<PagingWithFilter>({});
   const [sorter, setSorter] = React.useState<Sorter<SortField> | undefined>(
     undefined,
   );
 
   const auth = useAuth();
-  const [paginatedDto, setListElements] = React.useState<
+  const [paginatedDto, setPaginatedDto] = React.useState<
     ExercisePaginatedDto | undefined
   >(undefined);
 
   React.useEffect(() => {
     const listSetter = () =>
       list(auth, exerciseSourceIdNumber, paging, sorter, (result) =>
-        setListElements(result),
+        setPaginatedDto(result),
       );
     if (paging.searching) {
       const task = setTimeout(() => {
@@ -212,7 +223,6 @@ const ExerciseList: React.FC<{}> = () => {
             onChange={(e) => {
               setPaging({
                 ...paging,
-                page: 0,
                 problemNameFilter: e.target.value,
                 searching: true,
               });
@@ -227,11 +237,14 @@ const ExerciseList: React.FC<{}> = () => {
             onChange={(value) => {
               setPaging({
                 ...paging,
-                page: 0,
-                solutionStatusFilter: value,
+                solutionStatusFilter: value === "ANY" ? undefined : value,
               });
             }}
             options={[
+              {
+                value: "ANY",
+                label: "ANY",
+              },
               {
                 value: "UNSOLVED",
                 label: "UNSOLVED",
@@ -251,15 +264,28 @@ const ExerciseList: React.FC<{}> = () => {
             ]}
           />
         </Col>
+
+        <Col>
+          <Button
+            type="primary"
+            onClick={() =>
+              navigate(getCreateExercisePath(exerciseSourceIdNumber))
+            }
+          >
+            Create exercise
+          </Button>
+        </Col>
       </Row>
 
-      <Divider orientation="center">Exercises</Divider>
+      <Divider orientation="center">
+        Exercises, total count - {paginatedDto.totalCount}
+      </Divider>
       <Table
         bordered
         pagination={false}
         columns={getColumns()}
         onRow={(data, index) => ({
-          onClick: () => navigate("/home"),
+          onClick: () => navigate(getExercisePath(data.id)),
         })}
         onChange={(
           pagination: TablePaginationConfig,
@@ -297,22 +323,7 @@ const ExerciseList: React.FC<{}> = () => {
           setSorter(undefined);
         }}
         dataSource={paginatedDto.result}
-        scroll={{ x: 1500, y: 300 }}
       />
-
-      {/* <Row> */}
-      {/*   <Pagination */}
-      {/*     current={paging.page + 1} */}
-      {/*     onChange={(pageNumber, pageSize) => */}
-      {/*       setPaging({ page: pageNumber - 1, pageSize: pageSize }) */}
-      {/*     } */}
-      {/*     defaultCurrent={1} */}
-      {/*     total={listElements.totalCount} */}
-      {/*     pageSize={paging.pageSize} */}
-      {/*     pageSizeOptions={[paging.pageSize]} */}
-      {/*     hideOnSinglePage */}
-      {/*   /> */}
-      {/* </Row> */}
     </>
   );
 };

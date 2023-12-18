@@ -24,8 +24,31 @@ function getExerciseListHttpRequest(exerciseSourceId: number): HttpRequest {
   };
 }
 
+function getExerciseHttpRequest(id: number): HttpRequest {
+  return {
+    method: "get",
+    url: EXERCISES_AUTHORIZED_URL + `/exercise/${id}`,
+  };
+}
+
+function updateExerciseHttpRequest(id: number): HttpRequest {
+  return {
+    method: "patch",
+    url: EXERCISES_AUTHORIZED_URL + `/exercise/${id}`,
+  };
+}
+function createExerciseHttpRequest(id: number): HttpRequest {
+  return {
+    method: "post",
+    url: EXERCISES_AUTHORIZED_URL + `/${id}/exercise`,
+  };
+}
+
 export {
   EXCERCISE_SOURCE_LIST_HTTP_REQUEST,
   EXCERCISE_SOURCE_CREATE_HTTP_REQUEST,
   getExerciseListHttpRequest,
+  getExerciseHttpRequest,
+  updateExerciseHttpRequest,
+  createExerciseHttpRequest,
 };

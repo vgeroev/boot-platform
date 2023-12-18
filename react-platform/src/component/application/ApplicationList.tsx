@@ -1,6 +1,6 @@
 import { Divider, Col, Row } from "antd";
 import { useNavigate } from "react-router-dom";
-import { EXERCISE_SOURCE_LIST_PATH } from "../../module/exercises/route/ExcercisesRouteGetter";
+import { EXERCISE_SOURCE_LIST_PATH } from "../../module/exercises/route/ExercisesRouteGetter";
 import { getMatrix } from "../../utils/GridUtils";
 import Application from "./Application";
 
