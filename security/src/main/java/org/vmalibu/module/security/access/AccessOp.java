@@ -1,5 +1,8 @@
 package org.vmalibu.module.security.access;
 
+import lombok.Getter;
+
+@Getter
 public enum AccessOp {
 
     READ(1),
@@ -11,10 +14,5 @@ public enum AccessOp {
     AccessOp(int value) {
         this.value = value;
     }
-
-    public int getValue() {
-        return value;
-    }
-
 
 }
