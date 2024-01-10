@@ -46,7 +46,7 @@ public class PaginationForm {
 
         validate(nullablePage, nullablePageSize);
         this.page = Objects.requireNonNull(nullablePage);
-        this.pageSize = Objects.requireNonNull(nullablePageSize);
+        this.pageSize = Math.min(getMaxPageSize(), Objects.requireNonNull(nullablePageSize));
     }
 
     protected int getDefaultPage() {
@@ -54,6 +54,10 @@ public class PaginationForm {
     }
 
     protected int getDefaultPageSize() {
+        return Integer.MAX_VALUE;
+    }
+
+    protected int getMaxPageSize() {
         return Integer.MAX_VALUE;
     }
 

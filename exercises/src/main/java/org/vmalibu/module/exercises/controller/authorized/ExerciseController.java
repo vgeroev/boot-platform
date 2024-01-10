@@ -205,6 +205,10 @@ public class ExerciseController {
             }
         }
 
+        @Override
+        protected int getMaxPageSize() {
+            return 512;
+        }
     }
 
     public static class CreationForm {
@@ -258,6 +262,10 @@ public class ExerciseController {
             }
         }
 
+        @Override
+        protected int getMaxPageSize() {
+            return 1024;
+        }
     }
 
     public static class ExerciseCreationForm {
