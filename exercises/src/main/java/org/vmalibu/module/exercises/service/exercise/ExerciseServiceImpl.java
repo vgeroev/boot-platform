@@ -10,16 +10,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.vmalibu.module.exercises.database.dao.ExerciseListElementRepository;
 import org.vmalibu.module.exercises.database.dao.ExerciseRepository;
 import org.vmalibu.module.exercises.database.dao.ExerciseSourceRepository;
 import org.vmalibu.module.exercises.database.domainobject.DbExercise;
+import org.vmalibu.module.exercises.database.domainobject.DbExerciseListElement;
 import org.vmalibu.module.exercises.database.domainobject.DbExerciseSource;
-import org.vmalibu.module.exercises.service.exercisesource.ExerciseSourceDto;
+import org.vmalibu.module.exercises.service.exercise.list.ExerciseListElement;
+import org.vmalibu.module.exercises.service.exercise.list.ExercisePagingRequest;
 import org.vmalibu.modules.database.domainobject.DomainObject;
-import org.vmalibu.modules.database.paging.DefaultDomainObjectPagination;
 import org.vmalibu.modules.database.paging.DomainObjectPagination;
+import org.vmalibu.modules.database.paging.DomainObjectPaginationImpl;
 import org.vmalibu.modules.database.paging.PaginatedDto;
-import org.vmalibu.modules.database.paging.SortDirection;
 import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
@@ -32,14 +34,15 @@ public class ExerciseServiceImpl implements ExerciseService {
 
     private final ExerciseRepository exerciseRepository;
     private final ExerciseSourceRepository exerciseSourceRepository;
-    private final DomainObjectPagination<DbExercise, ExerciseListElement> domainObjectPagination;
+    private final DomainObjectPagination<DbExerciseListElement, ExerciseListElement> domainObjectPagination;
 
     @Autowired
     public ExerciseServiceImpl(ExerciseRepository exerciseRepository,
+                               ExerciseListElementRepository exerciseListElementRepository,
                                ExerciseSourceRepository exerciseSourceRepository) {
         this.exerciseRepository = exerciseRepository;
         this.exerciseSourceRepository = exerciseSourceRepository;
-        this.domainObjectPagination = new DefaultDomainObjectPagination<>(exerciseRepository, ExerciseListElement::from);
+        this.domainObjectPagination = new DomainObjectPaginationImpl<>(exerciseListElementRepository, ExerciseListElement::from);
     }
 
     @Override
@@ -107,33 +110,19 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
 
     @Override
-    public @Nullable ExerciseSourceDto getExerciseSource(long exerciseId) {
-        return exerciseRepository.findWithExerciseSource(exerciseId)
-                .map(e -> ExerciseSourceDto.from(e.getExerciseSource()))
-                .orElse(null);
+    public @NonNull PaginatedDto<ExerciseListElement> findAll(@NonNull ExercisePagingRequest pagingRequest) {
+        return getDomainObjectPagination().findAll(
+                pagingRequest,
+                buildSpecification(
+                        pagingRequest.getExerciseSourceId(),
+                        pagingRequest.getProblemNameFilter(),
+                        pagingRequest.getSolutionStatusFilter()
+                )
+        );
     }
 
-    @Override
-    public @NonNull PaginatedDto<ExerciseListElement> findAll(int page,
-                                                              int pageSize,
-                                                              @Nullable ExerciseSortField sortField,
-                                                              @Nullable SortDirection direction,
-                                                              @NonNull OptionalField<Long> exerciseSourceIdFilter,
-                                                              @NonNull OptionalField<String> problemNameFilter,
-                                                              @NonNull OptionalField<ExerciseSolutionStatus> solutionStatusFilter) {
-        return domainObjectPagination.findAll(page, pageSize, direction, sortField,
-                buildSpecification(exerciseSourceIdFilter, problemNameFilter, solutionStatusFilter));
-    }
-
-    @Override
-    public @NonNull PaginatedDto<ExerciseListElement> findAll(@Nullable Integer limit,
-                                                              @Nullable ExerciseSortField sortField,
-                                                              @Nullable SortDirection direction,
-                                                              @NonNull OptionalField<Long> exerciseSourceIdFilter,
-                                                              @NonNull OptionalField<String> problemNameFilter,
-                                                              @NonNull OptionalField<ExerciseSolutionStatus> solutionStatusFilter) {
-        return domainObjectPagination.findAll(limit, direction, sortField,
-                buildSpecification(exerciseSourceIdFilter, problemNameFilter, solutionStatusFilter));
+    protected @NonNull DomainObjectPagination<DbExerciseListElement, ExerciseListElement> getDomainObjectPagination() {
+        return domainObjectPagination;
     }
 
     private void setFieldsFor(
@@ -192,17 +181,15 @@ public class ExerciseServiceImpl implements ExerciseService {
         exercise.setExerciseSource(exerciseSource);
     }
 
-    private static Specification<DbExercise> buildSpecification(
-            OptionalField<Long> exerciseSourceIdFilter,
+    private static Specification<DbExerciseListElement> buildSpecification(
+            long exerciseSourceId,
             OptionalField<String> problemNameFilter,
             OptionalField<ExerciseSolutionStatus> solutionStatusFilter
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (exerciseSourceIdFilter.isPresent()) {
-                predicates.add(getExerciseSourceIdFilterPredicate(root, cb, exerciseSourceIdFilter.get()));
-            }
+            predicates.add(getExerciseSourceIdFilterPredicate(root, cb, exerciseSourceId));
 
             if (problemNameFilter.isPresent()) {
                 predicates.add(getProblemNameFilterPredicate(root, cb, problemNameFilter.get()));
@@ -217,31 +204,31 @@ public class ExerciseServiceImpl implements ExerciseService {
     }
 
     private static Predicate getExerciseSourceIdFilterPredicate(
-            Root<DbExercise> root,
+            Root<DbExerciseListElement> root,
             CriteriaBuilder cb,
             Long exerciseSourceId
     ) {
-        Path<Long> idPath = root.get(DbExercise.Fields.exerciseSource).get(DomainObject.Fields.id);
+        Path<Long> idPath = root.get(DbExerciseListElement.Fields.exerciseSource).get(DomainObject.Fields.id);
         return exerciseSourceId != null ? cb.equal(idPath, exerciseSourceId) : cb.isNull(idPath);
     }
 
     private static Predicate getProblemNameFilterPredicate(
-            Root<DbExercise> root,
+            Root<DbExerciseListElement> root,
             CriteriaBuilder cb,
             String problemName
     ) {
-        Path<String> problemNamePath = root.get(DbExercise.Fields.problemName);
+        Path<String> problemNamePath = root.get(DbExerciseListElement.Fields.problemName);
         return problemName != null
                 ? cb.like(cb.upper(problemNamePath), "%" + problemName.toUpperCase() + "%")
                 : cb.isNull(problemNamePath);
     }
 
     private static Predicate getSolutionStatusFilterPredicate(
-            Root<DbExercise> root,
+            Root<DbExerciseListElement> root,
             CriteriaBuilder cb,
             ExerciseSolutionStatus solutionStatus
     ) {
-        Path<ExerciseSolutionStatus> solutionStatusPath = root.get(DbExercise.Fields.solutionStatus);
+        Path<ExerciseSolutionStatus> solutionStatusPath = root.get(DbExerciseListElement.Fields.solutionStatus);
         return solutionStatus != null
                 ? cb.equal(solutionStatusPath, solutionStatus)
                 : cb.isNull(solutionStatusPath);

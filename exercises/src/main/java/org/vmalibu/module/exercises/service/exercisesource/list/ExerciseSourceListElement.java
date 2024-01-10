@@ -1,4 +1,4 @@
-package org.vmalibu.module.exercises.service.exercisesource;
+package org.vmalibu.module.exercises.service.exercisesource.list;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.Builder;

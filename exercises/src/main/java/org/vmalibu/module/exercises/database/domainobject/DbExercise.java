@@ -38,6 +38,8 @@ import java.util.Date;
 @FieldNameConstants
 public class DbExercise extends DomainObject {
 
+    public static final String CREATED_AT = "created_at";
+    public static final String UPDATED_AT = "updated_at";
     public static final String FIELD_PROBLEM_NAME = "problem_name";
     public static final String FIELD_PROBLEM = "problem";
     public static final String FIELD_SOLUTION_STATUS = "solution_status";
@@ -45,11 +47,11 @@ public class DbExercise extends DomainObject {
     public static final String FIELD_EXERCISE_SOURCE_ID = "exercise_source_id";
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = CREATED_AT, nullable = false, updatable = false)
     private Date createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at")
+    @Column(name = UPDATED_AT)
     private Date updatedAt;
 
     @Column(name = FIELD_PROBLEM_NAME, nullable = false)

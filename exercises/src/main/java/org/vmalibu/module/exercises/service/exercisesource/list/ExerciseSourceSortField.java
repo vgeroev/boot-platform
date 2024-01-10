@@ -1,4 +1,4 @@
-package org.vmalibu.module.exercises.service.exercisesource;
+package org.vmalibu.module.exercises.service.exercisesource.list;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.data.domain.Sort;

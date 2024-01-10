@@ -4,7 +4,7 @@ module org.vmalibu.modules {
 
     requires org.checkerframework.checker.qual;
     requires jdk.unsupported;
-    requires org.jboss.logging;
+//    requires org.jboss.logging;
     requires org.slf4j;
     requires jakarta.xml.bind;
     requires jakarta.cdi;
@@ -37,7 +37,7 @@ module org.vmalibu.modules {
     requires net.bytebuddy;
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.core;
-    requires com.fasterxml.classmate;
+//    requires com.fasterxml.classmate;
     requires com.google.common;
     requires org.json;
 
@@ -49,12 +49,14 @@ module org.vmalibu.modules {
     opens org.vmalibu.modules.module.settings to spring.beans, spring.context, spring.core;
     opens org.vmalibu.modules.settings to spring.beans, spring.context, spring.core;
     opens org.vmalibu.modules.database.domainobject;
+    opens org.vmalibu.modules.database.domainobject.listener;
     opens org.vmalibu.modules.database.sqmfunctionregistry;
     opens org.vmalibu.modules.database.repository to spring.data.commons;
     opens org.vmalibu.modules.web.advice to com.fasterxml.jackson.databind;
 
     exports org.vmalibu.modules.module;
     exports org.vmalibu.modules.database.domainobject;
+    exports org.vmalibu.modules.database.domainobject.listener;
     exports org.vmalibu.modules.database.paging;
     exports org.vmalibu.modules.database.repository;
     exports org.vmalibu.modules.module.exception;

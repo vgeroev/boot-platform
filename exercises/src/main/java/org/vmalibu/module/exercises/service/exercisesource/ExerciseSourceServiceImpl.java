@@ -11,12 +11,13 @@ import org.vmalibu.module.exercises.database.dao.ExerciseSourceAccessRepository;
 import org.vmalibu.module.exercises.database.dao.ExerciseSourceRepository;
 import org.vmalibu.module.exercises.database.domainobject.DbExerciseSource;
 import org.vmalibu.module.exercises.database.domainobject.DbExerciseSourceAccess;
+import org.vmalibu.module.exercises.service.exercisesource.list.ExerciseSourceListElement;
+import org.vmalibu.module.exercises.service.exercisesource.list.ExerciseSourcePagingRequest;
 import org.vmalibu.module.security.access.AccessOp;
 import org.vmalibu.module.security.database.converter.AccessOpsConverter;
-import org.vmalibu.modules.database.paging.DefaultDomainObjectPagination;
 import org.vmalibu.modules.database.paging.DomainObjectPagination;
+import org.vmalibu.modules.database.paging.DomainObjectPaginationImpl;
 import org.vmalibu.modules.database.paging.PaginatedDto;
-import org.vmalibu.modules.database.paging.SortDirection;
 import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
@@ -36,7 +37,7 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
                                      @NonNull ExerciseSourceAccessRepository exerciseSourceAccessRepository) {
         this.exerciseSourceRepository = exerciseSourceRepository;
         this.exerciseSourceAccessRepository = exerciseSourceAccessRepository;
-        this.domainObjectPagination = new DefaultDomainObjectPagination<>(
+        this.domainObjectPagination = new DomainObjectPaginationImpl<>(
                 exerciseSourceRepository, ExerciseSourceListElement::from);
     }
 
@@ -85,83 +86,20 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
     }
 
     @Override
-    public @NonNull PaginatedDto<ExerciseSourceListElement> findAll(int page,
-                                                                    int pageSize,
-                                                                    @Nullable ExerciseSourceSortField sortField,
-                                                                    @Nullable SortDirection direction,
-                                                                    @NonNull String userIdFilter,
-                                                                    @NonNull OptionalField<Set<AccessOp>> accessOpsFilter,
-                                                                    @NonNull OptionalField<String> nameFilter) {
-        return domainObjectPagination.findAll(
-                page, pageSize, direction, sortField, buildSpecification(userIdFilter, accessOpsFilter, nameFilter));
+    public @NonNull PaginatedDto<ExerciseSourceListElement> findAll(@NonNull ExerciseSourcePagingRequest pagingRequest) {
+        return getDomainObjectPagination().findAll(
+                pagingRequest,
+                buildSpecification(
+                        pagingRequest.getUserId(),
+                        pagingRequest.getAccessOpsFilter(),
+                        pagingRequest.getNameFilter()
+                )
+        );
     }
 
-    @Override
-    public @NonNull PaginatedDto<ExerciseSourceListElement> findAll(@Nullable Integer limit,
-                                                                    @Nullable ExerciseSourceSortField sortField,
-                                                                    @Nullable SortDirection direction,
-                                                                    @NonNull String userIdFilter,
-                                                                    @NonNull OptionalField<Set<AccessOp>> accessOpsFilter,
-                                                                    @NonNull OptionalField<String> nameFilter) {
-        return domainObjectPagination.findAll(
-                limit, direction, sortField, buildSpecification(userIdFilter, accessOpsFilter, nameFilter));
+    protected @NonNull DomainObjectPagination<DbExerciseSource, ExerciseSourceListElement> getDomainObjectPagination() {
+        return domainObjectPagination;
     }
-
-//    @Override
-//    public @NonNull List<ExerciseSourceListElement> findAll(@NonNull String userId,
-//                                                            @NonNull Set<AccessOp> accessOpsFilter) {
-//        AccessOpsConverter accessOpsConverter = new AccessOpsConverter();
-//        Integer accessOps = accessOpsConverter.convertToDatabaseColumn(accessOpsFilter);
-//        List<ExerciseSourceListElementRow> listElementRows = exerciseSourceRepository.listWithStats(userId, accessOps);
-//
-//        Map<Long, Map<ExerciseSolutionStatus, Integer>> solutionStatuses = mergeSolutionStatuses(listElementRows);
-//
-//        List<ExerciseSourceListElement> result = new ArrayList<>();
-//        Set<Long> alreadyPlacedElementIds = new HashSet<>();
-//        for (ExerciseSourceListElementRow listElementRow : listElementRows) {
-//            long elementId = listElementRow.getId();
-//            if (!alreadyPlacedElementIds.contains(elementId)) {
-//                alreadyPlacedElementIds.add(elementId);
-//                result.add(
-//                        ExerciseSourceListElement.builder()
-//                                .accessOps(accessOpsConverter.convertToEntityAttribute(listElementRow.getAccessOps()))
-//                                .exerciseSource(
-//                                        ExerciseSourceDto.builder()
-//                                                .id(elementId)
-//                                                .name(listElementRow.getName())
-//                                                .ownerId(listElementRow.getOwnerId())
-//                                                .build()
-//                                ).stats(
-//                                        ExerciseSourceStats.builder()
-//                                                .solutionStatusesStats(solutionStatuses.get(elementId))
-//                                                .build()
-//                                ).build()
-//                );
-//            }
-//        }
-//
-//        return result;
-//    }
-//
-//    private static Map<Long, Map<ExerciseSolutionStatus, Integer>> mergeSolutionStatuses(List<ExerciseSourceListElementRow> listElementRows) {
-//        Map<Long, Map<ExerciseSolutionStatus, Integer>> solutionStatuses = new HashMap<>();
-//        for (ExerciseSourceListElementRow listElementRow : listElementRows) {
-//            solutionStatuses.compute(listElementRow.getId(), (k, v) -> {
-//                ExerciseSolutionStatus solutionStatus = ExerciseSolutionStatus.from(listElementRow.getSolutionStatus());
-//                if (solutionStatus == null) {
-//                    return null;
-//                }
-//
-//                if (v == null) {
-//                    v = new EnumMap<>(ExerciseSolutionStatus.class);
-//                }
-//
-//                v.put(solutionStatus, listElementRow.getSolutionCount());
-//                return v;
-//            });
-//        }
-//        return solutionStatuses;
-//    }
 
     private void assignFullAccess(DbExerciseSource exerciseSource) {
         DbExerciseSourceAccess exerciseSourceAccess = new DbExerciseSourceAccess();
@@ -203,7 +141,6 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
             OptionalField<String> nameFilter
     ) {
         return (root, query, cb) -> {
-            Objects.requireNonNull(userIdFilter);
             List<Predicate> predicates = new ArrayList<>();
 
             Join<DbExerciseSource, DbExerciseSourceAccess> join = root.join(DbExerciseSource.Fields.exerciseSourceAccesses);

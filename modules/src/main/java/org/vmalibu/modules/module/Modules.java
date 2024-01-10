@@ -17,7 +17,6 @@ import java.util.List;
 @Component
 @PropertySource(
         value = {
-                "classpath:boot-properties/cluster.application.properties",
                 "classpath:boot-properties/database.application.properties",
                 "classpath:boot-properties/web.application.properties"
         }

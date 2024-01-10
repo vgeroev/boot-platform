@@ -1,11 +1,14 @@
 package org.vmalibu.modules.database.paging;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
-import org.vmalibu.modules.utils.EnumUtils;
 
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 public class PaginationForm {
 
@@ -16,47 +19,72 @@ public class PaginationForm {
 
     public final SortDirection sortDirection;
 
-    public final Integer page;
+    public final int page;
 
-    public final Integer pageSize;
+    public final int pageSize;
 
     protected PaginationForm(@NonNull Map<String, String> params) throws PlatformException {
         if (params.containsKey(JSON_SORT_DIRECTION)) {
-            sortDirection = EnumUtils.parseOrThrow(
-                    SortDirection.class,
-                    params.get(JSON_SORT_DIRECTION),
-                    () -> GeneralExceptionBuilder.buildInvalidArgumentException(JSON_SORT_DIRECTION)
-            );
+            sortDirection = parseEnum(SortDirection.class, params, JSON_SORT_DIRECTION);
         } else {
             sortDirection = SortDirection.ASC;
         }
 
+        Integer nullablePage;
         if (params.containsKey(JSON_PAGE)) {
-            page = Integer.valueOf(params.get(JSON_PAGE));
+            nullablePage = parseInt(params, JSON_PAGE);
         } else {
-            page = 0;
+            nullablePage = getDefaultPage();
         }
 
+        Integer nullablePageSize;
         if (params.containsKey(JSON_PAGE_SIZE)) {
-            pageSize = Integer.valueOf(params.get(JSON_PAGE_SIZE));
+            nullablePageSize = parseInt(params, JSON_PAGE_SIZE);
         } else {
-            pageSize = null;
+            nullablePageSize = getDefaultPageSize();
         }
 
-        validate();
+        validate(nullablePage, nullablePageSize);
+        this.page = Objects.requireNonNull(nullablePage);
+        this.pageSize = Objects.requireNonNull(nullablePageSize);
     }
 
-    private void validate() throws PlatformException {
+    protected int getDefaultPage() {
+        return 0;
+    }
+
+    protected int getDefaultPageSize() {
+        return Integer.MAX_VALUE;
+    }
+
+    private static void validate(Integer page, Integer pageSize) throws PlatformException {
         if (page == null || page < 0) {
             throw GeneralExceptionBuilder.buildInvalidArgumentException("page must be not null and non negative");
         }
 
-        if (pageSize != null && pageSize < 1) {
-            throw GeneralExceptionBuilder.buildInvalidArgumentException("pageSize must be > 0");
+        if (pageSize == null || pageSize < 1) {
+            throw GeneralExceptionBuilder.buildInvalidArgumentException("pageSize must be not null and greater than 0");
         }
+    }
 
-        if (page > 0 && pageSize == null) {
-            throw GeneralExceptionBuilder.buildInvalidArgumentException("If page > 0 then pageSize must be not null");
+    protected static @Nullable <T> T parseEnum(@NonNull Class<T> enumClass,
+                                               @NonNull Map<String, String> params,
+                                               @NonNull String fieldName) throws PlatformException {
+        String strEnum = params.get(fieldName);
+        return Stream.of(enumClass.getEnumConstants())
+                .filter(value -> value.toString().equals(strEnum))
+                .findFirst()
+                .orElseThrow(() -> GeneralExceptionBuilder.buildInvalidValueException(fieldName));
+    }
+
+    protected static @Nullable Integer parseInt(@NonNull Map<String, String> params,
+                                                @NonNull String fieldName) throws PlatformException {
+        try {
+            return Optional.ofNullable(params.get(fieldName))
+                    .map(Integer::valueOf)
+                    .orElse(null);
+        } catch (NumberFormatException e) {
+            throw GeneralExceptionBuilder.buildInvalidValueException(fieldName);
         }
     }
 

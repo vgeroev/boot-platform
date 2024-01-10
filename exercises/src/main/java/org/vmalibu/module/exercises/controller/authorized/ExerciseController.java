@@ -10,7 +10,13 @@ import org.vmalibu.module.exercises.ExercisesModuleConsts;
 import org.vmalibu.module.exercises.database.domainobject.DbExercise;
 import org.vmalibu.module.exercises.exception.ExercisesExceptionFactory;
 import org.vmalibu.module.exercises.service.exercise.*;
+import org.vmalibu.module.exercises.service.exercise.list.ExerciseListElement;
+import org.vmalibu.module.exercises.service.exercise.list.ExercisePagingRequest;
+import org.vmalibu.module.exercises.service.exercise.list.ExerciseSortField;
 import org.vmalibu.module.exercises.service.exercisesource.*;
+import org.vmalibu.module.exercises.service.exercisesource.list.ExerciseSourceListElement;
+import org.vmalibu.module.exercises.service.exercisesource.list.ExerciseSourcePagingRequest;
+import org.vmalibu.module.exercises.service.exercisesource.list.ExerciseSourceSortField;
 import org.vmalibu.module.exercises.service.exercisesourceaccess.ExerciseSourceAccessService;
 import org.vmalibu.module.security.access.AccessOp;
 import org.vmalibu.module.security.authorization.source.UserSource;
@@ -18,7 +24,6 @@ import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.database.paging.PaginationForm;
 import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
 import org.vmalibu.modules.module.exception.PlatformException;
-import org.vmalibu.modules.utils.EnumUtils;
 import org.vmalibu.modules.utils.OptionalField;
 
 import java.util.EnumSet;
@@ -27,6 +32,9 @@ import java.util.Map;
 @RestController
 @RequestMapping(ExercisesModuleConsts.REST_AUTHORIZED_PREFIX)
 public class ExerciseController {
+
+    protected static final String ID = "id";
+    protected static final String EXERCISE_SOURCE_ID = "exerciseSourceId";
 
     private final ExerciseSourceService exerciseSourceService;
     private final ExerciseSourceAccessService exerciseSourceAccessService;
@@ -43,39 +51,24 @@ public class ExerciseController {
 
     @GetMapping("/exercise-source/list")
     @ResponseStatus(HttpStatus.OK)
-    public PaginatedDto<ExerciseSourceListElement> list(
+    public PaginatedDto<ExerciseSourceListElement> exerciseSourceList(
             final UserSource userSource,
             @RequestParam(required = false) final Map<String, String> params
     ) throws PlatformException {
         ExerciseSourcePaginationForm form = new ExerciseSourcePaginationForm(params);
-
-        Integer pageSize = form.pageSize;
-        if (pageSize != null) {
-            return exerciseSourceService.findAll(
-                    form.page,
-                    pageSize,
-                    form.sortField,
-                    form.sortDirection,
-                    userSource.getUserId(),
-                    OptionalField.of(EnumSet.of(AccessOp.READ)),
-                    form.nameFilter
-            );
-        } else {
-            return exerciseSourceService.findAll(
-                    null,
-                    form.sortField,
-                    form.sortDirection,
-                    userSource.getUserId(),
-                    OptionalField.of(EnumSet.of(AccessOp.READ)),
-                    form.nameFilter
-            );
-        }
-
+        return exerciseSourceService.findAll(
+                new ExerciseSourcePagingRequest.Builder(form.page, form.pageSize)
+                        .withSort(form.sortField, form.sortDirection)
+                        .withUserId(userSource.getUserId())
+                        .withNameFilter(form.nameFilter)
+                        .withAccessOpsFilter(OptionalField.of(EnumSet.of(AccessOp.READ)))
+                        .build()
+        );
     }
 
     @PostMapping("/exercise-source")
     @ResponseStatus(HttpStatus.CREATED)
-    public ExerciseSourceDto create(
+    public ExerciseSourceDto createExerciseSource(
             @RequestBody final CreationForm form,
             final UserSource userSource
     ) throws PlatformException {
@@ -89,7 +82,7 @@ public class ExerciseController {
     @PatchMapping("/exercise-source/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ExerciseSourceDto update(
-            @PathVariable(name = "id") final long id,
+            @PathVariable(name = ID) final long id,
             @RequestBody final UpdateForm form,
             final UserSource userSource
     ) throws PlatformException {
@@ -99,8 +92,8 @@ public class ExerciseController {
 
     @DeleteMapping("/exercise-source/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(
-            @PathVariable(name = "id") final long id,
+    public void deleteExerciseSource(
+            @PathVariable(name = ID) final long id,
             final UserSource userSource
     ) throws PlatformException {
         checkUserAccess(userSource.getUserId(), id, AccessOp.DELETE);
@@ -110,40 +103,27 @@ public class ExerciseController {
     @GetMapping("/{exerciseSourceId}/exercise/list")
     @ResponseStatus(HttpStatus.OK)
     public PaginatedDto<ExerciseListElement> exerciseList(
-            @PathVariable(name = "exerciseSourceId") final long exerciseSourceId,
+            @PathVariable(name = EXERCISE_SOURCE_ID) final long exerciseSourceId,
             @RequestParam(required = false) final Map<String, String> params,
             final UserSource userSource
     ) throws PlatformException {
         ExercisePaginationForm form = new ExercisePaginationForm(params);
         checkUserAccess(userSource.getUserId(), exerciseSourceId, AccessOp.READ);
 
-        Integer pageSize = form.pageSize;
-        if (pageSize != null) {
-            return exerciseService.findAll(
-                    form.page,
-                    form.pageSize,
-                    form.sortField,
-                    form.sortDirection,
-                    OptionalField.of(exerciseSourceId),
-                    form.problemNameFilter,
-                    form.solutionStatusFilter
-            );
-        } else {
-            return exerciseService.findAll(
-                    null,
-                    form.sortField,
-                    form.sortDirection,
-                    OptionalField.of(exerciseSourceId),
-                    form.problemNameFilter,
-                    form.solutionStatusFilter
-            );
-        }
+        return exerciseService.findAll(
+                new ExercisePagingRequest.Builder(form.page, form.pageSize)
+                        .withExerciseSourceId(exerciseSourceId)
+                        .withSort(form.sortField, form.sortDirection)
+                        .withProblemNameFilter(form.problemNameFilter)
+                        .withSolutionStatusFilter(form.solutionStatusFilter)
+                        .build()
+        );
     }
 
     @PostMapping("/{exerciseSourceId}/exercise")
     @ResponseStatus(HttpStatus.CREATED)
     public ExerciseDto createExercise(
-            @PathVariable(name = "exerciseSourceId") final long exerciseSourceId,
+            @PathVariable(name = EXERCISE_SOURCE_ID) final long exerciseSourceId,
             @RequestBody final ExerciseCreationForm form,
             final UserSource userSource
     ) throws PlatformException {
@@ -161,7 +141,7 @@ public class ExerciseController {
     @GetMapping("/exercise/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ExerciseDto getExercise(
-            @PathVariable(name = "id") final long id,
+            @PathVariable(name = ID) final long id,
             final UserSource userSource
     ) throws PlatformException {
         ExerciseDto exercise = exerciseService.get(id);
@@ -176,7 +156,7 @@ public class ExerciseController {
     @PatchMapping("/exercise/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ExerciseDto updateExercise(
-            @PathVariable("id") final long id,
+            @PathVariable(ID) final long id,
             @RequestBody final ExerciseUpdateForm form,
             final UserSource userSource
     ) throws PlatformException {
@@ -202,7 +182,6 @@ public class ExerciseController {
         }
     }
 
-
     public static class ExerciseSourcePaginationForm extends PaginationForm {
 
         static final String JSON_NAME_FILTER = "nameFilter";
@@ -214,11 +193,7 @@ public class ExerciseController {
             super(params);
 
             if (params.containsKey(JSON_SORT_FIELD)) {
-                this.sortField = EnumUtils.parseOrThrow(
-                        ExerciseSourceSortField.class,
-                        params.get(JSON_SORT_FIELD),
-                        () -> GeneralExceptionBuilder.buildInvalidArgumentException(JSON_SORT_FIELD)
-                );
+                this.sortField = parseEnum(ExerciseSourceSortField.class, params, JSON_SORT_FIELD);
             } else {
                 this.sortField = null;
             }
@@ -264,11 +239,7 @@ public class ExerciseController {
             super(params);
 
             if (params.containsKey(JSON_SORT_FIELD)) {
-                this.sortField = EnumUtils.parseOrThrow(
-                        ExerciseSortField.class,
-                        params.get(JSON_SORT_FIELD),
-                        () -> GeneralExceptionBuilder.buildInvalidArgumentException(JSON_SORT_FIELD)
-                );
+                this.sortField = parseEnum(ExerciseSortField.class, params, JSON_SORT_FIELD);
             } else {
                 this.sortField = null;
             }
@@ -281,7 +252,7 @@ public class ExerciseController {
 
             if (params.containsKey(JSON_SOLUTION_STATUS_FILTER)) {
                 this.solutionStatusFilter = OptionalField.of(
-                        ExerciseSolutionStatus.valueOf(params.get(JSON_SOLUTION_STATUS_FILTER)));
+                        parseEnum(ExerciseSolutionStatus.class, params, JSON_SOLUTION_STATUS_FILTER));
             } else {
                 this.solutionStatusFilter = OptionalField.empty();
             }

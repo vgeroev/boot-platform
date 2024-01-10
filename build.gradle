@@ -50,7 +50,6 @@ allprojects {
 
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'org.springframework.boot:spring-boot-starter-validation'
 
         implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.1.0'
 
@@ -90,7 +89,7 @@ allprojects {
 
     bootJar {
         //launchScript()
-        //archiveName = project.name + '.jar'
+        archiveFileName = project.name + '.jar'
         mainClass = 'org.vmalibu.modules.entrypoint.AppStarter'
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
@@ -114,7 +113,6 @@ allprojects {
 
 
 dependencies {
-
     implementation project(':modules')
     implementation project(':security')
     implementation project(':exercises')

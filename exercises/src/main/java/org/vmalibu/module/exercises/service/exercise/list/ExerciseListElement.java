@@ -1,8 +1,9 @@
-package org.vmalibu.module.exercises.service.exercise;
+package org.vmalibu.module.exercises.service.exercise.list;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import lombok.Builder;
-import org.vmalibu.module.exercises.database.domainobject.DbExercise;
+import org.vmalibu.module.exercises.database.domainobject.DbExerciseListElement;
+import org.vmalibu.module.exercises.service.exercise.ExerciseSolutionStatus;
 
 import java.util.Date;
 
@@ -14,7 +15,7 @@ public record ExerciseListElement(long id,
                                   String problemName,
                                   ExerciseSolutionStatus solutionStatus) {
 
-    public static ExerciseListElement from(DbExercise exercise) {
+    public static ExerciseListElement from(DbExerciseListElement exercise) {
         if (exercise == null) {
             return null;
         }
