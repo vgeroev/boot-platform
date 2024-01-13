@@ -22,12 +22,14 @@ module org.vmalibu.module.exercises {
     requires com.fasterxml.jackson.annotation;
 
     opens org.vmalibu.module.exercises to spring.core;
+    opens org.vmalibu.module.exercises.access to org.vmalibu.module.security;
     opens org.vmalibu.module.exercises.database.domainobject to org.hibernate.orm.core, spring.core, spring.beans;
     opens org.vmalibu.module.exercises.service.exercise to spring.core;
     opens org.vmalibu.module.exercises.service.exercise.list to spring.core;
     opens org.vmalibu.module.exercises.service.exercisesource to spring.core;
     opens org.vmalibu.module.exercises.service.exercisesource.list to spring.core;
     opens org.vmalibu.module.exercises.service.exercisesourceaccess to spring.core;
+    opens org.vmalibu.module.exercises.service.exercisesourcepublishrequest to spring.core;
     opens org.vmalibu.module.exercises.controller.authorized to com.fasterxml.jackson.databind;
     opens org.vmalibu.module.exercises.database.dao to spring.data.commons;
 
@@ -37,6 +39,7 @@ module org.vmalibu.module.exercises {
     exports org.vmalibu.module.exercises.service.exercise to spring.beans, spring.core, spring.aop, com.fasterxml.jackson.databind;
     exports org.vmalibu.module.exercises.service.exercisesource to spring.beans, spring.core, spring.aop, com.fasterxml.jackson.databind;
     exports org.vmalibu.module.exercises.service.exercisesourceaccess to spring.beans, spring.core, spring.aop, com.fasterxml.jackson.databind;
+    exports org.vmalibu.module.exercises.service.exercisesourcepublishrequest to spring.beans, spring.core, spring.aop, com.fasterxml.jackson.databind;
     exports org.vmalibu.module.exercises.database.converter to spring.beans;
     exports org.vmalibu.module.exercises.controller.authorized to spring.beans, spring.core, spring.web, com.fasterxml.jackson.databind;
     exports org.vmalibu.module.exercises.service.exercise.list to com.fasterxml.jackson.databind, spring.aop, spring.beans, spring.core;

@@ -8,7 +8,7 @@ import org.vmalibu.modules.module.exception.PlatformException;
 public interface ExerciseSourceAccessService {
 
     @Transactional(readOnly = true)
-    boolean hasAccess(@NonNull String userId, long exerciseSourceId, @NonNull AccessOp... accessOps);
+    boolean hasAccess(@NonNull String userId, long exerciseSourceId, @NonNull AccessOp... accessOps) throws PlatformException;
 
     @Transactional
     void setAccesses(@NonNull String userId, long exerciseSourceId, @NonNull AccessOp... accessOps) throws PlatformException;

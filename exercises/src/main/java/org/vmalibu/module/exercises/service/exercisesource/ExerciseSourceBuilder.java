@@ -6,6 +6,7 @@ public class ExerciseSourceBuilder {
 
     private OptionalField<String> name = OptionalField.empty();
     private OptionalField<String> ownerId = OptionalField.empty();
+    private OptionalField<Boolean> published = OptionalField.empty();
 
     public ExerciseSourceBuilder name(String name) {
         this.name = OptionalField.of(name);
@@ -14,6 +15,11 @@ public class ExerciseSourceBuilder {
 
     public ExerciseSourceBuilder ownerId(String ownerId) {
         this.ownerId = OptionalField.of(ownerId);
+        return this;
+    }
+
+    public ExerciseSourceBuilder published(boolean published) {
+        this.published = OptionalField.of(published);
         return this;
     }
 
@@ -27,6 +33,10 @@ public class ExerciseSourceBuilder {
         return ownerId.isPresent();
     }
 
+    public boolean isContainPublished() {
+        return published.isPresent();
+    }
+
     //------------------------------------------------------------------------------------------------------------------
 
     public String getName() {
@@ -37,4 +47,7 @@ public class ExerciseSourceBuilder {
         return ownerId.get();
     }
 
+    public Boolean getPublished() {
+        return published.get();
+    }
 }

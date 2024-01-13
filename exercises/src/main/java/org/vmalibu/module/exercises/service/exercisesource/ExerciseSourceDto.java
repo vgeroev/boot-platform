@@ -12,7 +12,8 @@ public record ExerciseSourceDto(long id,
                                 Date createdAt,
                                 Date updatedAt,
                                 String name,
-                                String ownerId) {
+                                String ownerId,
+                                boolean published) {
 
     public static ExerciseSourceDto from(DbExerciseSource exerciseSource) {
         if (exerciseSource == null) {
@@ -25,6 +26,7 @@ public record ExerciseSourceDto(long id,
                 .updatedAt(exerciseSource.getUpdatedAt())
                 .name(exerciseSource.getName())
                 .ownerId(exerciseSource.getOwnerId())
+                .published(exerciseSource.isPublished())
                 .build();
     }
 }

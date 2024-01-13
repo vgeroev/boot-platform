@@ -92,7 +92,8 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
                 buildSpecification(
                         pagingRequest.getUserId(),
                         pagingRequest.getAccessOpsFilter(),
-                        pagingRequest.getNameFilter()
+                        pagingRequest.getNameFilter(),
+                        pagingRequest.getPublishedFilter()
                 )
         );
     }
@@ -136,22 +137,32 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
     }
 
     private static Specification<DbExerciseSource> buildSpecification(
-            String userIdFilter,
+            OptionalField<String> userIdFilter,
             OptionalField<Set<AccessOp>> accessOpsFilter,
-            OptionalField<String> nameFilter
+            OptionalField<String> nameFilter,
+            OptionalField<Boolean> publishedFilter
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            Join<DbExerciseSource, DbExerciseSourceAccess> join = root.join(DbExerciseSource.Fields.exerciseSourceAccesses);
-            predicates.add(getUserIdFilterPredicate(join, cb, userIdFilter));
+            if (userIdFilter.isPresent() || accessOpsFilter.isPresent()) {
+                Join<DbExerciseSource, DbExerciseSourceAccess> join = root.join(DbExerciseSource.Fields.exerciseSourceAccesses);
 
-            if (accessOpsFilter.isPresent()) {
-                predicates.add(getAccessOpsFilterPredicate(join, cb, accessOpsFilter.get()));
+                if (userIdFilter.isPresent()) {
+                    predicates.add(getUserIdFilterPredicate(join, cb, userIdFilter.get()));
+                }
+
+                if (accessOpsFilter.isPresent()) {
+                    predicates.add(getAccessOpsFilterPredicate(join, cb, accessOpsFilter.get()));
+                }
             }
 
             if (nameFilter.isPresent()) {
                 predicates.add(getNameFilter(root, cb, nameFilter.get()));
+            }
+
+            if (publishedFilter.isPresent()) {
+                predicates.add(getPublishedFilter(root, cb, Objects.requireNonNull(publishedFilter.get())));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
@@ -187,6 +198,17 @@ public class ExerciseSourceServiceImpl implements ExerciseSourceService {
         return name != null
                 ? cb.like(cb.upper(namePath), "%" + name.toUpperCase() + "%")
                 : cb.isNull(namePath);
+    }
+
+    private static Predicate getPublishedFilter(Root<DbExerciseSource> root,
+                                                CriteriaBuilder cb,
+                                                boolean published) {
+        Path<Boolean> publishedPath = root.get(DbExerciseSource.Fields.published);
+        if (published) {
+            return cb.isTrue(publishedPath);
+        } else {
+            return cb.isFalse(publishedPath);
+        }
     }
 
 }

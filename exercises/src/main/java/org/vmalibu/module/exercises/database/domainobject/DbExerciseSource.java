@@ -39,6 +39,7 @@ public class DbExerciseSource extends DomainObject {
 
     public static final String FIELD_NAME = "name";
     public static final String FIELD_OWNER_ID = "owner_id";
+    public static final String FIELD_PUBLISHED = "published";
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -54,6 +55,18 @@ public class DbExerciseSource extends DomainObject {
     @Column(name = FIELD_OWNER_ID, nullable = false)
     private String ownerId;
 
+    @Column(name = FIELD_PUBLISHED, nullable = false)
+    private boolean published;
+
+    // Necessary only for filtering by criteria
     @OneToMany(mappedBy = DbExerciseSourceAccess.Fields.exerciseSource)
     private List<DbExerciseSourceAccess> exerciseSourceAccesses;
+
+    protected List<DbExerciseSourceAccess> getExerciseSourceAccesses() {
+        return exerciseSourceAccesses;
+    }
+
+    protected void setExerciseSourceAccesses(List<DbExerciseSourceAccess> exerciseSourceAccesses) {
+        this.exerciseSourceAccesses = exerciseSourceAccesses;
+    }
 }

@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.vmalibu.module.exercises.ExercisesModuleConsts;
+import org.vmalibu.module.exercises.access.ExercisesPrivilege;
 import org.vmalibu.module.exercises.database.domainobject.DbExercise;
+import org.vmalibu.module.exercises.database.domainobject.DbExerciseSource;
 import org.vmalibu.module.exercises.exception.ExercisesExceptionFactory;
 import org.vmalibu.module.exercises.service.exercise.*;
 import org.vmalibu.module.exercises.service.exercise.list.ExerciseListElement;
@@ -18,7 +20,13 @@ import org.vmalibu.module.exercises.service.exercisesource.list.ExerciseSourceLi
 import org.vmalibu.module.exercises.service.exercisesource.list.ExerciseSourcePagingRequest;
 import org.vmalibu.module.exercises.service.exercisesource.list.ExerciseSourceSortField;
 import org.vmalibu.module.exercises.service.exercisesourceaccess.ExerciseSourceAccessService;
+import org.vmalibu.module.exercises.service.exercisesourcepublishrequest.ExerciseSourcePublishRequestCreationBuilder;
+import org.vmalibu.module.exercises.service.exercisesourcepublishrequest.ExerciseSourcePublishRequestDto;
+import org.vmalibu.module.exercises.service.exercisesourcepublishrequest.ExerciseSourcePublishRequestService;
+import org.vmalibu.module.exercises.service.exercisesourcepublishrequest.ExerciseSourcePublishRequestStatus;
 import org.vmalibu.module.security.access.AccessOp;
+import org.vmalibu.module.security.authorization.controller.privilege.AccessPermission;
+import org.vmalibu.module.security.authorization.controller.privilege.PrivilegeAccess;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.database.paging.PaginationForm;
@@ -39,14 +47,17 @@ public class ExerciseController {
     private final ExerciseSourceService exerciseSourceService;
     private final ExerciseSourceAccessService exerciseSourceAccessService;
     private final ExerciseService exerciseService;
+    private final ExerciseSourcePublishRequestService exerciseSourcePublishRequestService;
 
     @Autowired
     public ExerciseController(@NonNull ExerciseSourceService exerciseSourceService,
                               @NonNull ExerciseSourceAccessService exerciseSourceAccessService,
-                              @NonNull ExerciseService exerciseService) {
+                              @NonNull ExerciseService exerciseService,
+                              @NonNull ExerciseSourcePublishRequestService exerciseSourcePublishRequestService) {
         this.exerciseSourceService = exerciseSourceService;
         this.exerciseSourceAccessService = exerciseSourceAccessService;
         this.exerciseService = exerciseService;
+        this.exerciseSourcePublishRequestService = exerciseSourcePublishRequestService;
     }
 
     @GetMapping("/exercise-source/list")
@@ -59,9 +70,24 @@ public class ExerciseController {
         return exerciseSourceService.findAll(
                 new ExerciseSourcePagingRequest.Builder(form.page, form.pageSize)
                         .withSort(form.sortField, form.sortDirection)
-                        .withUserId(userSource.getUserId())
+                        .withUserId(OptionalField.of(userSource.getUserId()))
                         .withNameFilter(form.nameFilter)
                         .withAccessOpsFilter(OptionalField.of(EnumSet.of(AccessOp.READ)))
+                        .build()
+        );
+    }
+
+    @GetMapping("/exercise-source/published-list")
+    @ResponseStatus(HttpStatus.OK)
+    public PaginatedDto<ExerciseSourceListElement> exerciseSourcePublishedList(
+            @RequestParam(required = false) final Map<String, String> params
+    ) throws PlatformException {
+        ExerciseSourcePaginationForm form = new ExerciseSourcePaginationForm(params);
+        return exerciseSourceService.findAll(
+                new ExerciseSourcePagingRequest.Builder(form.page, form.pageSize)
+                        .withSort(form.sortField, form.sortDirection)
+                        .withNameFilter(form.nameFilter)
+                        .withPublishedFilter(OptionalField.of(true))
                         .build()
         );
     }
@@ -69,7 +95,7 @@ public class ExerciseController {
     @PostMapping("/exercise-source")
     @ResponseStatus(HttpStatus.CREATED)
     public ExerciseSourceDto createExerciseSource(
-            @RequestBody final CreationForm form,
+            @RequestBody final ExerciseSourceCreationForm form,
             final UserSource userSource
     ) throws PlatformException {
         return exerciseSourceService.create(
@@ -83,7 +109,7 @@ public class ExerciseController {
     @ResponseStatus(HttpStatus.OK)
     public ExerciseSourceDto update(
             @PathVariable(name = ID) final long id,
-            @RequestBody final UpdateForm form,
+            @RequestBody final ExerciseSourceUpdateForm form,
             final UserSource userSource
     ) throws PlatformException {
         checkUserAccess(userSource.getUserId(), id, AccessOp.WRITE);
@@ -108,8 +134,8 @@ public class ExerciseController {
             final UserSource userSource
     ) throws PlatformException {
         ExercisePaginationForm form = new ExercisePaginationForm(params);
-        checkUserAccess(userSource.getUserId(), exerciseSourceId, AccessOp.READ);
 
+        checkIfPublishedOrUserHasAccess(userSource.getUserId(), exerciseSourceId, AccessOp.READ);
         return exerciseService.findAll(
                 new ExercisePagingRequest.Builder(form.page, form.pageSize)
                         .withExerciseSourceId(exerciseSourceId)
@@ -149,7 +175,7 @@ public class ExerciseController {
             throw GeneralExceptionBuilder.buildNotFoundDomainObjectException(DbExercise.class, id);
         }
 
-        checkUserAccess(userSource.getUserId(), exercise.exerciseSourceId(), AccessOp.READ);
+        checkIfPublishedOrUserHasAccess(userSource.getUserId(), exercise.exerciseSourceId(), AccessOp.READ);
         return exercise;
     }
 
@@ -175,10 +201,50 @@ public class ExerciseController {
         return exerciseService.update(id, builder);
     }
 
+    @PostMapping("/exercise-source/{id}/publish-request")
+    @ResponseStatus(HttpStatus.OK)
+    public ExerciseSourcePublishRequestDto publishExerciseSourceRequest(
+            @PathVariable(ID) final long id,
+            final UserSource userSource
+    ) throws PlatformException {
+        return exerciseSourcePublishRequestService.createRequest(
+                new ExerciseSourcePublishRequestCreationBuilder()
+                        .withExerciseSourceId(id)
+                        .withUserId(userSource.getUserId())
+        );
+    }
+
+    @PostMapping("/exercise-source/{id}/publish")
+    @ResponseStatus(HttpStatus.OK)
+    @AccessPermission(
+            values = @PrivilegeAccess(
+                    privilege = ExercisesPrivilege.class,
+                    ops = { AccessOp.WRITE }
+            )
+    )
+    public ExerciseSourcePublishRequestDto publishExerciseSource(
+            @PathVariable(ID) final long id,
+            @RequestBody final ExerciseSourcePublishForm form
+    ) throws PlatformException {
+        return exerciseSourcePublishRequestService.agreeOnRequest(id, form.status);
+    }
+
+
     private void checkUserAccess(String userId, long exerciseSourceId, AccessOp... accessOps) throws PlatformException {
         boolean hasAccess = exerciseSourceAccessService.hasAccess(userId, exerciseSourceId, accessOps);
         if (!hasAccess) {
             throw ExercisesExceptionFactory.buildAccessDeniedOnExerciseSourceException(exerciseSourceId, userId);
+        }
+    }
+
+    private void checkIfPublishedOrUserHasAccess(String userId, long exerciseSourceId, AccessOp... accessOps) throws PlatformException {
+        ExerciseSourceDto exerciseSourceDto = exerciseSourceService.get(exerciseSourceId);
+        if (exerciseSourceDto == null) {
+            throw GeneralExceptionBuilder.buildNotFoundDomainObjectException(DbExerciseSource.class, exerciseSourceId);
+        }
+
+        if (!exerciseSourceDto.published()) {
+            checkUserAccess(userId, exerciseSourceId, accessOps);
         }
     }
 
@@ -211,7 +277,7 @@ public class ExerciseController {
         }
     }
 
-    public static class CreationForm {
+    public static class ExerciseSourceCreationForm {
 
         static final String JSON_NAME = "name";
 
@@ -221,7 +287,7 @@ public class ExerciseController {
     }
 
     @Data
-    public static class UpdateForm {
+    public static class ExerciseSourceUpdateForm {
 
         static final String JSON_NAME = "name";
 
@@ -317,6 +383,16 @@ public class ExerciseController {
         void setSolution(String solution) {
             this.solution = OptionalField.of(solution);
         }
+    }
+
+    @Data
+    public static class ExerciseSourcePublishForm {
+
+        static final String JSON_STATUS = "status";
+
+        @JsonProperty(JSON_STATUS)
+        ExerciseSourcePublishRequestStatus status;
+
     }
 
 

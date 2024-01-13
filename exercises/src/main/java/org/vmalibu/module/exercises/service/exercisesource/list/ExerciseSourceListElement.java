@@ -9,7 +9,12 @@ import java.util.Date;
 
 @JsonTypeName("exercise_source_list_element")
 @Builder
-public record ExerciseSourceListElement(long id, Date createdAt, Date updatedAt, String name) {
+public record ExerciseSourceListElement(long id,
+                                        Date createdAt,
+                                        Date updatedAt,
+                                        String name,
+                                        String ownerId,
+                                        boolean published) {
 
     public static @Nullable ExerciseSourceListElement from(@Nullable DbExerciseSource exerciseSource) {
         if (exerciseSource == null) {
@@ -21,6 +26,7 @@ public record ExerciseSourceListElement(long id, Date createdAt, Date updatedAt,
                 .createdAt(exerciseSource.getCreatedAt())
                 .updatedAt(exerciseSource.getUpdatedAt())
                 .name(exerciseSource.getName())
+                .published(exerciseSource.isPublished())
                 .build();
     }
 }
