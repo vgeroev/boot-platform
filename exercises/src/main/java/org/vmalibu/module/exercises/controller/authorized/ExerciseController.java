@@ -102,6 +102,7 @@ public class ExerciseController {
                 new ExerciseSourceBuilder()
                         .name(form.name)
                         .ownerId(userSource.getUserId())
+                        .published(false)
         );
     }
 

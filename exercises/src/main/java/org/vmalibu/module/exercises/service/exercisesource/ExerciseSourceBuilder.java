@@ -47,7 +47,7 @@ public class ExerciseSourceBuilder {
         return ownerId.get();
     }
 
-    public Boolean getPublished() {
+    public Boolean isPublished() {
         return published.get();
     }
 }
