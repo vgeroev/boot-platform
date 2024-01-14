@@ -1,7 +1,6 @@
 package org.vmalibu.module.exercises.database.domainobject;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,7 +10,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.vmalibu.module.exercises.ExercisesModuleConsts;
-import org.vmalibu.modules.database.domainobject.DomainObject;
+import org.vmalibu.modules.database.domainobject.IdentityGeneratedDomainObject;
 
 import java.util.Date;
 import java.util.List;
@@ -29,24 +28,26 @@ import java.util.List;
         }
 )
 @DynamicUpdate
+@Access(value = AccessType.FIELD)
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @FieldNameConstants
-public class DbExerciseSource extends DomainObject {
+public class DbExerciseSource extends IdentityGeneratedDomainObject {
 
+    public static final String FIELD_CREATED_AT = "created_at";
+    public static final String FIELD_UPDATED_AT = "updated_at";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_OWNER_ID = "owner_id";
     public static final String FIELD_PUBLISHED = "published";
 
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = FIELD_CREATED_AT, nullable = false, updatable = false)
     private Date createdAt;
 
     @LastModifiedDate
-    @Column(name = "updated_at")
+    @Column(name = FIELD_UPDATED_AT)
     private Date updatedAt;
 
     @Column(name = FIELD_NAME, nullable = false)

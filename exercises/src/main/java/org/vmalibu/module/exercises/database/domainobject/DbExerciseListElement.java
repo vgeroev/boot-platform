@@ -16,12 +16,18 @@ import java.util.Date;
         name = ExercisesModuleConsts.DB_PREFIX + "exercise"
 )
 @EntityListeners(ReadOnlyEntityListener.class)
+@Access(value = AccessType.FIELD)
 @Getter
-@Setter(value = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @NoArgsConstructor
 @FieldNameConstants
 public class DbExerciseListElement extends DomainObject {
+
+    @Override
+    @Id
+    @Access(value = AccessType.PROPERTY)
+    public Long getId() {
+        return super.getId();
+    }
 
     @Column(name = DbExercise.CREATED_AT)
     private Date createdAt;

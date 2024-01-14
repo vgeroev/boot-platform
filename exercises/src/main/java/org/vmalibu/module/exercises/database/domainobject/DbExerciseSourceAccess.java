@@ -1,7 +1,6 @@
 package org.vmalibu.module.exercises.database.domainobject;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,7 +9,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.vmalibu.module.exercises.ExercisesModuleConsts;
 import org.vmalibu.module.security.access.AccessOp;
 import org.vmalibu.module.security.database.converter.AccessOpsConverter;
-import org.vmalibu.modules.database.domainobject.DomainObject;
+import org.vmalibu.modules.database.domainobject.IdentityGeneratedDomainObject;
 
 import java.util.Set;
 
@@ -27,12 +26,12 @@ import java.util.Set;
         }
 )
 @DynamicUpdate
+@Access(value = AccessType.FIELD)
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @FieldNameConstants
-public class DbExerciseSourceAccess extends DomainObject {
+public class DbExerciseSourceAccess extends IdentityGeneratedDomainObject {
 
     public static final String FIELD_USER_ID = "user_id";
     public static final String FIELD_ACCESS_OPS = "access_ops";

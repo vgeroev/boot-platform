@@ -1,7 +1,6 @@
 package org.vmalibu.module.exercises.database.domainobject;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.vmalibu.module.exercises.ExercisesModuleConsts;
 import org.vmalibu.module.exercises.database.converter.ExerciseSolutionStatusConverter;
 import org.vmalibu.module.exercises.service.exercise.ExerciseSolutionStatus;
-import org.vmalibu.modules.database.domainobject.DomainObject;
+import org.vmalibu.modules.database.domainobject.IdentityGeneratedDomainObject;
 
 import java.util.Date;
 
@@ -30,13 +29,13 @@ import java.util.Date;
         }
 )
 @DynamicUpdate
+@Access(value = AccessType.FIELD)
 @EntityListeners(AuditingEntityListener.class)
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @FieldNameConstants
-public class DbExercise extends DomainObject {
+public class DbExercise extends IdentityGeneratedDomainObject {
 
     public static final String CREATED_AT = "created_at";
     public static final String UPDATED_AT = "updated_at";

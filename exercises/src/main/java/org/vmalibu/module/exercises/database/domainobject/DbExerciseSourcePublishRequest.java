@@ -1,7 +1,6 @@
 package org.vmalibu.module.exercises.database.domainobject;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,7 +9,7 @@ import org.hibernate.annotations.DynamicUpdate;
 import org.vmalibu.module.exercises.ExercisesModuleConsts;
 import org.vmalibu.module.exercises.database.converter.ExerciseSourcePublishRequestStatusConverter;
 import org.vmalibu.module.exercises.service.exercisesourcepublishrequest.ExerciseSourcePublishRequestStatus;
-import org.vmalibu.modules.database.domainobject.DomainObject;
+import org.vmalibu.modules.database.domainobject.IdentityGeneratedDomainObject;
 
 import java.util.Date;
 
@@ -27,12 +26,12 @@ import java.util.Date;
         }
 )
 @DynamicUpdate
+@Access(value = AccessType.FIELD)
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
 @FieldNameConstants
-public class DbExerciseSourcePublishRequest extends DomainObject {
+public class DbExerciseSourcePublishRequest extends IdentityGeneratedDomainObject {
 
     public static final String FIELD_REQUESTED_AT = "requested_at";
     public static final String FIELD_AGREED_AT = "agreed_at";

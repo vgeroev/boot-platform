@@ -2,5 +2,8 @@
 dependencies {
 
     runtimeOnly 'org.postgresql:postgresql'
-    
+
+    // https://mvnrepository.com/artifact/org.liquibase/liquibase-core
+//    implementation 'org.liquibase:liquibase-core:4.25.1'
+
 }
