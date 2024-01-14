@@ -5,7 +5,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
-import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class JsonUtils {
                                                 @NonNull String fieldName) throws PlatformException {
         String value = getStringValue(json, fieldName);
         if (value == null || value.isBlank()) {
-            throw GeneralExceptionBuilder.buildJsonParsingErrorException("Value is null or blank for json field=" + fieldName);
+            throw GeneralExceptionFactory.buildJsonParsingErrorException("Value is null or blank for json field=" + fieldName);
         }
 
         return value;
@@ -35,7 +35,7 @@ public class JsonUtils {
                                       @NonNull String fieldName) throws PlatformException {
         Integer value = getValue(json, fieldName, true, Integer.class);
         if (value == null) {
-            throw GeneralExceptionBuilder.buildJsonParsingErrorException("Value is null for json field=" + fieldName);
+            throw GeneralExceptionFactory.buildJsonParsingErrorException("Value is null for json field=" + fieldName);
         }
 
         return value;
@@ -58,7 +58,7 @@ public class JsonUtils {
 
         Class<?> valueClass = value.getClass();
         if (!clazz.isAssignableFrom(valueClass)) {
-            throw GeneralExceptionBuilder.buildJsonParsingErrorException("%s cannot be casted to %s".formatted(value, clazz));
+            throw GeneralExceptionFactory.buildJsonParsingErrorException("%s cannot be casted to %s".formatted(value, clazz));
         }
 
         return clazz.cast(value);
@@ -67,7 +67,7 @@ public class JsonUtils {
 
     public static void checkFieldExistence(@NonNull JSONObject json, @NonNull String name) throws PlatformException {
         if (!json.has(name)) {
-            throw GeneralExceptionBuilder.buildJsonParsingErrorException("There is no field with name=" + name);
+            throw GeneralExceptionFactory.buildJsonParsingErrorException("There is no field with name=" + name);
         }
     }
 
@@ -76,9 +76,9 @@ public class JsonUtils {
             JSONTokener jsonTokener = new JSONTokener(Files.readString(path));
             return new JSONObject(jsonTokener);
         } catch (JSONException e) {
-            throw GeneralExceptionBuilder.buildJsonParsingErrorException(e);
+            throw GeneralExceptionFactory.buildJsonParsingErrorException(e);
         } catch (IOException e) {
-            throw GeneralExceptionBuilder.buildIOErrorException(e);
+            throw GeneralExceptionFactory.buildIOErrorException(e);
         }
     }
 }

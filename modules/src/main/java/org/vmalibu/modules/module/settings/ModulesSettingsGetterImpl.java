@@ -3,7 +3,7 @@ package org.vmalibu.modules.module.settings;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.settings.ModuleSettingsService;
 import org.vmalibu.modules.module.settings.rabbit.ClusterRabbitSettings;
@@ -43,7 +43,7 @@ public class ModulesSettingsGetterImpl implements ModulesSettingsGetter {
                 Files.createFile(clusterPath);
                 Files.writeString(clusterPath, ClusterRabbitSettings.getDefault().toString());
             } catch (IOException e) {
-                throw GeneralExceptionBuilder.buildIOErrorException(e);
+                throw GeneralExceptionFactory.buildIOErrorException(e);
             }
         }
 

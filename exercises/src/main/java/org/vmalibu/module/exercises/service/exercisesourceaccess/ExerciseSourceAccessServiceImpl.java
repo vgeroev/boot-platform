@@ -7,14 +7,14 @@ import org.vmalibu.module.exercises.database.dao.ExerciseSourceRepository;
 import org.vmalibu.module.exercises.database.domainobject.DbExerciseSource;
 import org.vmalibu.module.exercises.database.domainobject.DbExerciseSourceAccess;
 import org.vmalibu.module.security.access.AccessOp;
-import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.util.Optional;
 import java.util.Set;
 
 @Service
-public class ExerciseSourceAccessServiceImpl implements ExerciseSourceAccessService {
+class ExerciseSourceAccessServiceImpl implements ExerciseSourceAccessService {
 
     private final ExerciseSourceAccessRepository exerciseSourceAccessRepository;
     private final ExerciseSourceRepository exerciseSourceRepository;
@@ -42,7 +42,7 @@ public class ExerciseSourceAccessServiceImpl implements ExerciseSourceAccessServ
         if (sourceAccess == null) {
             Optional<DbExerciseSource> exerciseSourceOptional = exerciseSourceRepository.findById(exerciseSourceId);
             if (exerciseSourceOptional.isEmpty()) {
-                throw GeneralExceptionBuilder.buildNotFoundDomainObjectException(DbExerciseSource.class, exerciseSourceId);
+                throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DbExerciseSource.class, exerciseSourceId);
             }
 
             newSourceAccess = new DbExerciseSourceAccess();

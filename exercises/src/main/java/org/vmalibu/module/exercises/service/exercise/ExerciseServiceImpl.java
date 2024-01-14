@@ -22,15 +22,16 @@ import org.vmalibu.modules.database.domainobject.DomainObject;
 import org.vmalibu.modules.database.paging.DomainObjectPagination;
 import org.vmalibu.modules.database.paging.DomainObjectPaginationImpl;
 import org.vmalibu.modules.database.paging.PaginatedDto;
-import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
-public class ExerciseServiceImpl implements ExerciseService {
+class ExerciseServiceImpl implements ExerciseService {
 
     private final ExerciseRepository exerciseRepository;
     private final ExerciseSourceRepository exerciseSourceRepository;
@@ -53,15 +54,15 @@ public class ExerciseServiceImpl implements ExerciseService {
     @Override
     public @NonNull ExerciseDto create(@NonNull ExerciseBuilder builder) throws PlatformException {
         if (!builder.isContainProblemName() || !StringUtils.hasText(builder.getProblemName())) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExercise.Fields.problemName);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExercise.Fields.problemName);
         }
 
         if (!builder.isContainProblem() || !StringUtils.hasText(builder.getProblem())) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExercise.Fields.problem);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExercise.Fields.problem);
         }
 
         if (!builder.isContainSolutionStatus() || builder.getSolutionStatus() == null) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExercise.Fields.solutionStatus);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExercise.Fields.solutionStatus);
         }
 
         if (!builder.isContainSolution()) {
@@ -69,7 +70,7 @@ public class ExerciseServiceImpl implements ExerciseService {
         }
 
         if (!builder.isContainExerciseSourceId() || builder.getExerciseSourceId() == null) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExercise.Fields.exerciseSource);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExercise.Fields.exerciseSource);
         }
 
         DbExercise exercise = new DbExercise();
@@ -82,19 +83,19 @@ public class ExerciseServiceImpl implements ExerciseService {
     @Override
     public @NonNull ExerciseDto update(long id, @NonNull ExerciseBuilder builder) throws PlatformException {
         if (builder.isContainProblemName() && !StringUtils.hasText(builder.getProblemName())) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExercise.Fields.problemName);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExercise.Fields.problemName);
         }
 
         if (builder.isContainProblem() && !StringUtils.hasText(builder.getProblem())) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExercise.Fields.problem);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExercise.Fields.problem);
         }
 
         if (builder.isContainSolutionStatus() && builder.getSolutionStatus() == null) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExercise.Fields.solutionStatus);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExercise.Fields.solutionStatus);
         }
 
         if (builder.isContainExerciseSourceId() && builder.getExerciseSourceId() == null) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExercise.Fields.exerciseSource);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExercise.Fields.exerciseSource);
         }
 
         DbExercise exercise = exerciseRepository.checkExistenceAndGet(id);
@@ -121,7 +122,7 @@ public class ExerciseServiceImpl implements ExerciseService {
         );
     }
 
-    protected @NonNull DomainObjectPagination<DbExerciseListElement, ExerciseListElement> getDomainObjectPagination() {
+    DomainObjectPagination<DbExerciseListElement, ExerciseListElement> getDomainObjectPagination() {
         return domainObjectPagination;
     }
 
@@ -168,8 +169,12 @@ public class ExerciseServiceImpl implements ExerciseService {
             exerciseRepository.checkUniqueness(
                     exercise,
                     () -> exerciseRepository.findByProblemNameAndExerciseSourceId(problemName, exerciseSource.getId()),
-                    () -> GeneralExceptionBuilder.buildNotUniqueDomainObjectException(
-                            DbExercise.class, DbExercise.Fields.problemName, problemName
+                    () -> GeneralExceptionFactory.buildNotUniqueDomainObjectException(
+                            DbExercise.class,
+                            Map.of(
+                                    DbExercise.Fields.problemName, problemName,
+                                    DbExercise.Fields.exerciseSource, exerciseSource.getId()
+                            )
                     )
             );
         }

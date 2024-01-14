@@ -30,7 +30,7 @@ import org.vmalibu.module.security.authorization.controller.privilege.PrivilegeA
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.database.paging.PaginationForm;
-import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
 
@@ -173,7 +173,7 @@ public class ExerciseController {
     ) throws PlatformException {
         ExerciseDto exercise = exerciseService.get(id);
         if (exercise == null) {
-            throw GeneralExceptionBuilder.buildNotFoundDomainObjectException(DbExercise.class, id);
+            throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DbExercise.class, id);
         }
 
         checkIfPublishedOrUserHasAccess(userSource.getUserId(), exercise.exerciseSourceId(), AccessOp.READ);
@@ -189,7 +189,7 @@ public class ExerciseController {
     ) throws PlatformException {
         ExerciseDto exercise = exerciseService.get(id);
         if (exercise == null) {
-            throw GeneralExceptionBuilder.buildNotFoundDomainObjectException(DbExercise.class, id);
+            throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DbExercise.class, id);
         }
 
         checkUserAccess(userSource.getUserId(), exercise.exerciseSourceId(), AccessOp.WRITE);
@@ -241,7 +241,7 @@ public class ExerciseController {
     private void checkIfPublishedOrUserHasAccess(String userId, long exerciseSourceId, AccessOp... accessOps) throws PlatformException {
         ExerciseSourceDto exerciseSourceDto = exerciseSourceService.get(exerciseSourceId);
         if (exerciseSourceDto == null) {
-            throw GeneralExceptionBuilder.buildNotFoundDomainObjectException(DbExerciseSource.class, exerciseSourceId);
+            throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DbExerciseSource.class, exerciseSourceId);
         }
 
         if (!exerciseSourceDto.published()) {

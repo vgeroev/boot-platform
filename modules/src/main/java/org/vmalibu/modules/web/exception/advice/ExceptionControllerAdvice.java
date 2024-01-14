@@ -5,7 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 
 import java.util.function.Function;
 
@@ -16,9 +16,9 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<?> handle(PlatformException e) {
         Function<HttpStatus, ResponseEntity<?>> generateResponse = status -> new ResponseEntity<>(e, status);
         String code = e.getCode();
-        if (GeneralExceptionBuilder.INTERNAL_SERVER_ERROR_CODE.equals(code)) {
+        if (GeneralExceptionFactory.INTERNAL_SERVER_ERROR_CODE.equals(code)) {
             return generateResponse.apply(HttpStatus.INTERNAL_SERVER_ERROR);
-        } else if (GeneralExceptionBuilder.INVALID_ARGUMENT_CODE.equals(code)) {
+        } else if (GeneralExceptionFactory.INVALID_ARGUMENT_CODE.equals(code)) {
             return generateResponse.apply(HttpStatus.BAD_REQUEST);
         } else {
             return generateResponse.apply(HttpStatus.CONFLICT);

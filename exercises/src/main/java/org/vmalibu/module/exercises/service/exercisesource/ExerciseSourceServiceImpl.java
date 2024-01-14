@@ -18,7 +18,7 @@ import org.vmalibu.module.security.database.converter.AccessOpsConverter;
 import org.vmalibu.modules.database.paging.DomainObjectPagination;
 import org.vmalibu.modules.database.paging.DomainObjectPaginationImpl;
 import org.vmalibu.modules.database.paging.PaginatedDto;
-import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
 import org.vmalibu.modules.utils.database.DatabaseFunctionNames;
@@ -49,15 +49,15 @@ class ExerciseSourceServiceImpl implements ExerciseSourceService {
     @Override
     public @NonNull ExerciseSourceDto create(@NonNull ExerciseSourceBuilder builder) throws PlatformException {
         if (!builder.isContainName() || !StringUtils.hasText(builder.getName())) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExerciseSource.class, DbExerciseSource.Fields.name);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExerciseSource.class, DbExerciseSource.Fields.name);
         }
 
         if (!builder.isContainOwnerId() || !StringUtils.hasText(builder.getOwnerId())) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExerciseSource.class, DbExerciseSource.Fields.ownerId);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExerciseSource.class, DbExerciseSource.Fields.ownerId);
         }
 
         if (!builder.isContainPublished()) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExerciseSource.class, DbExerciseSource.Fields.published);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExerciseSource.class, DbExerciseSource.Fields.published);
         }
 
         DbExerciseSource exerciseSource = new DbExerciseSource();
@@ -70,11 +70,11 @@ class ExerciseSourceServiceImpl implements ExerciseSourceService {
     @Override
     public @NonNull ExerciseSourceDto update(long id, @NonNull ExerciseSourceBuilder builder) throws PlatformException {
         if (builder.isContainName() && !StringUtils.hasText(builder.getName())) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExerciseSource.class, DbExerciseSource.Fields.name);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExerciseSource.class, DbExerciseSource.Fields.name);
         }
 
         if (builder.isContainOwnerId() && !StringUtils.hasText(builder.getOwnerId())) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(DbExerciseSource.class, DbExerciseSource.Fields.ownerId);
+            throw GeneralExceptionFactory.buildEmptyValueException(DbExerciseSource.class, DbExerciseSource.Fields.ownerId);
         }
 
         DbExerciseSource exerciseSource = exerciseSourceRepository.checkExistenceAndGet(id);
@@ -141,8 +141,13 @@ class ExerciseSourceServiceImpl implements ExerciseSourceService {
             exerciseSourceRepository.checkUniqueness(
                     exerciseSource,
                     () -> exerciseSourceRepository.findByNameAndOwnerId(name, ownerId),
-                    () -> GeneralExceptionBuilder.buildNotUniqueDomainObjectException(
-                            DbExerciseSource.class, DbExerciseSource.Fields.name, name)
+                    () -> GeneralExceptionFactory.buildNotUniqueDomainObjectException(
+                            DbExerciseSource.class,
+                            Map.of(
+                                    DbExerciseSource.Fields.name, name,
+                                    DbExerciseSource.Fields.ownerId, ownerId
+                            )
+                    )
             );
         }
 

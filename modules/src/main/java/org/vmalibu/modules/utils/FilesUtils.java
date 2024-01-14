@@ -1,7 +1,7 @@
 package org.vmalibu.modules.utils;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.io.IOException;
@@ -17,7 +17,7 @@ public class FilesUtils {
             try {
                 Files.createDirectory(dir);
             } catch (IOException e) {
-                throw GeneralExceptionBuilder.buildIOErrorException(e);
+                throw GeneralExceptionFactory.buildIOErrorException(e);
             }
         }
 

@@ -8,14 +8,14 @@ import org.vmalibu.module.exercises.database.dao.ExerciseSourceRepository;
 import org.vmalibu.module.exercises.database.domainobject.DbExerciseSource;
 import org.vmalibu.module.exercises.database.domainobject.DbExerciseSourcePublishRequest;
 import org.vmalibu.module.exercises.exception.ExercisesExceptionFactory;
-import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.util.Date;
 import java.util.Objects;
 
 @Service
-public class ExerciseSourcePublishRequestServiceImpl implements ExerciseSourcePublishRequestService {
+class ExerciseSourcePublishRequestServiceImpl implements ExerciseSourcePublishRequestService {
 
     private final ExerciseSourcePublishRequestRepository exerciseSourcePublishRequestRepository;
     private final ExerciseSourceRepository exerciseSourceRepository;
@@ -31,12 +31,12 @@ public class ExerciseSourcePublishRequestServiceImpl implements ExerciseSourcePu
             @NonNull ExerciseSourcePublishRequestCreationBuilder builder) throws PlatformException {
         Long exerciseSourceId = builder.getExerciseSourceId();
         if (!builder.isContainExerciseSourceId() || exerciseSourceId == null) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(
+            throw GeneralExceptionFactory.buildEmptyValueException(
                     DbExerciseSourcePublishRequest.class, DbExerciseSourcePublishRequest.Fields.exerciseSource);
         }
 
         if (!builder.isContainUserId() || !StringUtils.hasText(builder.getUserId())) {
-            throw GeneralExceptionBuilder.buildEmptyValueException(
+            throw GeneralExceptionFactory.buildEmptyValueException(
                     DbExerciseSourcePublishRequest.class, DbExerciseSourcePublishRequest.Fields.userId);
         }
 
@@ -68,7 +68,7 @@ public class ExerciseSourcePublishRequestServiceImpl implements ExerciseSourcePu
                 exerciseSourceId
         );
         if (publishRequest == null) {
-            throw GeneralExceptionBuilder.buildNotFoundDomainObjectException(
+            throw GeneralExceptionFactory.buildNotFoundDomainObjectException(
                     DbExerciseSourcePublishRequest.class,
                     DbExerciseSourcePublishRequest.Fields.exerciseSource,
                     exerciseSourceId

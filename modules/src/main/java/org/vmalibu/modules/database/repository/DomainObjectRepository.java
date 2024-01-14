@@ -3,7 +3,7 @@ package org.vmalibu.modules.database.repository;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.vmalibu.modules.database.domainobject.DomainObject;
 import org.vmalibu.modules.module.exception.PlatformException;
-import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.utils.function.Supplier;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.NoRepositoryBean;
@@ -17,7 +17,7 @@ public interface DomainObjectRepository<T extends DomainObject> extends JpaRepos
     default @NonNull T checkExistenceAndGet(long id, @NonNull Class<T> entityClass) throws PlatformException {
         Optional<T> oDomainObject = findById(id);
         if (oDomainObject.isEmpty()) {
-            throw GeneralExceptionBuilder.buildNotFoundDomainObjectException(entityClass, id);
+            throw GeneralExceptionFactory.buildNotFoundDomainObjectException(entityClass, id);
         }
 
         return oDomainObject.get();

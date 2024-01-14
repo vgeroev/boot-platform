@@ -1,4 +1,4 @@
-package org.vmalibu.module.exercises.service;
+package org.vmalibu.module.exercises.service.exercise;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.assertj.core.api.Assertions;
@@ -11,9 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.vmalibu.module.exercises.database.dao.ExerciseRepository;
 import org.vmalibu.module.exercises.database.domainobject.DbExercise;
 import org.vmalibu.module.exercises.database.domainobject.DbExerciseSource;
-import org.vmalibu.module.exercises.service.exercise.ExerciseDto;
-import org.vmalibu.module.exercises.service.exercise.ExerciseServiceImpl;
-import org.vmalibu.module.exercises.service.exercise.ExerciseSolutionStatus;
 import org.vmalibu.module.exercises.utils.TestUtils;
 
 import java.util.Date;

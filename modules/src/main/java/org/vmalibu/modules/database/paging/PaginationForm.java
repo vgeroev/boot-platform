@@ -3,7 +3,7 @@ package org.vmalibu.modules.database.paging;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.vmalibu.modules.module.exception.PlatformException;
-import org.vmalibu.modules.module.exception.GeneralExceptionBuilder;
+import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 
 import java.util.Map;
 import java.util.Objects;
@@ -63,11 +63,11 @@ public class PaginationForm {
 
     private static void validate(Integer page, Integer pageSize) throws PlatformException {
         if (page == null || page < 0) {
-            throw GeneralExceptionBuilder.buildInvalidArgumentException("page must be not null and non negative");
+            throw GeneralExceptionFactory.buildInvalidArgumentException("page must be not null and non negative");
         }
 
         if (pageSize == null || pageSize < 1) {
-            throw GeneralExceptionBuilder.buildInvalidArgumentException("pageSize must be not null and greater than 0");
+            throw GeneralExceptionFactory.buildInvalidArgumentException("pageSize must be not null and greater than 0");
         }
     }
 
@@ -78,7 +78,7 @@ public class PaginationForm {
         return Stream.of(enumClass.getEnumConstants())
                 .filter(value -> value.toString().equals(strEnum))
                 .findFirst()
-                .orElseThrow(() -> GeneralExceptionBuilder.buildInvalidValueException(fieldName));
+                .orElseThrow(() -> GeneralExceptionFactory.buildInvalidValueException(fieldName));
     }
 
     protected static @Nullable Integer parseInt(@NonNull Map<String, String> params,
@@ -88,7 +88,7 @@ public class PaginationForm {
                     .map(Integer::valueOf)
                     .orElse(null);
         } catch (NumberFormatException e) {
-            throw GeneralExceptionBuilder.buildInvalidValueException(fieldName);
+            throw GeneralExceptionFactory.buildInvalidValueException(fieldName);
         }
     }
 
