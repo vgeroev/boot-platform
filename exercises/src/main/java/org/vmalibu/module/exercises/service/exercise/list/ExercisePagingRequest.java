@@ -22,7 +22,7 @@ public class ExercisePagingRequest extends PagingRequest {
         this.solutionStatusFilter = Objects.requireNonNull(builder.solutionStatusFilter);
     }
 
-    public static class Builder extends PagingRequest.Builder<Builder> {
+    public static class Builder extends AbstractBuilder<Builder> {
 
         private long exerciseSourceId;
         private OptionalField<String> problemNameFilter = OptionalField.empty();

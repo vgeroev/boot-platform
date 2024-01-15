@@ -15,19 +15,19 @@ public class PagingRequest {
     private final int pageSize;
     private final Sort sort;
 
-    protected PagingRequest(@NonNull Builder<?> builder) {
+    protected PagingRequest(@NonNull AbstractBuilder<?> builder) {
         this.page = builder.page;
         this.pageSize = builder.pageSize;
         this.sort = Objects.requireNonNull(builder.sort);
     }
 
-    public static class Builder<T extends Builder<T>> {
+    public abstract static class AbstractBuilder<T extends AbstractBuilder<T>> {
 
         private final int page;
         private final int pageSize;
         private Sort sort;
 
-        public Builder(int page, int pageSize) {
+        protected AbstractBuilder(int page, int pageSize) {
             this.page = page;
             this.pageSize = pageSize;
         }
@@ -52,9 +52,20 @@ public class PagingRequest {
             return withSort(newSort);
         }
 
-        @SuppressWarnings("unchecked")
-        protected @NonNull T self() {
-            return (T) this;
+        protected abstract @NonNull T self();
+
+        public abstract @NonNull PagingRequest build();
+    }
+
+    public static class Builder extends AbstractBuilder<Builder> {
+
+        public Builder(int page, int pageSize) {
+            super(page, pageSize);
+        }
+
+        @Override
+        protected @NonNull Builder self() {
+            return this;
         }
 
         public @NonNull PagingRequest build() {

@@ -25,7 +25,7 @@ public class ExerciseSourcePagingRequest extends PagingRequest {
         this.publishedFilter = Objects.requireNonNull(builder.publishedFilter);
     }
 
-    public static class Builder extends PagingRequest.Builder<Builder> {
+    public static class Builder extends AbstractBuilder<Builder> {
 
         private OptionalField<String> userId = OptionalField.empty();
         private OptionalField<Set<AccessOp>> accessOpsFilter = OptionalField.empty();
