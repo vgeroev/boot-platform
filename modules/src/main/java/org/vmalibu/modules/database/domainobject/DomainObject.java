@@ -13,6 +13,6 @@ import lombok.experimental.FieldNameConstants;
 @FieldNameConstants
 public abstract class DomainObject {
 
-    protected Long id;
+    private Long id;
 
 }
