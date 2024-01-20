@@ -15,9 +15,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.vmalibu.module.security.authentication.jwt.JwtAuthenticationManager;
 import org.vmalibu.module.security.authorization.manager.CustomAuthorizationManager;
 
@@ -43,7 +40,6 @@ public class AuthorizedSecurityConfiguration {
     SecurityFilterChain protectedFilterChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/authorized/**")
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -62,24 +58,12 @@ public class AuthorizedSecurityConfiguration {
             log.warn("There are no authorization managers for protectedFilterChain. Using negative strategy for any request...");
             return (authentication, object) -> new AuthorizationDecision(false);
         } else {
-            String simpleManagerClassNames = authorizationManagers.stream()
+            String authManagerClassNames = authorizationManagers.stream()
                             .map(m -> m.getClass().getName())
                             .collect(Collectors.joining(", "));
-            log.info("Authorization managers for protectedFilterChain: [{}]", simpleManagerClassNames);
+            log.info("Authorization managers for protectedFilterChain: [{}]", authManagerClassNames);
             return AuthorizationManagers.allOf(authorizationManagers.toArray(new CustomAuthorizationManager[0]));
         }
-    }
-
-    private CorsConfigurationSource corsConfigurationSource() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration().applyPermitDefaultValues();
-        config.setAllowedMethods(List.of(CorsConfiguration.ALL));
-        config.setAllowedHeaders(List.of(CorsConfiguration.ALL));
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://localhost:3000"));
-        config.setAllowCredentials(true);
-        config.setMaxAge(3600L);
-        source.registerCorsConfiguration("/**", config);
-        return source;
     }
 
 }
