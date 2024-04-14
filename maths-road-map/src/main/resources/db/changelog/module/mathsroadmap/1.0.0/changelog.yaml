@@ -1,0 +1,99 @@
+databaseChangeLog:
+- changeSet:
+    id: 1.0.0
+    author: vmalibu
+    changes:
+      - createTable:
+          tableName: maths_road_map_topic
+          remarks: Topics
+          columns:
+            - column:
+                name: id
+                type: bigint
+                autoIncrement: true
+                constraints:
+                  primaryKey: true
+                  primaryKeyName: pk_topic
+                  nullable: false
+            - column:
+                name: version
+                type: smallint
+                constraints:
+                  nullable: false
+            - column:
+                name: title
+                type: varchar(50)
+                constraints:
+                  nullable: false
+            - column:
+                name: body
+                type: text
+                constraints:
+                  nullable: false
+
+      - createTable:
+          tableName: maths_road_map_topic_node
+          remarks: Tree node in a road map
+          columns:
+            - column:
+                name: id
+                type: bigint
+                autoIncrement: true
+                constraints:
+                  primaryKey: true
+                  primaryKeyName: pk_topic_node
+                  nullable: false
+            - column:
+                name: version
+                type: smallint
+                constraints:
+                  nullable: false
+            - column:
+                name: easiness_level
+                type: integer
+                constraints:
+                  nullable: false
+
+      - createTable:
+          tableName: maths_road_map_topic_tree
+          remarks: Linking table for tree
+          columns:
+            - column:
+                name: fk_prev
+                type: bigint
+                constraints:
+                  nullable: false
+            - column:
+                name: fk_next
+                type: bigint
+                constraints:
+                  nullable: false
+
+      - addPrimaryKey:
+          tableName: maths_road_map_topic_tree
+          columnNames: fk_prev, fk_next
+          constraintName: tree_edge
+
+      - addForeignKeyConstraint:
+          baseTableName: maths_road_map_topic
+          baseColumnNames: id
+          referencedTableName: maths_road_map_topic_node
+          referencedColumnNames: id
+          constraintName: fk_topic_to_topic_node
+
+      - addForeignKeyConstraint:
+          baseTableName: maths_road_map_topic_tree
+          baseColumnNames: fk_prev
+          referencedTableName: maths_road_map_topic_node
+          referencedColumnNames: id
+          constraintName: fk_prev_to_topic_node
+
+      - addForeignKeyConstraint:
+          baseTableName: maths_road_map_topic_tree
+          baseColumnNames: fk_next
+          referencedTableName: maths_road_map_topic_node
+          referencedColumnNames: id
+          constraintName: fk_next_to_topic_node
+
+
+
