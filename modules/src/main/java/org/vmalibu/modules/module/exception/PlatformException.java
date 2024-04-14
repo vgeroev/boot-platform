@@ -16,13 +16,13 @@ import java.util.Objects;
 public class PlatformException extends Exception {
 
     private final String code;
-    private final String message;
+    private final String comment;
     private final Map<String, String> parameters;
 
-    public PlatformException(String code, String message, Map<String, Object> errorParams, Throwable cause) {
-        super(cause);
+    public PlatformException(String code, String comment, Map<String, Object> errorParams, Throwable cause) {
+        super(toDetailedMessage(code, comment, errorParams), cause);
         this.code = code;
-        this.message = message;
+        this.comment = comment;
         this.parameters = new HashMap<>();
         if (errorParams != null) {
             errorParams.forEach((k, v) -> parameters.put(k, String.valueOf(v)));
@@ -33,8 +33,8 @@ public class PlatformException extends Exception {
         this(code, null, errorParams, null);
     }
 
-    public PlatformException(String code, String message) {
-        this(code, message, new HashMap<>(), null);
+    public PlatformException(String code, String comment) {
+        this(code, comment, new HashMap<>(), null);
     }
 
     public PlatformException(String code) {
@@ -43,16 +43,7 @@ public class PlatformException extends Exception {
 
     @Override
     public String toString() {
-        JSONObject json = new JSONObject();
-        json.put("code", code);
-        if (StringUtils.hasText(message)) {
-            json.put("message", message);
-        }
-
-        if (!parameters.isEmpty()) {
-            json.put("parameters", new JSONObject(parameters));
-        }
-        return json.toString();
+        return toDetailedMessage(code, comment, parameters);
     }
 
     @Override
@@ -73,11 +64,24 @@ public class PlatformException extends Exception {
             }
         }
 
-        return Objects.equals(code, o2.code) && Objects.equals(message, o2.message);
+        return Objects.equals(code, o2.code) && Objects.equals(comment, o2.comment);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(code, message);
+        return Objects.hash(code, comment);
+    }
+
+    private static String toDetailedMessage(String code, String comment, Map<String, ?> parameters) {
+        JSONObject json = new JSONObject();
+        json.put("code", code);
+        if (StringUtils.hasText(comment)) {
+            json.put("message", comment);
+        }
+
+        if (parameters != null && !parameters.isEmpty()) {
+            json.put("parameters", new JSONObject(parameters));
+        }
+        return json.toString();
     }
 }

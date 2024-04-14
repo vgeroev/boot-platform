@@ -53,7 +53,10 @@ module org.vmalibu.modules {
     opens org.vmalibu.modules.database.sqmfunctionregistry;
     opens org.vmalibu.modules.database.repository to spring.data.commons;
     opens org.vmalibu.modules.web.advice to com.fasterxml.jackson.databind;
+    opens org.vmalibu.modules to spring.aop, spring.core;
+    opens org.vmalibu.modules.service.platformmanager to spring.aop, spring.core;
 
+    exports org.vmalibu.modules;
     exports org.vmalibu.modules.module;
     exports org.vmalibu.modules.database.domainobject;
     exports org.vmalibu.modules.database.converter;
@@ -73,5 +76,6 @@ module org.vmalibu.modules {
     exports org.vmalibu.modules.utils.function;
     exports org.vmalibu.modules.utils.database;
     exports org.vmalibu.modules.entrypoint;
+    exports org.vmalibu.modules.service.platformmanager;
 
 }

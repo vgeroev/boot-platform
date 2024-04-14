@@ -15,7 +15,7 @@ public class OptionalField<T> {
     private final T value;
     private final boolean present;
 
-    public @Nullable T get() {
+    public T get() {
         return value;
     }
 
