@@ -58,6 +58,7 @@ module org.vmalibu.modules {
 
     exports org.vmalibu.modules;
     exports org.vmalibu.modules.module;
+    exports org.vmalibu.modules.controller.platform;
     exports org.vmalibu.modules.database.domainobject;
     exports org.vmalibu.modules.database.converter;
     exports org.vmalibu.modules.database.domainobject.listener;

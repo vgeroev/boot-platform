@@ -2,6 +2,7 @@ package org.vmalibu.modules.service.platformmanager;
 
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import org.vmalibu.modules.module.exception.PlatformException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -22,7 +24,7 @@ public class PlatformManagerImpl implements PlatformManager {
 
     @Autowired(required = false)
     public PlatformManagerImpl(List<? extends AbstractModule<?>> modules) {
-        this.modules = modules;
+        this.modules = Objects.requireNonNullElseGet(modules, List::of);
     }
 
     @Transactional(rollbackFor = Throwable.class)
@@ -75,6 +77,11 @@ public class PlatformManagerImpl implements PlatformManager {
             isDestroyed = true;
             log.info("Platform is destroyed.");
         }
+    }
+
+    @Override
+    public @NonNull List<? extends AbstractModule<?>> getModules() {
+        return modules;
     }
 
     private void checkAndSortModuleDependencies() {

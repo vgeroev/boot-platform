@@ -9,21 +9,21 @@ import java.util.Optional;
 import java.util.function.Function;
 
 @Converter
-public abstract class BaseEnumConverter<T extends BaseEnum> implements AttributeConverter<T, Integer> {
+public abstract class BaseEnumConverter<T extends BaseEnum> implements AttributeConverter<T, Short> {
 
-    private final Function<Integer, T> toBaseEnum;
+    private final Function<Short, T> toBaseEnum;
 
-    protected BaseEnumConverter(@NonNull Function<Integer, T> toBaseEnum) {
+    protected BaseEnumConverter(@NonNull Function<Short, T> toBaseEnum) {
         this.toBaseEnum = toBaseEnum;
     }
 
     @Override
-    public Integer convertToDatabaseColumn(T attribute) {
-        return Optional.ofNullable(attribute).map(BaseEnum::intValue).orElse(null);
+    public Short convertToDatabaseColumn(T attribute) {
+        return Optional.ofNullable(attribute).map(BaseEnum::shortValue).orElse(null);
     }
 
     @Override
-    public T convertToEntityAttribute(Integer dbData) {
+    public T convertToEntityAttribute(Short dbData) {
         return toBaseEnum.apply(dbData);
     }
 }
