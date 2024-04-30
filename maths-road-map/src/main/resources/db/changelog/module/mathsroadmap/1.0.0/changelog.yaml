@@ -4,8 +4,8 @@ databaseChangeLog:
     author: vmalibu
     changes:
       - createTable:
-          tableName: maths_road_map_topic
-          remarks: Topics
+          tableName: maths_road_map_article
+          remarks: Articles
           columns:
             - column:
                 name: id
@@ -13,10 +13,15 @@ databaseChangeLog:
                 autoIncrement: true
                 constraints:
                   primaryKey: true
-                  primaryKeyName: pk_topic
+                  primaryKeyName: pk_article
                   nullable: false
             - column:
                 name: version
+                type: smallint
+                constraints:
+                  nullable: false
+            - column:
+                name: abstraction_level
                 type: smallint
                 constraints:
                   nullable: false
@@ -25,15 +30,10 @@ databaseChangeLog:
                 type: varchar(50)
                 constraints:
                   nullable: false
-            - column:
-                name: body
-                type: text
-                constraints:
-                  nullable: false
 
       - createTable:
-          tableName: maths_road_map_topic_node
-          remarks: Tree node in a road map
+          tableName: maths_road_map_article_latex
+          remarks: Article latex data
           columns:
             - column:
                 name: id
@@ -41,7 +41,7 @@ databaseChangeLog:
                 autoIncrement: true
                 constraints:
                   primaryKey: true
-                  primaryKeyName: pk_topic_node
+                  primaryKeyName: pk_article_latex
                   nullable: false
             - column:
                 name: version
@@ -49,13 +49,13 @@ databaseChangeLog:
                 constraints:
                   nullable: false
             - column:
-                name: easiness_level
-                type: integer
+                name: latex
+                type: text
                 constraints:
                   nullable: false
 
       - createTable:
-          tableName: maths_road_map_topic_tree
+          tableName: maths_road_map_article_tree
           remarks: Linking table for tree
           columns:
             - column:
@@ -70,30 +70,27 @@ databaseChangeLog:
                   nullable: false
 
       - addPrimaryKey:
-          tableName: maths_road_map_topic_tree
+          tableName: maths_road_map_article_tree
           columnNames: fk_prev, fk_next
-          constraintName: tree_edge
+          constraintName: article_tree_edge
 
       - addForeignKeyConstraint:
-          baseTableName: maths_road_map_topic
+          baseTableName: maths_road_map_article_latex
           baseColumnNames: id
-          referencedTableName: maths_road_map_topic_node
+          referencedTableName: maths_road_map_article
           referencedColumnNames: id
-          constraintName: fk_topic_to_topic_node
+          constraintName: fk_article_latex_to_article
 
       - addForeignKeyConstraint:
-          baseTableName: maths_road_map_topic_tree
+          baseTableName: maths_road_map_article_tree
           baseColumnNames: fk_prev
-          referencedTableName: maths_road_map_topic_node
+          referencedTableName: maths_road_map_article
           referencedColumnNames: id
-          constraintName: fk_prev_to_topic_node
+          constraintName: fk_prev_to_article
 
       - addForeignKeyConstraint:
-          baseTableName: maths_road_map_topic_tree
+          baseTableName: maths_road_map_article_tree
           baseColumnNames: fk_next
-          referencedTableName: maths_road_map_topic_node
+          referencedTableName: maths_road_map_article
           referencedColumnNames: id
-          constraintName: fk_next_to_topic_node
-
-
-
+          constraintName: fk_next_to_article

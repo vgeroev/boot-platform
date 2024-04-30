@@ -8,7 +8,6 @@ module org.vmalibu.module.mathsroadmap {
     requires org.vmalibu.module.security;
 
     requires com.google.common;
-    requires org.springdoc.openapi.webmvc.core;
     requires spring.beans;
     requires spring.tx;
     requires spring.context;
@@ -23,12 +22,25 @@ module org.vmalibu.module.mathsroadmap {
 
     opens org.vmalibu.module.mathsroadmap to spring.core;
     opens org.vmalibu.module.mathsroadmap.database.domainobject to org.hibernate.orm.core, spring.core, spring.beans;
-    opens org.vmalibu.module.mathsroadmap.service.topic to spring.core;
     opens org.vmalibu.module.mathsroadmap.database.dao to spring.data.commons;
+    opens org.vmalibu.module.mathsroadmap.controller.article;
+    opens org.vmalibu.module.mathsroadmap.service.config;
+    opens org.vmalibu.module.mathsroadmap.service.article;
+    opens org.vmalibu.module.mathsroadmap.service.article.pagemanager;
+    opens org.vmalibu.module.mathsroadmap.service.pdflatexconverter;
+    opens org.vmalibu.module.mathsroadmap.service.latexconverter;
+    opens org.vmalibu.module.mathsroadmap.service.nginx;
 
     exports org.vmalibu.module.mathsroadmap;
+    exports org.vmalibu.module.mathsroadmap.controller.article;
     exports org.vmalibu.module.mathsroadmap.database.dao;
     exports org.vmalibu.module.mathsroadmap.database.domainobject;
-    exports org.vmalibu.module.mathsroadmap.service.topic to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.mathsroadmap.database.converter to spring.beans;
+    exports org.vmalibu.module.mathsroadmap.service.config to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.mathsroadmap.service.article to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.mathsroadmap.service.article.pagemanager to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.mathsroadmap.service.pdflatexconverter to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.mathsroadmap.service.latexconverter to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.mathsroadmap.service.nginx to spring.beans, spring.core, spring.aop;
 
 }

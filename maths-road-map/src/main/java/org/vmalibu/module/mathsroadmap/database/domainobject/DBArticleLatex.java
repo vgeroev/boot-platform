@@ -9,7 +9,7 @@ import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
 import org.vmalibu.modules.database.domainobject.VersionedDomainObject;
 
 @Table(
-        name = MathsRoadMapConsts.DB_PREFIX + "topic"
+        name = MathsRoadMapConsts.DB_PREFIX + "article_latex"
 )
 @Entity
 @Getter
@@ -17,29 +17,25 @@ import org.vmalibu.modules.database.domainobject.VersionedDomainObject;
 @Access(value = AccessType.FIELD)
 @NoArgsConstructor
 @FieldNameConstants
-public class DBTopic extends VersionedDomainObject {
+public class DBArticleLatex extends VersionedDomainObject {
 
-    public static final String DB_NODE_ID = "id";
-    public static final String DB_TITLE = "title";
-    public static final String DB_BODY = "body";
+    public static final String DB_ARTICLE_ID = "id";
+    public static final String DB_LATEX = "latex";
 
     @Override
     @Id
     @Access(value = AccessType.PROPERTY)
-    @Column(name = DB_NODE_ID)
+    @Column(name = DB_ARTICLE_ID)
     public Long getId() {
         return super.getId();
     }
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
     @MapsId
-    @JoinColumn(name = DB_NODE_ID)
-    private DBTopicNode node;
+    @JoinColumn(name = DB_ARTICLE_ID)
+    private DBArticle article;
 
-    @Column(name = DB_TITLE, nullable = false)
-    private String title;
-
-    @Column(name = DB_BODY, nullable = false)
-    private String body;
+    @Column(name = DB_LATEX, nullable = false)
+    private String latex;
 
 }
