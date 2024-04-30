@@ -3,23 +3,27 @@ import { getAuthorizedUrl } from "../../../utils/UrlUtils";
 
 const EXERCISES_AUTHORIZED_URL = getAuthorizedUrl("exercises", "v1");
 
+function getExercisesAuthorizedUrl(path: string) {
+  return EXERCISES_AUTHORIZED_URL + path;
+}
+
 //---------------------------------------------------------------------------
 
 const EXCERCISE_SOURCE_LIST_HTTP_REQUEST: HttpRequest = {
   method: "get",
-  url: EXERCISES_AUTHORIZED_URL + "/exercise-source/list",
+  url: getExercisesAuthorizedUrl("/exercise-source/list"),
 };
 
 const EXCERCISE_SOURCE_CREATE_HTTP_REQUEST: HttpRequest = {
   method: "post",
-  url: EXERCISES_AUTHORIZED_URL + "/exercise-source",
+  url: getExercisesAuthorizedUrl("/exercise-source"),
 };
 
 //---------------------------------------------------------------------------
 
 function getExerciseListHttpRequest(exerciseSourceId: number): HttpRequest {
   return {
-    url: EXERCISES_AUTHORIZED_URL + `/${exerciseSourceId}/exercise/list`,
+    url: getExercisesAuthorizedUrl(`/${exerciseSourceId}/exercise/list`),
     method: "get",
   };
 }
@@ -27,20 +31,20 @@ function getExerciseListHttpRequest(exerciseSourceId: number): HttpRequest {
 function getExerciseHttpRequest(id: number): HttpRequest {
   return {
     method: "get",
-    url: EXERCISES_AUTHORIZED_URL + `/exercise/${id}`,
+    url: getExercisesAuthorizedUrl(`/exercise/${id}`),
   };
 }
 
 function updateExerciseHttpRequest(id: number): HttpRequest {
   return {
     method: "patch",
-    url: EXERCISES_AUTHORIZED_URL + `/exercise/${id}`,
+    url: getExercisesAuthorizedUrl(`/exercise/${id}`),
   };
 }
 function createExerciseHttpRequest(id: number): HttpRequest {
   return {
     method: "post",
-    url: EXERCISES_AUTHORIZED_URL + `/${id}/exercise`,
+    url: getExercisesAuthorizedUrl(`/${id}/exercise`),
   };
 }
 
