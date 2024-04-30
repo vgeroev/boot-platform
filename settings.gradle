@@ -2,5 +2,6 @@ rootProject.name = 'boot-platform'
 
 include 'modules'
 include 'security'
-include 'exercises'
+//include 'exercises'
+include 'maths-road-map'
 
