@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import BaseLayout from "./layout/BaseLayout";
 import { moduleRoutes as exerciseModuleRoutes } from "./module/exercises/route/ExercisesRouteGetter";
+import { moduleRoutes as mathsRoadMapModuleRoutes } from "./module/mathsroadmap/route/MathsRoadMapRouteGetter";
 import Home from "./page/home/Home";
 import { ModuleRoute } from "./route/ModuleRoute";
 
@@ -24,7 +25,9 @@ function App() {
   routes.push(
     <Route path="/home" element={<BaseLayout component={<Home />} />} />,
   );
-  routes = routes.concat(getModuleRoutes(exerciseModuleRoutes));
+  routes = routes
+    .concat(getModuleRoutes(exerciseModuleRoutes))
+    .concat(getModuleRoutes(mathsRoadMapModuleRoutes));
 
   return (
     <BrowserRouter>

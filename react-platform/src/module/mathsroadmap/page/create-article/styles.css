@@ -1,0 +1,29 @@
+.editor {
+  counter-reset: line;
+  border: 1px solid #ced4da;
+  background-color: white;
+}
+
+.editor #codeArea {
+  outline: none;
+  padding-left: 60px !important;
+}
+
+.editor pre {
+  color: black;
+  padding-left: 60px !important;
+}
+
+.editor .editorLineNumber {
+  position: absolute;
+  left: 0px;
+  color: black;
+  text-align: right;
+  width: 40px;
+  font-weight: 100;
+}
+
+.previewArticle {
+  background-color: white;
+  border: 1px solid #ced4da;
+}

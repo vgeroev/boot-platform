@@ -1,4 +1,4 @@
-import Layout, { Content } from "antd/es/layout/layout";
+import Layout, { Content, Footer } from "antd/es/layout/layout";
 import BaseHeader from "./BaseHeader";
 
 const contentProperties: React.CSSProperties = {
@@ -17,6 +17,7 @@ const BaseLayout: React.FC<BaseLayoutProps> = ({
     <Layout>
       <BaseHeader />
       <Content style={contentProperties}>{component}</Content>
+      <Footer />
     </Layout>
   );
 };
