@@ -4,10 +4,12 @@ import com.google.common.hash.Hashing;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 import org.vmalibu.module.mathsroadmap.service.config.MathsRoadMapConfigService;
 import org.vmalibu.module.mathsroadmap.service.config.NginxConfig;
-import org.vmalibu.module.mathsroadmap.service.latexconverter.LatexConverter;
+import org.vmalibu.module.mathsroadmap.service.latexconverter.tex4ht.TeX4htLatexConverter;
 import org.vmalibu.module.mathsroadmap.service.nginx.NginxControl;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
@@ -23,15 +25,16 @@ import java.nio.file.Path;
 @AllArgsConstructor
 public class ArticlePageManagerImpl implements ArticlePageManager {
 
-    private final LatexConverter latexConverter;
+    private final TeX4htLatexConverter tex4htLatexConverter;
     private final NginxControl nginxControl;
     private final MathsRoadMapConfigService mathsRoadMapConfigService;
 
     @Override
-    public @NonNull String createPreviewPage(@NonNull String latex,
-                                             @NonNull String userId) throws PlatformException {
+    public @NonNull String createPreviewPageByTeX4ht(@NonNull String latex,
+                                                     @NonNull String userId,
+                                                     @Nullable String configuration) throws PlatformException {
         String dirname = getPreviewDirname(userId);
-        internalCreatePreviewPage(latex, dirname);
+        internalCreatePreviewPage(latex, configuration, dirname);
         createPreviewConf(dirname);
         nginxControl.reload();
         return getPreviewPageURL(dirname);
@@ -46,14 +49,23 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
         }
     }
 
-    private void internalCreatePreviewPage(String latex, String dirname) throws PlatformException {
+    private void internalCreatePreviewPage(String latex,
+                                           String configuration,
+                                           String dirname) throws PlatformException {
         Path dir = mathsRoadMapConfigService.getNginxConfig().nginxArticlesConfig().previewDir();
         Path pagePath = dir.resolve(dirname);
-        createPage(latex, pagePath);
+        createPage(latex, configuration, pagePath);
     }
 
-    private void createPage(String latex, Path pagePath) throws PlatformException {
-        latexConverter.toHtml(latex, pagePath);
+    private void createPage(String latex,
+                            String configuration,
+                            Path pagePath) throws PlatformException {
+        try {
+            FileSystemUtils.deleteRecursively(pagePath);
+        } catch (IOException e) {
+            throw GeneralExceptionFactory.buildIOErrorException(e);
+        }
+        tex4htLatexConverter.toHtml(latex, pagePath, configuration);
     }
 
     private void createPreviewConf(String dirname) throws PlatformException {
@@ -87,9 +99,9 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
 
         private static final String PREVIEW =
                 """
-                    location /articles/preview/%s/ {
-                        index index.html;
-                    }
+                location /articles/preview/%s/ {
+                    index index.html;
+                }
                 """;
     }
 }

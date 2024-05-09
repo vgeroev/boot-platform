@@ -19,25 +19,36 @@ public class ArticleController {
 
     private final ArticlePageManager articlePageManager;
 
-    @PostMapping("/article/preview")
+    @PostMapping("/article/tex4ht/preview")
     @ResponseStatus(HttpStatus.OK)
-    public PreviewArticleResponse previewArticle(
+    public PreviewArticleResponse previewArticleTex4ht(
             final UserSource userSource,
-            @RequestBody PreviewArticleRequest previewArticleRequest
+            @RequestBody TeX4htPreviewArticleRequest previewArticleRequest
     ) throws PlatformException {
+        String configuration = StringUtils.hasText(previewArticleRequest.configuration)
+                ? previewArticleRequest.configuration
+                : null;
         String latex = previewArticleRequest.latex;
         if (!StringUtils.hasText(latex)) {
-            throw GeneralExceptionFactory.buildEmptyValueException(PreviewArticleRequest.JSON_LATEX);
+            throw GeneralExceptionFactory.buildEmptyValueException(TeX4htPreviewArticleRequest.JSON_LATEX);
         }
 
-        String articleURL = articlePageManager.createPreviewPage(latex, userSource.getUserId());
+        String articleURL = articlePageManager.createPreviewPageByTeX4ht(
+                latex,
+                userSource.getUserId(),
+                configuration
+        );
         return new PreviewArticleResponse(articleURL);
     }
 
     @Data
-    public static class PreviewArticleRequest {
+    public static class TeX4htPreviewArticleRequest {
 
+        static final String JSON_CONFIGURATION = "configuration";
         static final String JSON_LATEX = "latex";
+
+        @JsonProperty(JSON_CONFIGURATION)
+        private String configuration;
 
         @JsonProperty(JSON_LATEX)
         private String latex;
@@ -52,5 +63,4 @@ public class ArticleController {
         @JsonProperty(JSON_ARTICLE_URL)
         private String articleURL;
     }
-
 }

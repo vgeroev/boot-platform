@@ -16,8 +16,8 @@ public class MathsRoadMapExceptionFactory {
         return new PlatformException(TOPICS_HAVE_CYCLE_CODE);
     }
 
-    public static PlatformException buildInvalidLatexSyntaxException(String latex) {
-        return new PlatformException(INVALID_LATEX_SYNTAX_CODE, Map.of("latex", latex));
+    public static PlatformException buildInvalidLatexSyntaxException(String cmdOutput) {
+        return new PlatformException(INVALID_LATEX_SYNTAX_CODE, Map.of("cmdOutput", cmdOutput));
     }
 
     public static PlatformException buildNginxReloadErrorException(int exitValue) {
