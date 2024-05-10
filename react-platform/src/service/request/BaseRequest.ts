@@ -44,7 +44,10 @@ export abstract class BaseRequest<M extends BaseModel | {} = {}, D = any> {
     const promise: Promise<void> = this.httpCaller
       .exec(props)
       .then((httpResponse) => {
-        const response: ModuleError | M = httpResponse.data;
+        const response: ModuleError | M | undefined = httpResponse.data;
+        if (!response) {
+          return;
+        }
 
         if (onModuleError && response instanceof ModuleError) {
           onModuleError(httpResponse as HttpResponse<ModuleError>);

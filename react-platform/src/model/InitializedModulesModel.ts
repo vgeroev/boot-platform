@@ -7,9 +7,9 @@ export class InitializedModulesModel implements BaseModel {
   constructor(private readonly _moduleUUIDs: string[]) {}
 
   public static parse(data: Record<string, unknown>): InitializedModulesModel {
-    const moduleUUIDs: string[] | unknown = data["articleURL"];
+    const moduleUUIDs: string[] | unknown = data;
     if (!moduleUUIDs || !(moduleUUIDs instanceof Array<string>)) {
-      throw new Error("No moduleUUIDs" + data);
+      throw new Error("No moduleUUIDs " + data);
     }
 
     const model: InitializedModulesModel = new InitializedModulesModel(

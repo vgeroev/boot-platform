@@ -51,7 +51,7 @@ const httpCall = <M = {}, D = any>(
 
             return {
               httpStatus: rawResponse.status,
-              response: new ModuleError(
+              data: new ModuleError(
                 moduleError.code,
                 moduleError?.parameters as Record<string, unknown> | undefined,
                 moduleError?.message as string | undefined,
@@ -61,7 +61,7 @@ const httpCall = <M = {}, D = any>(
           if (model) {
             return {
               httpStatus: rawResponse.status,
-              response: new ModelFactory(model).getModel(data),
+              data: new ModelFactory(model).getModel(data),
             };
           }
           return { httpStatus: rawResponse.status } as HttpResponse<M>;

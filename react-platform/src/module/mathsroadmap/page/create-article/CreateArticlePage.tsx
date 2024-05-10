@@ -10,44 +10,13 @@ import {
   Affix,
 } from "antd";
 import React from "react";
-import Editor from "react-simple-code-editor";
-import Forbidden from "../../../../component/forbidden/Forbidden";
-import Prism, { highlight } from "prismjs";
 import "prismjs/themes/prism-solarizedlight.css";
 import Iframe from "react-iframe";
 import "./styles.css";
 import { latexEditorService } from "../../service/latexeditor/LatexEditorService";
 import { PreviewArticleRequest } from "../../service/request/PreviewArticleRequest";
 import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
-require("prismjs/components/prism-latex.js");
-
-interface HighlightedLatex {
-  linesCount: number;
-  code: string;
-}
-
-const highlightWithLineNumbers = (code: string): HighlightedLatex => {
-  const highlighted = highlight(code, Prism.languages.latex, "latex");
-  const modifiedLines: string[] = addLineNumbers(highlighted);
-  return {
-    linesCount: modifiedLines.length,
-    code: modifiedLines.join("\n"),
-  };
-};
-
-const getCodeWithLineNumbers = (code: string): string => {
-  return addLineNumbers(code).join("\n");
-};
-
-const addLineNumbers = (code: string): Array<string> => {
-  const modifiedLines = [];
-  let i = 1;
-  for (let line of code.split("\n")) {
-    modifiedLines.push(`<span class='editorLineNumber'>${i}</span>${line}`);
-    i++;
-  }
-  return modifiedLines;
-};
+import { LatexEditor } from "../../component/latexeditor/LatexEditor";
 
 const getDefaultConfiguration = (): string => {
   return `\\Preamble{xhtml,mathjax} 
@@ -104,23 +73,6 @@ const CreateArticlePage: React.FC<{}> = () => {
       },
     });
   };
-
-  // React.useEffect(() => {
-  //   const handleKeyPress = (event: any) => {
-  //     console.log(event);
-  //     if (event.altKey === true && event.keyCode === 13) {
-  //       runRender();
-  //     }
-  //   };
-  //   document.addEventListener("keydown", handleKeyPress, true);
-  //   return () => {
-  //     document.removeEventListener("keydown", handleKeyPress);
-  //   };
-  // }, [runRender]);
-
-  // if (!auth?.isAuthenticated) {
-  //   return <Forbidden />;
-  // }
 
   return (
     <>
@@ -183,42 +135,22 @@ const CreateArticlePage: React.FC<{}> = () => {
         <Row justify={"space-evenly"}>
           <Col span={11}>
             <Row>
-              <Editor
-                className="editor"
-                textareaId="codeArea"
+              <LatexEditor
+                withHighlight
                 value={tex4ht.configuration || ""}
                 onValueChange={(code) => {
                   setTex4ht({ ...tex4ht, configuration: code });
                   latexEditorService.saveConfiguration(code);
                 }}
-                highlight={(code) => {
-                  return highlightWithLineNumbers(code).code;
-                }}
-                padding={15}
-                style={{
-                  fontFamily: '"Fira code", "Fira Mono", monospace',
-                  fontSize: 16,
-                  color: "black",
-                }}
               />
             </Row>
             <Row>
-              <Editor
-                className="editor"
-                textareaId="codeArea"
+              <LatexEditor
+                withHighlight
                 value={tex4ht.latex}
                 onValueChange={(code) => {
                   setTex4ht({ ...tex4ht, latex: code });
                   latexEditorService.saveLatex(code);
-                }}
-                highlight={(code) => {
-                  return highlightWithLineNumbers(code).code;
-                }}
-                padding={15}
-                style={{
-                  fontFamily: '"Fira code", "Fira Mono", monospace',
-                  fontSize: 16,
-                  color: "black",
                 }}
               />
             </Row>
@@ -239,22 +171,17 @@ function loadIframe(
   if (!renderResult) {
     return <div></div>;
   }
+
+  const heightPx: number = window.screen.height - 209;
   if (renderResult.errorMsg) {
     return (
-      <Editor
-        className="editor"
-        textareaId="codeArea"
-        value={getCodeWithLineNumbers(renderResult.errorMsg.trim())}
-        onValueChange={() => {}}
-        highlight={(code) => {
-          return code;
-        }}
-        padding={15}
+      <LatexEditor
+        value={renderResult.errorMsg.trim()}
         style={{
           fontFamily: '"Fira code", "Fira Mono", monospace',
           fontSize: 16,
           color: "black",
-          height: window.screen.height - 209 + "px",
+          height: heightPx + "px",
           overflow: "scroll",
         }}
       />
@@ -267,7 +194,7 @@ function loadIframe(
       allowFullScreen
       key={checksum + ""}
       url={renderResult.url || ""}
-      height={window.screen.height - 209 + "px"}
+      height={heightPx + "px"}
       width="100%"
     />
   );

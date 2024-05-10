@@ -3,7 +3,6 @@ import React from "react";
 import ApplicationList, {
   AppModule,
 } from "../../component/application/ApplicationList";
-import Spinner from "../../component/spinner/Spinner";
 import { useHttpRequest } from "../../hook/useHttpRequestHook";
 import { EXERCISE_SOURCE_LIST_PATH } from "../../module/exercises/route/ExercisesRouteGetter";
 import { InitializedModulesRequest } from "../../service/request/InitializedModulesRequest";
@@ -64,7 +63,7 @@ const Home: React.FC<{}> = () => {
       },
       onFinally: () => setLoading(false),
     });
-  }, [initializedModulesRequest]);
+  }, []);
 
   return (
     <Spin spinning={loading}>
