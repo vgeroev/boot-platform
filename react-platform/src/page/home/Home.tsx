@@ -1,12 +1,13 @@
-import axios from "axios";
+import { Spin } from "antd";
 import React from "react";
 import ApplicationList, {
   AppModule,
 } from "../../component/application/ApplicationList";
 import Spinner from "../../component/spinner/Spinner";
+import { useHttpRequest } from "../../hook/useHttpRequestHook";
 import { EXERCISE_SOURCE_LIST_PATH } from "../../module/exercises/route/ExercisesRouteGetter";
+import { InitializedModulesRequest } from "../../service/request/InitializedModulesRequest";
 import { getMatrix } from "../../utils/GridUtils";
-import { getModulesRequest, HttpRequest } from "../../utils/HttpUtils";
 
 const applications: Map<string, AppModule> = initApplicationMap();
 
@@ -30,27 +31,6 @@ function initApplicationMap(): Map<string, AppModule> {
   return apps;
 }
 
-async function fetchApplications(
-  onSuccess: (result: any) => void,
-  onError: (e: Error) => void,
-): Promise<void> {
-  try {
-    const httpRequest: HttpRequest = getModulesRequest();
-
-    await axios
-      .request<any>({
-        url: httpRequest.url,
-        method: httpRequest.method,
-      })
-      .then((response: any) => {
-        onSuccess(response.data);
-      })
-      .catch(onError);
-  } catch (e: any) {
-    console.error(e);
-  }
-}
-
 function getInitializedApps(uuids: string[]): Array<AppModule> {
   const apps: Array<AppModule> = [];
   uuids.forEach((uuid) => {
@@ -63,36 +43,35 @@ function getInitializedApps(uuids: string[]): Array<AppModule> {
 }
 
 const Home: React.FC<{}> = () => {
+  const [loading, setLoading] = React.useState<boolean>(false);
   const [appsMatrix, setAppsMatrix] = React.useState<AppModule[][] | undefined>(
     undefined,
   );
+  const initializedModulesRequest: InitializedModulesRequest = useHttpRequest(
+    InitializedModulesRequest,
+  );
 
   const span: number = 4;
-
   React.useEffect(() => {
-    fetchApplications(
-      (data) => {
-        const initializedApps: AppModule[] = getInitializedApps(
-          data as string[],
-        );
+    setLoading(true);
+    initializedModulesRequest.exec({
+      onSuccess: (response) => {
+        const moduleUUIDs: string[] = response.data?.moduleUUIDs || [];
+        const initializedApps: AppModule[] = getInitializedApps(moduleUUIDs);
         const elementsPerRow: number = 24 / span;
         const cRow = initializedApps.length / elementsPerRow;
         setAppsMatrix(getMatrix(initializedApps, cRow, elementsPerRow));
       },
-      (e) => console.log(e),
-    );
-  }, []);
-
-  if (!appsMatrix) {
-    return <Spinner />;
-  }
+      onFinally: () => setLoading(false),
+    });
+  }, [initializedModulesRequest]);
 
   return (
-    <>
+    <Spin spinning={loading}>
       <div style={{ height: "100vh" }}>
-        <ApplicationList span={span} applications={appsMatrix} />
+        <ApplicationList span={span} applications={appsMatrix || [[]]} />
       </div>
-    </>
+    </Spin>
   );
 };
 

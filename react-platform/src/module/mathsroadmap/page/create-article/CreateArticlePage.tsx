@@ -10,56 +10,16 @@ import {
   Affix,
 } from "antd";
 import React from "react";
-import { AuthState, useAuth } from "react-oidc-context";
 import Editor from "react-simple-code-editor";
 import Forbidden from "../../../../component/forbidden/Forbidden";
 import Prism, { highlight } from "prismjs";
 import "prismjs/themes/prism-solarizedlight.css";
 import Iframe from "react-iframe";
-import axios from "axios";
-import { HttpRequest } from "../../../../utils/HttpUtils";
 import "./styles.css";
 import { latexEditorService } from "../../service/latexeditor/LatexEditorService";
-import { MATHS_ROAD_MAP_ARTICLE_PREVIEW_HTTP_REQUEST } from "../../utils/MathsRoadMapHttpUtils";
+import { PreviewArticleRequest } from "../../service/request/PreviewArticleRequest";
+import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
 require("prismjs/components/prism-latex.js");
-
-async function preview(
-  auth: AuthState,
-  tex4ht: TeX4ht,
-  urlSetter: (url: string) => void,
-  onError: (message: string) => void,
-  onFinally: () => void,
-): Promise<void> {
-  const token = auth.user?.access_token;
-  if (!token) {
-    onFinally();
-    throw new Error("Failed to get token");
-  }
-
-  const request: HttpRequest = MATHS_ROAD_MAP_ARTICLE_PREVIEW_HTTP_REQUEST;
-  await axios
-    .request({
-      url: request.url,
-      method: request.method,
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        latex: tex4ht.latex,
-        configuration: tex4ht.configuration || null,
-      },
-    })
-    .then((data: any) => {
-      const url: string = data["data"]["article_url"];
-      urlSetter(url);
-    })
-    .catch((e) => {
-      onError(e.response?.data?.moduleError?.parameters?.cmdOutput);
-    })
-    .finally(() => {
-      onFinally();
-    });
-}
 
 interface HighlightedLatex {
   linesCount: number;
@@ -118,24 +78,31 @@ const CreateArticlePage: React.FC<{}> = () => {
   // For iframe reloading
   const [checksum, setChecksum] = React.useState<number>(0);
   const [loading, setLoading] = React.useState<boolean>(false);
-  const auth: AuthState = useAuth();
+  const previewArticleRequest: PreviewArticleRequest = useHttpRequest(
+    PreviewArticleRequest,
+  );
 
   const runRender = () => {
     setLoading(true);
-    preview(
-      auth,
-      tex4ht,
-      (url) => {
-        setRenderResult({ url: url });
+
+    previewArticleRequest.exec({
+      data: {
+        latex: tex4ht.latex,
+        configuration: tex4ht.configuration,
       },
-      (errorMsg) => {
-        setRenderResult({ errorMsg: errorMsg });
+      onSuccess: (httpResponse) => {
+        setRenderResult({ url: httpResponse.data?.articleURL });
       },
-      () => {
+      onModuleError: (httpResponse) => {
+        setRenderResult({
+          errorMsg: httpResponse.data?.parameters?.cmdOutput + "",
+        });
+      },
+      onFinally: () => {
         setChecksum(checksum + 1);
         setLoading(false);
       },
-    );
+    });
   };
 
   // React.useEffect(() => {
