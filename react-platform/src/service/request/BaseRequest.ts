@@ -1,22 +1,28 @@
+import { Modal } from "antd";
+import { AuthContextProps } from "react-oidc-context";
 import {
   HttpCaller,
   HttpCallerFactory,
   HttpRequest,
   HttpRequestHookProps,
   HttpRequestMethod,
-  HttpResponse,
   ModuleError,
 } from "../../hook/useHttpHook";
 import { BaseModel, IModelParser } from "../../model/BaseModel";
 
+export interface RequestResult<T extends BaseModel | ModuleError> {
+  status: number;
+  data: T;
+}
+
 export interface ExecOptions<M extends BaseModel, D = any> {
   data?: D;
-  onSuccess?: (httpResponse: HttpResponse<M>) => void;
-  onModuleError?: (httpResponse: HttpResponse<ModuleError>) => void;
+  onSuccess?: (httpResponse: RequestResult<M>) => void;
+  handleModuleError?: (httpResponse: RequestResult<ModuleError>) => boolean;
   onFinally?: () => void;
 }
 
-export abstract class BaseRequest<M extends BaseModel | {} = {}, D = any> {
+export abstract class BaseRequest<M extends BaseModel, D = any> {
   private readonly httpCaller: HttpCaller<M, D>;
 
   constructor(
@@ -30,29 +36,44 @@ export abstract class BaseRequest<M extends BaseModel | {} = {}, D = any> {
   public exec({
     data,
     onSuccess,
-    onModuleError,
+    handleModuleError,
     onFinally,
   }: ExecOptions<M, D>): void {
-    let props: HttpRequestHookProps = { request: this.getHttpRequest() };
+    let props: HttpRequestHookProps = {
+      request: this.getHttpRequest(),
+      model: this.modelParser,
+    };
     if (data) {
       props = { ...props, data: data };
-    }
-    if (this.modelParser) {
-      props = { ...props, model: this.modelParser };
     }
 
     const promise: Promise<void> = this.httpCaller
       .exec(props)
       .then((httpResponse) => {
-        const response: ModuleError | M | undefined = httpResponse.data;
-        if (!response) {
-          return;
+        if (httpResponse.httpStatus === 401) {
+          const auth: AuthContextProps = this.httpCaller.authState;
+          auth.signinRedirect();
         }
 
-        if (onModuleError && response instanceof ModuleError) {
-          onModuleError(httpResponse as HttpResponse<ModuleError>);
+        const response: ModuleError | M | undefined = httpResponse.data;
+        if (!response) {
+          throw new Error("No response in " + httpResponse);
+        }
+
+        if (response instanceof ModuleError) {
+          let errorHandled: boolean = false;
+          if (handleModuleError) {
+            errorHandled = handleModuleError({
+              status: httpResponse.httpStatus,
+              data: response,
+            });
+          }
+
+          if (!errorHandled) {
+            Modal.error({ title: response.code, content: response.message });
+          }
         } else if (onSuccess) {
-          onSuccess(httpResponse as HttpResponse<M>);
+          onSuccess({ status: httpResponse.httpStatus, data: response });
         }
       });
 
@@ -83,15 +104,16 @@ export abstract class BaseRequest<M extends BaseModel | {} = {}, D = any> {
 }
 
 export interface IRequestBuilder {
-  new (...args: any[]): any;
+  new(...args: any[]): any;
   build(httpCallerFactory: HttpCallerFactory): InstanceType<this>;
 }
 
 export class RequestFactory<
+  M extends BaseModel,
   I extends IRequestBuilder,
-  R extends BaseRequest = InstanceType<I>,
+  R extends BaseRequest<M> = InstanceType<I>,
 > {
-  constructor(private readonly request: I) {}
+  constructor(private readonly request: I) { }
 
   public build(httpCallerFactory: HttpCallerFactory): R {
     return this.request.build(httpCallerFactory);

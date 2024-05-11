@@ -2,7 +2,7 @@ import { BaseModel } from "../../../../model/BaseModel";
 import { BaseRequest } from "../../../../service/request/BaseRequest";
 
 export abstract class MathsRoadMapBaseRequest<
-  M extends BaseModel | {} = {},
+  M extends BaseModel,
   D = any,
 > extends BaseRequest<M, D> {
   public getApiVersion(): string {

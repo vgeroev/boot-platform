@@ -1,13 +1,16 @@
-import axios from "axios";
-import { AuthState, useAuth } from "react-oidc-context";
+import axios, { AxiosResponse } from "axios";
+import { AuthContextProps, useAuth } from "react-oidc-context";
 import { IModelParser, ModelFactory } from "../model/BaseModel";
 
-const httpCall = <M = {}, D = any>(
+type HttpResult = Record<"moduleError" | "data", any>;
+
+const httpCall = <M, D = any>(
   authorized: boolean,
-  authState?: AuthState,
+  authState: AuthContextProps,
 ): HttpCaller<M, D> => {
   return {
     isAuthorized: authorized,
+    authState: authState,
     exec: async ({
       request,
       data,
@@ -17,7 +20,7 @@ const httpCall = <M = {}, D = any>(
       if (authorized) {
         const token = authState?.user?.access_token;
         if (!token) {
-          throw new Error("Failed to get token");
+          authState.signinRedirect();
         }
         headers = { Authorization: `Bearer ${token}` };
       } else {
@@ -25,7 +28,7 @@ const httpCall = <M = {}, D = any>(
       }
 
       return await axios
-        .request({
+        .request<HttpResult>({
           url: request.url,
           method: request.method,
           headers: headers,
@@ -36,21 +39,27 @@ const httpCall = <M = {}, D = any>(
           console.log(e);
           throw new Error(e);
         })
-        .then((rawResponse: any) => {
-          const data: any = rawResponse.data;
+        .then((axiosResponse: AxiosResponse<HttpResult>) => {
+          const data: HttpResult = axiosResponse.data;
           if (!data) {
-            console.log("No data in " + rawResponse);
-            throw new Error("No data in " + rawResponse);
+            return { httpStatus: axiosResponse.status };
           }
 
-          const moduleError: Record<string, unknown> = data.moduleError;
-          if (moduleError) {
+          if (data.data) {
+            return {
+              httpStatus: axiosResponse.status,
+              data: new ModelFactory(model).getModel(data),
+            };
+          } else if (data.moduleError) {
+            const moduleError: any = data.moduleError;
             if (typeof moduleError.code !== "string") {
-              throw new Error("No `code` field " + moduleError);
+              throw new Error(
+                "No `code` field with `string` type in" + moduleError,
+              );
             }
 
             return {
-              httpStatus: rawResponse.status,
+              httpStatus: axiosResponse.status,
               data: new ModuleError(
                 moduleError.code,
                 moduleError?.parameters as Record<string, unknown> | undefined,
@@ -58,13 +67,8 @@ const httpCall = <M = {}, D = any>(
               ),
             };
           }
-          if (model) {
-            return {
-              httpStatus: rawResponse.status,
-              data: new ModelFactory(model).getModel(data),
-            };
-          }
-          return { httpStatus: rawResponse.status } as HttpResponse<M>;
+
+          throw new Error("Unknown response " + axiosResponse);
         });
     },
   };
@@ -78,13 +82,14 @@ export interface HttpRequest {
 }
 export interface HttpRequestHookProps<D = any> {
   request: HttpRequest;
+  model: IModelParser;
   data?: D;
-  model?: IModelParser;
 }
 
 export interface HttpCaller<M = {}, D = any> {
   exec: (x: HttpRequestHookProps<D>) => Promise<HttpResponse<M | ModuleError>>;
   isAuthorized: boolean;
+  authState: AuthContextProps;
 }
 
 export interface HttpCallerFactory {
@@ -96,7 +101,7 @@ export class ModuleError {
     private readonly _code: string,
     private readonly _parameters?: Record<string, unknown>,
     private readonly _message?: string,
-  ) {}
+  ) { }
   public get message(): string | undefined {
     return this._message;
   }
@@ -114,13 +119,13 @@ export interface HttpResponse<R> {
 }
 
 export const useHttpCallerFactory = (): HttpCallerFactory => {
-  const auth: AuthState = useAuth();
+  const auth: AuthContextProps = useAuth();
   return {
     newInstance: <M = {}, D = any>(authorized: boolean): HttpCaller<M, D> => {
       if (authorized) {
         return httpCall<M>(true, auth);
       } else {
-        return httpCall<M>(false);
+        return httpCall<M>(false, auth);
       }
     },
   };

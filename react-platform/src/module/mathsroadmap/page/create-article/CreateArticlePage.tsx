@@ -17,6 +17,8 @@ import { latexEditorService } from "../../service/latexeditor/LatexEditorService
 import { PreviewArticleRequest } from "../../service/request/PreviewArticleRequest";
 import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
 import { LatexEditor } from "../../component/latexeditor/LatexEditor";
+import { CreateArticleRequest } from "../../service/request/CreateArticleRequest";
+import { AbstractionLevel } from "../../model/ArticleModel";
 
 const getDefaultConfiguration = (): string => {
   return `\\Preamble{xhtml,mathjax} 
@@ -36,6 +38,10 @@ interface TeX4ht {
 }
 
 const CreateArticlePage: React.FC<{}> = () => {
+  const [title, setTitle] = React.useState<string>("");
+  const [abstractionLevel, setAbstractionLevel] = React.useState<
+    AbstractionLevel | undefined
+  >(undefined);
   const [tex4ht, setTex4ht] = React.useState<TeX4ht>({
     latex: latexEditorService.getLatex() || "",
     configuration:
@@ -50,8 +56,10 @@ const CreateArticlePage: React.FC<{}> = () => {
   const previewArticleRequest: PreviewArticleRequest = useHttpRequest(
     PreviewArticleRequest,
   );
+  const createArticleRequest: CreateArticleRequest =
+    useHttpRequest(CreateArticleRequest);
 
-  const runRender = () => {
+  const render = () => {
     setLoading(true);
 
     previewArticleRequest.exec({
@@ -62,13 +70,49 @@ const CreateArticlePage: React.FC<{}> = () => {
       onSuccess: (httpResponse) => {
         setRenderResult({ url: httpResponse.data?.articleURL });
       },
-      onModuleError: (httpResponse) => {
-        setRenderResult({
-          errorMsg: httpResponse.data?.parameters?.cmdOutput + "",
-        });
+      handleModuleError: (httpResponse) => {
+        switch (httpResponse.data.code) {
+          case "invalid_latex_syntax":
+            setRenderResult({
+              errorMsg: httpResponse.data.parameters?.cmdOutput + "",
+            });
+            return true;
+        }
+        return false;
       },
       onFinally: () => {
         setChecksum(checksum + 1);
+        setLoading(false);
+      },
+    });
+  };
+
+  const submit = () => {
+    if (!abstractionLevel) {
+      throw new Error("abstractionLevel should not be empty");
+    }
+    setLoading(true);
+    createArticleRequest.exec({
+      data: {
+        title: title?.trim(),
+        abstractionLevel: abstractionLevel,
+        latex: tex4ht.latex,
+        configuration: tex4ht.configuration,
+      },
+      onSuccess: (httpResponse) => {
+        console.log(httpResponse.data);
+      },
+      handleModuleError: (httpResponse) => {
+        switch (httpResponse.data.code) {
+          case "invalid_latex_syntax":
+            setRenderResult({
+              errorMsg: httpResponse.data.parameters?.cmdOutput + "",
+            });
+            return true;
+        }
+        return false;
+      },
+      onFinally: () => {
         setLoading(false);
       },
     });
@@ -88,10 +132,13 @@ const CreateArticlePage: React.FC<{}> = () => {
               style={{ maxWidth: 1000 }}
             >
               <Form.Item label="Title">
-                <Input maxLength={255} />
+                <Input
+                  maxLength={255}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
               </Form.Item>
               <Form.Item label="Abstraction level">
-                <Select>
+                <Select onChange={(value) => setAbstractionLevel(value)}>
                   <Select.Option value="LOW">
                     <div style={{ color: "#808080", fontWeight: 100 }}>Low</div>
                   </Select.Option>
@@ -107,6 +154,14 @@ const CreateArticlePage: React.FC<{}> = () => {
                   </Select.Option>
                 </Select>
               </Form.Item>
+
+              <Button
+                onClick={() => {
+                  submit();
+                }}
+              >
+                Submit
+              </Button>
             </Form>
           </Col>
         </Row>
@@ -123,12 +178,9 @@ const CreateArticlePage: React.FC<{}> = () => {
             </Button>
           </Col>
           <Col span={1}>
-            <Button type="primary" onClick={(e) => runRender()}>
+            <Button type="primary" onClick={() => render()}>
               Render
             </Button>
-          </Col>
-          <Col span={1}>
-            <Button>Submit</Button>
           </Col>
         </Row>
 

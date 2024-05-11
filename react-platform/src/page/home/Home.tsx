@@ -55,7 +55,7 @@ const Home: React.FC<{}> = () => {
     setLoading(true);
     initializedModulesRequest.exec({
       onSuccess: (response) => {
-        const moduleUUIDs: string[] = response.data?.moduleUUIDs || [];
+        const moduleUUIDs: string[] = response.data.moduleUUIDs || [];
         const initializedApps: AppModule[] = getInitializedApps(moduleUUIDs);
         const elementsPerRow: number = 24 / span;
         const cRow = initializedApps.length / elementsPerRow;
