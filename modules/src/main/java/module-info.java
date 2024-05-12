@@ -41,7 +41,6 @@ module org.vmalibu.modules {
     requires com.google.common;
     requires org.json;
 
-    opens org.vmalibu.modules.crypto to spring.aop, spring.core;
     opens org.vmalibu.modules.module to spring.aop, spring.core;
     opens org.vmalibu.modules.web.configuration to spring.core;
     opens org.vmalibu.modules.threadpool to spring.core;
@@ -72,7 +71,6 @@ module org.vmalibu.modules {
     exports org.vmalibu.modules.settings;
     exports org.vmalibu.modules.module.settings;
     exports org.vmalibu.modules.module.settings.rabbit;
-    exports org.vmalibu.modules.crypto;
     exports org.vmalibu.modules.utils;
     exports org.vmalibu.modules.utils.function;
     exports org.vmalibu.modules.utils.database;
