@@ -37,10 +37,14 @@ interface TeX4ht {
   configuration?: string;
 }
 
+interface CreateArticleForm {
+  title?: string;
+  abstractionLevel?: AbstractionLevel;
+}
+
 const CreateArticlePage: React.FC<{}> = () => {
-  const [title, setTitle] = React.useState<string>("");
-  const [abstractionLevel, setAbstractionLevel] = React.useState<
-    AbstractionLevel | undefined
+  const [createArticleForm, setCreateArticleForm] = React.useState<
+    CreateArticleForm | undefined
   >(undefined);
   const [tex4ht, setTex4ht] = React.useState<TeX4ht>({
     latex: latexEditorService.getLatex() || "",
@@ -77,8 +81,9 @@ const CreateArticlePage: React.FC<{}> = () => {
               errorMsg: httpResponse.data.parameters?.cmdOutput + "",
             });
             return true;
+          default:
+            return false;
         }
-        return false;
       },
       onFinally: () => {
         setChecksum(checksum + 1);
@@ -88,14 +93,21 @@ const CreateArticlePage: React.FC<{}> = () => {
   };
 
   const submit = () => {
-    if (!abstractionLevel) {
+    if (!createArticleForm) {
+      throw new Error("No createArticleForm");
+    }
+    if (!createArticleForm.title) {
+      throw new Error("title should not be empty");
+    }
+    if (!createArticleForm.abstractionLevel) {
       throw new Error("abstractionLevel should not be empty");
     }
+
     setLoading(true);
     createArticleRequest.exec({
       data: {
-        title: title?.trim(),
-        abstractionLevel: abstractionLevel,
+        title: createArticleForm.title?.trim(),
+        abstractionLevel: createArticleForm.abstractionLevel,
         latex: tex4ht.latex,
         configuration: tex4ht.configuration,
       },
@@ -109,8 +121,9 @@ const CreateArticlePage: React.FC<{}> = () => {
               errorMsg: httpResponse.data.parameters?.cmdOutput + "",
             });
             return true;
+          default:
+            return false;
         }
-        return false;
       },
       onFinally: () => {
         setLoading(false);
@@ -125,48 +138,75 @@ const CreateArticlePage: React.FC<{}> = () => {
         <Row>
           <Col span={24}>
             <Form
+              name="submitForm"
               labelCol={{ span: 16 }}
               wrapperCol={{ span: 14 }}
               layout="horizontal"
               disabled={false}
               style={{ maxWidth: 1000 }}
+              autoComplete="off"
+              onFinish={() => submit()}
             >
-              <Form.Item label="Title">
+              <Form.Item<CreateArticleForm>
+                name="title"
+                label="Title"
+                rules={[{ required: true, message: "Field cannot be empty!" }]}
+              >
                 <Input
                   maxLength={255}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(e) =>
+                    setCreateArticleForm({
+                      ...createArticleForm,
+                      title: e.target.value,
+                    })
+                  }
                 />
               </Form.Item>
-              <Form.Item label="Abstraction level">
-                <Select onChange={(value) => setAbstractionLevel(value)}>
+
+              <Form.Item<CreateArticleForm>
+                name="abstractionLevel"
+                label="Abstraction level"
+                rules={[{ required: true, message: "Field cannot be empty!" }]}
+              >
+                <Select
+                  onChange={(value) =>
+                    setCreateArticleForm({
+                      ...createArticleForm,
+                      abstractionLevel: value,
+                    })
+                  }
+                >
                   <Select.Option value="LOW">
-                    <div style={{ color: "#808080", fontWeight: 100 }}>Low</div>
+                    <div className="global-abstraction-level-color-low">
+                      Low
+                    </div>
                   </Select.Option>
                   <Select.Option value="MEDIUM">
-                    <div style={{ color: "#000080", fontWeight: 100 }}>
+                    <div className="global-abstraction-level-color-medium">
                       Medium
                     </div>
                   </Select.Option>
                   <Select.Option value="SUPREME">
-                    <div style={{ color: "#DAA520", fontWeight: 100 }}>
+                    <div className="global-abstraction-level-color-supreme">
                       Supreme
                     </div>
                   </Select.Option>
                 </Select>
               </Form.Item>
 
-              <Button
-                onClick={() => {
-                  submit();
-                }}
-              >
-                Submit
-              </Button>
+              <Form.Item wrapperCol={{ offset: 19, span: 14 }}>
+                <Button type="primary" htmlType="submit">
+                  Submit
+                </Button>
+              </Form.Item>
             </Form>
           </Col>
         </Row>
 
-        <Row justify="space-between" style={{ padding: "10px" }}>
+        <Row
+          justify="start"
+          style={{ marginLeft: "23px", marginBottom: "20px" }}
+        >
           <Col span={1}>
             <Button
               onClick={() => {
@@ -178,13 +218,11 @@ const CreateArticlePage: React.FC<{}> = () => {
             </Button>
           </Col>
           <Col span={1}>
-            <Button type="primary" onClick={() => render()}>
-              Render
-            </Button>
+            <Button onClick={() => render()}>Render</Button>
           </Col>
         </Row>
 
-        <Row justify={"space-evenly"}>
+        <Row justify="space-evenly">
           <Col span={11}>
             <Row>
               <LatexEditor
@@ -196,7 +234,7 @@ const CreateArticlePage: React.FC<{}> = () => {
                 }}
               />
             </Row>
-            <Row>
+            <Row style={{ paddingTop: 10 }}>
               <LatexEditor
                 withHighlight
                 value={tex4ht.latex}

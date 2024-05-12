@@ -1,3 +1,4 @@
+import { Modal } from "antd";
 import axios, { AxiosResponse } from "axios";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { IModelParser, ModelFactory } from "../model/BaseModel";
@@ -33,10 +34,13 @@ const httpCall = <M, D = any>(
           method: request.method,
           headers: headers,
           data: data,
-          validateStatus: () => true,
+          validateStatus: (status) => status < 500,
         })
         .catch((e) => {
           console.log(e);
+          Modal.error({
+            title: "Server error",
+          });
           throw new Error(e);
         })
         .then((axiosResponse: AxiosResponse<HttpResult>) => {

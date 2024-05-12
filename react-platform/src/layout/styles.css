@@ -1,0 +1,15 @@
+.header {
+  float: left;
+  width: 120px;
+  height: 30px;
+  margin: 16px 24px 16px 0;
+}
+
+.content {
+  padding: 0 50px;
+  min-height: calc(100vh - 64px - 50px);
+}
+
+.footer {
+  text-align: center;
+}

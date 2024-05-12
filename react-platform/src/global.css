@@ -1,0 +1,17 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.global-abstraction-level-color-low {
+  color: #ff69b4;
+  font-weight: 100;
+}
+.global-abstraction-level-color-medium {
+  color: #000080;
+  font-weight: 100;
+}
+.global-abstraction-level-color-supreme {
+  color: #daa520;
+  font-weight: 100;
+}

@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { AuthProvider } from "react-oidc-context";
 import App from "./App";
 import { getHomeUrl } from "./utils/UrlUtils";
+require("./global.css");
 
 const env = process.env;
 const oidcConfig = {
