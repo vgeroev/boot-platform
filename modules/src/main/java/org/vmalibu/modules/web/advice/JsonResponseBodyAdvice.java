@@ -33,7 +33,7 @@ public class JsonResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             return new ErrorWrapper<>(body);
         }
 
-        return body;
+        return new DataWrapper<>(body);
     }
 
     @Getter
@@ -43,6 +43,15 @@ public class JsonResponseBodyAdvice implements ResponseBodyAdvice<Object> {
     private static class ErrorWrapper<T> {
 
         private T moduleError;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private static class DataWrapper<T> {
+
+        private T data;
     }
 }
 
