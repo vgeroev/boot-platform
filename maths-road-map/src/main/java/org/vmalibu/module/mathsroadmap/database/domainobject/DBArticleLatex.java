@@ -21,6 +21,7 @@ public class DBArticleLatex extends VersionedDomainObject {
 
     public static final String DB_ARTICLE_ID = "id";
     public static final String DB_LATEX = "latex";
+    public static final String DB_CONFIGURATION = "configuration";
 
     @Override
     @Id
@@ -37,5 +38,8 @@ public class DBArticleLatex extends VersionedDomainObject {
 
     @Column(name = DB_LATEX, nullable = false)
     private String latex;
+
+    @Column(name = DB_CONFIGURATION)
+    private String configuration;
 
 }

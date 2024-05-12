@@ -37,6 +37,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional(rollbackFor = PlatformException.class)
     public @NonNull ArticleDTO create(@NonNull String title,
                                       @NonNull String latex,
+                                      @Nullable String configuration,
                                       @NonNull AbstractionLevel abstractionLevel,
                                       @NonNull Set<Long> prevNodeIds,
                                       @NonNull Set<Long> nextNodeIds) throws PlatformException {
@@ -49,6 +50,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         DBArticleLatex articleLatex = new DBArticleLatex();
         articleLatex.setLatex(latex);
+        articleLatex.setConfiguration(configuration);
 
         DBArticle article = new DBArticle();
         article.setArticleLatex(articleLatex);

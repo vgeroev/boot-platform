@@ -3,4 +3,7 @@ ext.moduleName = 'org.vmalibu.module.mathsroadmap'
 dependencies {
     implementation project(":modules")
     implementation project(":security")
+
+    implementation 'com.antkorwin:xsync:1.3'
+
 }

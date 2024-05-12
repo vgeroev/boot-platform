@@ -53,6 +53,11 @@ databaseChangeLog:
                 type: text
                 constraints:
                   nullable: false
+            - column:
+                name: configuration
+                type: text
+                constraints:
+                  nullable: true
 
       - createTable:
           tableName: maths_road_map_article_tree

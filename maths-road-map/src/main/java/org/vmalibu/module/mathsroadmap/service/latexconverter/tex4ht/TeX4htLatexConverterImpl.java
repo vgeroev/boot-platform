@@ -66,16 +66,16 @@ public class TeX4htLatexConverterImpl implements TeX4htLatexConverter {
                              Path latexPath,
                              Path configurationPath) throws IOException, PlatformException {
         Process process = Runtime.getRuntime().exec(getCommand(destinationDir, latexPath, configurationPath));
-        String cmdOutput;
-        try (InputStreamReader isr = new InputStreamReader(process.getInputStream())) {
-            cmdOutput = CharStreams.toString(isr);
-        }
-
         try {
             process.waitFor(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new IllegalStateException(e);
+        }
+
+        String cmdOutput;
+        try (InputStreamReader isr = new InputStreamReader(process.getInputStream())) {
+            cmdOutput = CharStreams.toString(isr);
         }
 
         int exitValue = process.exitValue();

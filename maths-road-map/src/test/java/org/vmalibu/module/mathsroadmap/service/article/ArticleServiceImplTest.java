@@ -7,13 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomUtils;
 import org.vmalibu.module.mathsroadmap.BaseTestClass;
+import org.vmalibu.module.mathsroadmap.TestUtils;
 import org.vmalibu.module.mathsroadmap.exception.MathsRoadMapExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static org.vmalibu.module.mathsroadmap.TestUtils.getRandomEnumValue;
 
 class ArticleServiceImplTest extends BaseTestClass {
 
@@ -25,11 +26,13 @@ class ArticleServiceImplTest extends BaseTestClass {
     void createWithCorrectValuesTest() throws PlatformException {
         String title = RandomStringUtils.randomAlphabetic(10);
         String latex = RandomStringUtils.randomAlphabetic(100);
-        AbstractionLevel abstractionLevel = getRandomEnumValue(AbstractionLevel.class);
+        String configuration = new Random().nextBoolean() ? RandomStringUtils.randomAlphabetic(100) : null;
+        AbstractionLevel abstractionLevel = TestUtils.getRandomEnumValue(AbstractionLevel.class);
 
         ArticleDTO topic = articleService.create(
                 title,
                 latex,
+                configuration,
                 abstractionLevel,
                 Set.of(),
                 Set.of()
@@ -48,10 +51,11 @@ class ArticleServiceImplTest extends BaseTestClass {
     @Test
     @DisplayName("Test Case: Creating 4 topics with circular dependency. Awaiting PlatformException")
     void createMultipleTopicsWithCircularDependencyTest() throws PlatformException {
-        AbstractionLevel abstractionLevel = getRandomEnumValue(AbstractionLevel.class);
+        AbstractionLevel abstractionLevel = TestUtils.getRandomEnumValue(AbstractionLevel.class);
 
         ArticleDTO topic1 = articleService.create(
                 RandomStringUtils.randomAlphabetic(10),
+                RandomStringUtils.randomAlphabetic(100),
                 RandomStringUtils.randomAlphabetic(100),
                 abstractionLevel,
                 Set.of(),
@@ -61,6 +65,7 @@ class ArticleServiceImplTest extends BaseTestClass {
         ArticleDTO topic2 = articleService.create(
                 RandomStringUtils.randomAlphabetic(10),
                 RandomStringUtils.randomAlphabetic(100),
+                RandomStringUtils.randomAlphabetic(100),
                 abstractionLevel,
                 Set.of(),
                 Set.of(topic1.id())
@@ -69,6 +74,7 @@ class ArticleServiceImplTest extends BaseTestClass {
         ArticleDTO topic3 = articleService.create(
                 RandomStringUtils.randomAlphabetic(10),
                 RandomStringUtils.randomAlphabetic(100),
+                null,
                 abstractionLevel,
                 Set.of(),
                 Set.of(topic2.id())
@@ -77,6 +83,7 @@ class ArticleServiceImplTest extends BaseTestClass {
         Assertions.assertThatThrownBy(() -> articleService.create(
                 RandomStringUtils.randomAlphabetic(10),
                 RandomStringUtils.randomAlphabetic(100),
+                null,
                 abstractionLevel,
                 Set.of(topic1.id()),
                 Set.of(topic3.id())
@@ -94,7 +101,8 @@ class ArticleServiceImplTest extends BaseTestClass {
         articleService.create(
                 RandomStringUtils.randomAlphabetic(10),
                 RandomStringUtils.randomAlphabetic(100),
-                getRandomEnumValue(AbstractionLevel.class),
+                RandomStringUtils.randomAlphabetic(100),
+                TestUtils.getRandomEnumValue(AbstractionLevel.class),
                 Set.of(),
                 Set.of()
         );

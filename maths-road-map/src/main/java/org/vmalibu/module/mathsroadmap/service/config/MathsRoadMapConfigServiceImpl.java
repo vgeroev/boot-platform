@@ -16,10 +16,9 @@ public class MathsRoadMapConfigServiceImpl implements MathsRoadMapConfigService 
     public MathsRoadMapConfigServiceImpl(@Value("${maths-road-map.nginx.scheme}") String scheme,
                                          @Value("${maths-road-map.nginx.host}") String host,
                                          @Value("${maths-road-map.nginx.port}") int port,
-                                         @Value("${maths-road-map.nginx.reload-cmd}") String reloadCmd,
-                                         @Value("${maths-road-map.nginx.articles.preview.conf-dir}") Path previewConfDir,
-                                         @Value("${maths-road-map.nginx.articles.preview.dir}") Path previewDir) {
-        this.nginxConfig = buildNginxConfig(scheme, host, port, reloadCmd, previewConfDir, previewDir);
+                                         @Value("${maths-road-map.nginx.articles.preview.dir}") Path articlesPreviewDir,
+                                         @Value("${maths-road-map.nginx.articles.dir}") Path articlesDir) {
+        this.nginxConfig = buildNginxConfig(scheme, host, port, articlesPreviewDir, articlesDir);
     }
 
     @Override
@@ -30,21 +29,27 @@ public class MathsRoadMapConfigServiceImpl implements MathsRoadMapConfigService 
     private NginxConfig buildNginxConfig(String scheme,
                                          String host,
                                          int port,
-                                         String reloadCmd,
-                                         Path previewConfDir,
-                                         Path previewDir) {
+                                         Path articlesPreviewDir,
+                                         Path articlesDir) {
         NginxArticlesConfig nginxArticlesConfig = new NginxArticlesConfig(
-                previewConfDir.toAbsolutePath(),
-                previewDir.toAbsolutePath()
+                articlesPreviewDir.toAbsolutePath(),
+                articlesDir.toAbsolutePath()
         );
 
         URL url;
         try {
-            url = new URL(scheme, host, port, "");
+            url = new URL(scheme, host, getURLPort(port), "");
         } catch (MalformedURLException e) {
             throw new IllegalArgumentException(e);
         }
 
-        return new NginxConfig(url, reloadCmd, nginxArticlesConfig);
+        return new NginxConfig(url, nginxArticlesConfig);
+    }
+
+    private int getURLPort(int port) {
+        return switch (port) {
+            case 80, 443 -> -1;
+            default -> port;
+        };
     }
 }

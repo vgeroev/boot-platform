@@ -13,6 +13,7 @@ public interface ArticleService {
 
     @NonNull ArticleDTO create(@NonNull String title,
                                @NonNull String latex,
+                               @Nullable String configuration,
                                @NonNull AbstractionLevel abstractionLevel,
                                @NonNull Set<Long> prevNodeIds,
                                @NonNull Set<Long> nextNodeIds) throws PlatformException;
