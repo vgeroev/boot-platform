@@ -16,6 +16,7 @@ import org.vmalibu.module.mathsroadmap.service.config.MathsRoadMapConfigService;
 import org.vmalibu.module.mathsroadmap.service.config.NginxArticlesConfig;
 import org.vmalibu.module.mathsroadmap.service.latexconverter.tex4ht.TeX4htLatexConverter;
 import org.vmalibu.module.mathsroadmap.utils.ArticleURIUtils;
+import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
@@ -49,8 +50,9 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
 
     @Override
     public @NonNull URI createPreviewByTeX4ht(@NonNull String latex,
-                                              @NonNull String userId,
-                                              @Nullable String configuration) {
+                                              @Nullable String configuration,
+                                              @NonNull UserSource userSource) {
+        String userId = userSource.getUserId();
         String dirname = getPreviewDirname(userId);
         articlePreviewXSync.execute(userId, () -> internalCreatePreviewPage(latex, configuration, dirname));
         return ArticleURIUtils.getArticlePreviewURI(getNginxURI(), dirname);
@@ -63,12 +65,13 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
                                               @NonNull AbstractionLevel abstractionLevel,
                                               @NonNull Set<Long> prevArticleIds,
                                               @NonNull Set<Long> nextArticleIds,
-                                              @NonNull String userId) throws PlatformException {
+                                              @NonNull UserSource userSource) throws PlatformException {
+        String userId = userSource.getUserId();
         Path candidatePath = getCandidatePagePath(userId);
         try {
             createPage(latex, configuration, candidatePath);
             ArticleDTO articleDTO = articleService.create(
-                    title, latex, configuration, abstractionLevel, prevArticleIds, nextArticleIds);
+                    title, latex, configuration, abstractionLevel, prevArticleIds, nextArticleIds, userSource);
             submitCandidate(articleDTO.id(), candidatePath);
             return articleDTO;
         } finally {

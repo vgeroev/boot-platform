@@ -21,13 +21,26 @@ databaseChangeLog:
                 constraints:
                   nullable: false
             - column:
+                name: created_at
+                type: timestamp
+                constraints:
+                  nullable: false
+            - column:
+                name: creator_username
+                type: varchar(255)
+                constraints:
+                  nullable: false
+            - column:
+                name: updated_at
+                type: timestamp
+            - column:
                 name: abstraction_level
                 type: smallint
                 constraints:
                   nullable: false
             - column:
                 name: title
-                type: varchar(50)
+                type: varchar(255)
                 constraints:
                   nullable: false
 
@@ -56,8 +69,6 @@ databaseChangeLog:
             - column:
                 name: configuration
                 type: text
-                constraints:
-                  nullable: true
 
       - createTable:
           tableName: maths_road_map_article_tree

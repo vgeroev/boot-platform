@@ -21,7 +21,7 @@ import java.util.Set;
 @RestController
 @RequestMapping(MathsRoadMapConsts.REST_AUTHORIZED_PREFIX)
 @AllArgsConstructor
-public class ArticleController {
+public class ArticleAuthorizedController {
 
     private final ArticlePageManager articlePageManager;
 
@@ -41,8 +41,8 @@ public class ArticleController {
 
         URI articleURI = articlePageManager.createPreviewByTeX4ht(
                 latex,
-                userSource.getUserId(),
-                configuration
+                configuration,
+                userSource
         );
         return new PreviewArticleResponse(articleURI.toString());
     }
@@ -79,7 +79,7 @@ public class ArticleController {
                 abstractionLevel,
                 prevArticleIds,
                 nextArticleIds,
-                userSource.getUserId()
+                userSource
         );
 
         URI articleURI = articlePageManager.getArticleURI(articleDTO.id());
@@ -138,17 +138,4 @@ public class ArticleController {
         private String articleURL;
     }
 
-    @Data
-    @AllArgsConstructor
-    public static class ArticleResponse {
-
-        static final String JSON_ARTICLE = "article";
-        static final String JSON_ARTICLE_URL = "url";
-
-        @JsonProperty(JSON_ARTICLE)
-        private ArticleDTO article;
-
-        @JsonProperty(JSON_ARTICLE_URL)
-        private String articleURL;
-    }
 }

@@ -2,6 +2,7 @@ package org.vmalibu.module.mathsroadmap.service.article;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
 
@@ -16,7 +17,8 @@ public interface ArticleService {
                                @Nullable String configuration,
                                @NonNull AbstractionLevel abstractionLevel,
                                @NonNull Set<Long> prevNodeIds,
-                               @NonNull Set<Long> nextNodeIds) throws PlatformException;
+                               @NonNull Set<Long> nextNodeIds,
+                               @NonNull UserSource userSource) throws PlatformException;
 
     void updateNode(long id,
                     @NonNull OptionalField<@NonNull Set<Long>> prevNodeIds,

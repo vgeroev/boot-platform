@@ -11,6 +11,7 @@ import org.vmalibu.module.mathsroadmap.database.dao.ArticleTreeDAO;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleLatex;
 import org.vmalibu.module.mathsroadmap.exception.MathsRoadMapExceptionFactory;
+import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.database.domainobject.DomainObject;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
@@ -40,7 +41,8 @@ public class ArticleServiceImpl implements ArticleService {
                                       @Nullable String configuration,
                                       @NonNull AbstractionLevel abstractionLevel,
                                       @NonNull Set<Long> prevNodeIds,
-                                      @NonNull Set<Long> nextNodeIds) throws PlatformException {
+                                      @NonNull Set<Long> nextNodeIds,
+                                      @NonNull UserSource userSource) throws PlatformException {
         checkArticle(title, latex);
 
         Set<DBArticle> prevArticles = getArticles(prevNodeIds);
@@ -54,6 +56,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         DBArticle article = new DBArticle();
         article.setArticleLatex(articleLatex);
+        article.setCreatorUsername(userSource.getUsername());
         article.setAbstractionLevel(abstractionLevel);
         article.setTitle(title);
         article.setPrevArticles(prevArticles);
