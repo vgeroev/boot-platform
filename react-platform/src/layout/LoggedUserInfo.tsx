@@ -1,5 +1,5 @@
-import { UserOutlined } from "@ant-design/icons";
 import { Button } from "antd";
+import ModulesMenu from "./ModulesMenu";
 
 interface Props {
   username: string;
@@ -32,7 +32,7 @@ const LoggedUserInfo: React.FC<Props> = ({ username, onLogout }: Props) => {
         alignItems: "center",
       }}
     >
-      <UserOutlined />
+      <ModulesMenu />
       {username}
       <Button type="primary" onClick={onLogout}>
         Log out
