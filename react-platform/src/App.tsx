@@ -1,5 +1,6 @@
 import React from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import NotFound from "./component/notfound/NotFound";
 import BaseLayout from "./layout/BaseLayout";
 import { moduleRoutes as exerciseModuleRoutes } from "./module/exercises/route/ExercisesRouteGetter";
 import { moduleRoutes as mathsRoadMapModuleRoutes } from "./module/mathsroadmap/route/MathsRoadMapRouteGetter";
@@ -24,10 +25,15 @@ function App() {
   let routes: Array<React.ReactElement> = [];
   routes.push(
     <Route path="/home" element={<BaseLayout component={<Home />} />} />,
+    <Route path="/" element={<Navigate to="/home" replace />} />,
   );
   routes = routes
     .concat(getModuleRoutes(exerciseModuleRoutes))
     .concat(getModuleRoutes(mathsRoadMapModuleRoutes));
+
+  routes.push(
+    <Route path="*" element={<BaseLayout component={<NotFound />} />} />,
+  );
 
   return (
     <BrowserRouter>
