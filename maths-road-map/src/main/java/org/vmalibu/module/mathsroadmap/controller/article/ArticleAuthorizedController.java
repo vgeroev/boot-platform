@@ -15,8 +15,6 @@ import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.net.URI;
-import java.util.Objects;
-import java.util.Set;
 
 @RestController
 @RequestMapping(MathsRoadMapConsts.REST_AUTHORIZED_PREFIX)
@@ -69,16 +67,12 @@ public class ArticleAuthorizedController {
         String latex = request.latex;
 
         String configuration = StringUtils.hasText(request.configuration) ? request.configuration : null;
-        Set<Long> prevArticleIds = Objects.requireNonNullElseGet(request.prevArticleIds, Set::of);
-        Set<Long> nextArticleIds = Objects.requireNonNullElseGet(request.nextArticleIds, Set::of);
 
         ArticleDTO articleDTO = articlePageManager.createByTeX4ht(
                 title,
                 latex,
                 configuration,
                 abstractionLevel,
-                prevArticleIds,
-                nextArticleIds,
                 userSource
         );
 
@@ -106,8 +100,6 @@ public class ArticleAuthorizedController {
         static final String JSON_ABSTRACTION_LEVEL = "abstractionLevel";
         static final String JSON_LATEX = "latex";
         static final String JSON_CONFIGURATION = "configuration";
-        static final String JSON_PREV_ARTICLE_IDS = "prevArticleIds";
-        static final String JSON_NEXT_ARTICLE_IDS = "nextArticleIds";
 
         @JsonProperty(JSON_TITLE)
         private String title;
@@ -121,11 +113,6 @@ public class ArticleAuthorizedController {
         @JsonProperty(JSON_CONFIGURATION)
         private String configuration;
 
-        @JsonProperty(JSON_PREV_ARTICLE_IDS)
-        private Set<Long> prevArticleIds;
-
-        @JsonProperty(JSON_NEXT_ARTICLE_IDS)
-        private Set<Long> nextArticleIds;
     }
 
     @Data

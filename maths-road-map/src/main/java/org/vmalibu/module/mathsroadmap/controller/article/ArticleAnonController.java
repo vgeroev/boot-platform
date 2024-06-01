@@ -1,17 +1,24 @@
 package org.vmalibu.module.mathsroadmap.controller.article;
 
 import lombok.AllArgsConstructor;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleService;
+import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListElement;
+import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListService;
+import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
 import org.vmalibu.module.mathsroadmap.service.article.pagemanager.ArticlePageManager;
+import org.vmalibu.modules.database.paging.PaginatedDto;
+import org.vmalibu.modules.database.paging.PaginationForm;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.net.URI;
+import java.util.Map;
 
 @RestController
 @RequestMapping(MathsRoadMapConsts.REST_ANON_PREFIX)
@@ -20,6 +27,7 @@ public class ArticleAnonController {
 
     private final ArticlePageManager articlePageManager;
     private final ArticleService articleService;
+    private final ArticleListService articleListService;
 
     @GetMapping("/article/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -32,6 +40,41 @@ public class ArticleAnonController {
         }
         URI articleURI = articlePageManager.getArticleURI(article.id());
         return new ArticleResponse(article, articleURI.toString());
+    }
+
+    @GetMapping("/article/list")
+    @ResponseStatus(HttpStatus.OK)
+    public PaginatedDto<ArticleListElement> list(
+            @RequestParam(required = false) final Map<String, String> params
+    ) throws PlatformException {
+        ArticlePaginationForm form = new ArticlePaginationForm(params);
+        return articleListService.findAll(
+                new ArticlePagingRequest.Builder(form.page, form.pageSize)
+                        .withTitlePrefix(form.titlePrefix)
+                        .withCreatorUsernamePrefix(form.creatorUsernamePrefix)
+                        .build()
+        );
+    }
+
+    public static class ArticlePaginationForm extends PaginationForm {
+
+        static final String JSON_TITLE_PREFIX = "titlePrefix";
+        static final String JSON_CREATOR_USERNAME_PREFIX = "creatorUsernamePrefix";
+
+        final String titlePrefix;
+        final String creatorUsernamePrefix;
+
+        public ArticlePaginationForm(@NonNull Map<String, String> params) throws PlatformException {
+            super(params);
+
+            this.titlePrefix = params.getOrDefault(JSON_TITLE_PREFIX, null);
+            this.creatorUsernamePrefix = params.getOrDefault(JSON_CREATOR_USERNAME_PREFIX, null);
+        }
+
+        @Override
+        protected int getMaxPageSize() {
+            return 1024;
+        }
     }
 
 }

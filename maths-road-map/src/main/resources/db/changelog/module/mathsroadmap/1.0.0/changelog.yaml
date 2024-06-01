@@ -26,13 +26,13 @@ databaseChangeLog:
                 constraints:
                   nullable: false
             - column:
+                name: updated_at
+                type: timestamp
+            - column:
                 name: creator_username
                 type: varchar(255)
                 constraints:
                   nullable: false
-            - column:
-                name: updated_at
-                type: timestamp
             - column:
                 name: abstraction_level
                 type: smallint
@@ -51,7 +51,6 @@ databaseChangeLog:
             - column:
                 name: id
                 type: bigint
-                autoIncrement: true
                 constraints:
                   primaryKey: true
                   primaryKeyName: pk_article_latex
@@ -71,24 +70,81 @@ databaseChangeLog:
                 type: text
 
       - createTable:
-          tableName: maths_road_map_article_tree
-          remarks: Linking table for tree
+          tableName: maths_road_map_road_map
+          remarks: Maths road map
           columns:
             - column:
-                name: fk_prev
+                name: id
+                type: bigint
+                autoIncrement: true
+                constraints:
+                  primaryKey: true
+                  primaryKeyName: pk_road_map
+                  nullable: false
+            - column:
+                name: version
+                type: smallint
+                constraints:
+                  nullable: false
+            - column:
+                name: created_at
+                type: timestamp
+                constraints:
+                  nullable: false
+            - column:
+                name: updated_at
+                type: timestamp
+            - column:
+                name: creator_username
+                type: varchar(255)
+                constraints:
+                  nullable: false
+            - column:
+                name: title
+                type: varchar(255)
+                constraints:
+                  nullable: false
+            - column:
+                name: description
+                type: text
+
+      - createSequence:
+          sequenceName: maths_road_map_road_map_tree_edge_seq
+          dataType: bigint
+          startValue: 1
+          incrementBy: 3
+
+      - createTable:
+          tableName: maths_road_map_road_map_tree_edge
+          remarks: Maths road map tree edge
+          columns:
+            - column:
+                name: id
+                type: bigint
+                constraints:
+                  primaryKey: true
+                  primaryKeyName: pk_road_map_tree_edge
+                  nullable: false
+            - column:
+                name: version
+                type: smallint
+                constraints:
+                  nullable: false
+            - column:
+                name: fk_road_map
                 type: bigint
                 constraints:
                   nullable: false
             - column:
-                name: fk_next
+                name: fk_next_article
                 type: bigint
                 constraints:
                   nullable: false
-
-      - addPrimaryKey:
-          tableName: maths_road_map_article_tree
-          columnNames: fk_prev, fk_next
-          constraintName: article_tree_edge
+            - column:
+                name: fk_prev_article
+                type: bigint
+                constraints:
+                  nullable: false
 
       - addForeignKeyConstraint:
           baseTableName: maths_road_map_article_latex
@@ -98,15 +154,22 @@ databaseChangeLog:
           constraintName: fk_article_latex_to_article
 
       - addForeignKeyConstraint:
-          baseTableName: maths_road_map_article_tree
-          baseColumnNames: fk_prev
-          referencedTableName: maths_road_map_article
+          baseTableName: maths_road_map_road_map_tree_edge
+          baseColumnNames: fk_road_map
+          referencedTableName: maths_road_map_road_map
           referencedColumnNames: id
-          constraintName: fk_prev_to_article
+          constraintName: fk_road_map_tree_edge_to_road_map
 
       - addForeignKeyConstraint:
-          baseTableName: maths_road_map_article_tree
-          baseColumnNames: fk_next
+          baseTableName: maths_road_map_road_map_tree_edge
+          baseColumnNames: fk_next_article
           referencedTableName: maths_road_map_article
           referencedColumnNames: id
-          constraintName: fk_next_to_article
+          constraintName: fk_road_map_tree_edge_to_next_article
+
+      - addForeignKeyConstraint:
+          baseTableName: maths_road_map_road_map_tree_edge
+          baseColumnNames: fk_prev_article
+          referencedTableName: maths_road_map_article
+          referencedColumnNames: id
+          constraintName: fk_road_map_tree_edge_to_prev_article

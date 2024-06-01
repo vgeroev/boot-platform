@@ -26,7 +26,6 @@ import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -63,15 +62,13 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
                                               @NonNull String latex,
                                               @Nullable String configuration,
                                               @NonNull AbstractionLevel abstractionLevel,
-                                              @NonNull Set<Long> prevArticleIds,
-                                              @NonNull Set<Long> nextArticleIds,
                                               @NonNull UserSource userSource) throws PlatformException {
         String userId = userSource.getUserId();
         Path candidatePath = getCandidatePagePath(userId);
         try {
             createPage(latex, configuration, candidatePath);
             ArticleDTO articleDTO = articleService.create(
-                    title, latex, configuration, abstractionLevel, prevArticleIds, nextArticleIds, userSource);
+                    title, latex, configuration, abstractionLevel, userSource);
             submitCandidate(articleDTO.id(), candidatePath);
             return articleDTO;
         } finally {

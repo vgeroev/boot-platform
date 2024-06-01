@@ -28,19 +28,28 @@ module org.vmalibu.module.mathsroadmap {
     opens org.vmalibu.module.mathsroadmap.controller.article;
     opens org.vmalibu.module.mathsroadmap.service.config;
     opens org.vmalibu.module.mathsroadmap.service.article;
+    opens org.vmalibu.module.mathsroadmap.service.article.list;
     opens org.vmalibu.module.mathsroadmap.service.article.pagemanager;
+    opens org.vmalibu.module.mathsroadmap.service.roadmap;
+    opens org.vmalibu.module.mathsroadmap.service.roadmap.list;
+    opens org.vmalibu.module.mathsroadmap.service.roadmap.graph;
     opens org.vmalibu.module.mathsroadmap.service.pdflatexconverter;
     opens org.vmalibu.module.mathsroadmap.service.latexconverter.tex4ht;
 
     exports org.vmalibu.module.mathsroadmap;
     exports org.vmalibu.module.mathsroadmap.configuration;
     exports org.vmalibu.module.mathsroadmap.controller.article;
+    exports org.vmalibu.module.mathsroadmap.controller.mathsroadmap;
     exports org.vmalibu.module.mathsroadmap.database.dao;
     exports org.vmalibu.module.mathsroadmap.database.domainobject;
     exports org.vmalibu.module.mathsroadmap.database.converter to spring.beans;
     exports org.vmalibu.module.mathsroadmap.service.config to spring.beans, spring.core, spring.aop;
     exports org.vmalibu.module.mathsroadmap.service.article to spring.beans, spring.core, spring.aop;
     exports org.vmalibu.module.mathsroadmap.service.article.pagemanager to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.mathsroadmap.service.article.list to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.mathsroadmap.service.roadmap to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.mathsroadmap.service.roadmap.graph to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.mathsroadmap.service.roadmap.list to spring.beans, spring.core, spring.aop;
     exports org.vmalibu.module.mathsroadmap.service.pdflatexconverter to spring.beans, spring.core, spring.aop;
     exports org.vmalibu.module.mathsroadmap.service.latexconverter.tex4ht to spring.aop, spring.beans, spring.core;
 

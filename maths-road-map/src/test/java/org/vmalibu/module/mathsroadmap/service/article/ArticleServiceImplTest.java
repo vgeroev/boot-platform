@@ -8,11 +8,9 @@ import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomUtils;
 import org.vmalibu.module.mathsroadmap.BaseTestClass;
 import org.vmalibu.module.mathsroadmap.TestUtils;
-import org.vmalibu.module.mathsroadmap.exception.MathsRoadMapExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.util.Random;
-import java.util.Set;
 import java.util.function.Consumer;
 
 
@@ -28,69 +26,26 @@ class ArticleServiceImplTest extends BaseTestClass {
         String latex = RandomStringUtils.randomAlphabetic(100);
         String configuration = new Random().nextBoolean() ? RandomStringUtils.randomAlphabetic(100) : null;
         AbstractionLevel abstractionLevel = TestUtils.getRandomEnumValue(AbstractionLevel.class);
+        String creatorUsername = RandomStringUtils.randomAlphabetic(10);
 
         ArticleDTO topic = articleService.create(
                 title,
                 latex,
                 configuration,
                 abstractionLevel,
-                Set.of(),
-                Set.of()
+                getUserSource(creatorUsername)
         );
 
         Consumer<ArticleDTO> topicChecker = t ->
                 Assertions.assertThat(t).isNotNull()
                         .returns(abstractionLevel, ArticleDTO::abstractionLevel)
-                        .returns(title, ArticleDTO::title);
+                        .returns(title, ArticleDTO::title)
+                        .returns(creatorUsername, ArticleDTO::creatorUsername);
 
         topicChecker.accept(topic);
         Assertions.assertThat(articleService.findArticle(topic.id())).isNotNull()
                 .satisfies(topicChecker);
     }
-
-    @Test
-    @DisplayName("Test Case: Creating 4 topics with circular dependency. Awaiting PlatformException")
-    void createMultipleTopicsWithCircularDependencyTest() throws PlatformException {
-        AbstractionLevel abstractionLevel = TestUtils.getRandomEnumValue(AbstractionLevel.class);
-
-        ArticleDTO topic1 = articleService.create(
-                RandomStringUtils.randomAlphabetic(10),
-                RandomStringUtils.randomAlphabetic(100),
-                RandomStringUtils.randomAlphabetic(100),
-                abstractionLevel,
-                Set.of(),
-                Set.of()
-        );
-
-        ArticleDTO topic2 = articleService.create(
-                RandomStringUtils.randomAlphabetic(10),
-                RandomStringUtils.randomAlphabetic(100),
-                RandomStringUtils.randomAlphabetic(100),
-                abstractionLevel,
-                Set.of(),
-                Set.of(topic1.id())
-        );
-
-        ArticleDTO topic3 = articleService.create(
-                RandomStringUtils.randomAlphabetic(10),
-                RandomStringUtils.randomAlphabetic(100),
-                null,
-                abstractionLevel,
-                Set.of(),
-                Set.of(topic2.id())
-        );
-
-        Assertions.assertThatThrownBy(() -> articleService.create(
-                RandomStringUtils.randomAlphabetic(10),
-                RandomStringUtils.randomAlphabetic(100),
-                null,
-                abstractionLevel,
-                Set.of(topic1.id()),
-                Set.of(topic3.id())
-        )).isExactlyInstanceOf(PlatformException.class)
-                .hasMessageContaining(MathsRoadMapExceptionFactory.TOPICS_HAVE_CYCLE_CODE);
-    }
-
 
     @Test
     @DisplayName("Test Case: There is no row with such id. Awaiting that method findTopic will return null")
@@ -103,8 +58,7 @@ class ArticleServiceImplTest extends BaseTestClass {
                 RandomStringUtils.randomAlphabetic(100),
                 RandomStringUtils.randomAlphabetic(100),
                 TestUtils.getRandomEnumValue(AbstractionLevel.class),
-                Set.of(),
-                Set.of()
+                getUserSource(RandomStringUtils.randomAlphabetic(10))
         );
 
         Assertions.assertThat(articleService.findArticle(badId)).isNull();

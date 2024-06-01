@@ -8,7 +8,6 @@ import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.net.URI;
-import java.util.Set;
 
 public interface ArticlePageManager {
 
@@ -20,8 +19,6 @@ public interface ArticlePageManager {
                                        @NonNull String latex,
                                        @Nullable String configuration,
                                        @NonNull AbstractionLevel abstractionLevel,
-                                       @NonNull Set<Long> prevArticleIds,
-                                       @NonNull Set<Long> nextArticleIds,
                                        @NonNull UserSource userSource) throws PlatformException;
 
     @NonNull URI getArticleURI(long articleId);
