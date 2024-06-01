@@ -52,7 +52,7 @@ const httpCall = <M, D = any>(
           if (data.data) {
             return {
               httpStatus: axiosResponse.status,
-              data: new ModelFactory(model).getModel(data),
+              data: new ModelFactory(model).getModel(data.data),
             };
           } else if (data.moduleError) {
             const moduleError: any = data.moduleError;

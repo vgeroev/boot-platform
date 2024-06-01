@@ -15,14 +15,15 @@ export interface RequestResult<T extends BaseModel | ModuleError> {
   data: T;
 }
 
-export interface ExecOptions<M extends BaseModel, D = any> {
+export interface ExecOptions<M extends BaseModel, D = any, R = any> {
   data?: D;
+  requestVariables?: R;
   onSuccess?: (httpResponse: RequestResult<M>) => void;
   handleModuleError?: (httpResponse: RequestResult<ModuleError>) => boolean;
   onFinally?: () => void;
 }
 
-export abstract class BaseRequest<M extends BaseModel, D = any> {
+export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
   private readonly httpCaller: HttpCaller<M, D>;
 
   constructor(
@@ -35,12 +36,13 @@ export abstract class BaseRequest<M extends BaseModel, D = any> {
 
   public exec({
     data,
+    requestVariables,
     onSuccess,
     handleModuleError,
     onFinally,
   }: ExecOptions<M, D>): void {
     let props: HttpRequestHookProps = {
-      request: this.getHttpRequest(),
+      request: this.getHttpRequest(requestVariables),
       model: this.modelParser,
     };
     if (data) {
@@ -92,13 +94,13 @@ export abstract class BaseRequest<M extends BaseModel, D = any> {
 
   public abstract getHttpRequestMethod(): HttpRequestMethod;
 
-  public abstract getRelativeApiPath(): string;
+  public abstract getRelativeApiPath(requestVariables?: R): string;
 
-  private getHttpRequest(): HttpRequest {
+  private getHttpRequest(requestVariables?: R): HttpRequest {
     const authPath: string = this.isAuthorized() ? "authorized" : "anon";
     return {
       method: this.getHttpRequestMethod(),
-      url: `/${authPath}/${this.getModule()}/${this.getApiVersion()}/${this.getRelativeApiPath()}`,
+      url: `/${authPath}/${this.getModule()}/${this.getApiVersion()}/${this.getRelativeApiPath(requestVariables)}`,
     };
   }
 }

@@ -2,10 +2,7 @@ export abstract class BaseModel {
   protected readonly data: any;
 
   constructor(data: any) {
-    if (!data.data) {
-      throw new Error("No data field in " + data);
-    }
-    this.data = data.data;
+    this.data = data;
   }
 
   public getStringOptional(fieldName?: string): string | undefined {
@@ -88,6 +85,14 @@ export abstract class BaseModel {
     )!;
   }
 
+  public getDateOptional(fieldName?: string): Date | undefined {
+    return this.getValue<Date>((v) => new Date(v), true, fieldName);
+  }
+
+  public getDate(fieldName?: string): Date {
+    return this.getValue<Date>((v) => new Date(v), false, fieldName)!;
+  }
+
   public getModelOptional<T extends BaseModel>(
     model: IModelParser,
     fieldName?: string,
@@ -167,7 +172,7 @@ export abstract class BaseModel {
 }
 
 export interface IModelParser {
-  new (...args: any[]): any;
+  new(...args: any[]): any;
   parse(data: Record<string, unknown>): InstanceType<this>;
 }
 
@@ -175,9 +180,9 @@ export class ModelFactory<
   I extends IModelParser,
   M extends BaseModel = InstanceType<I>,
 > {
-  constructor(private readonly model: I) {}
+  constructor(private readonly model: I) { }
 
-  public getModel(data: Record<string, unknown>): M {
+  public getModel(data: any): M {
     return this.model.parse(data);
   }
 }

@@ -4,7 +4,8 @@ import { BaseRequest } from "../../../../service/request/BaseRequest";
 export abstract class MathsRoadMapBaseRequest<
   M extends BaseModel,
   D = any,
-> extends BaseRequest<M, D> {
+  R = any,
+> extends BaseRequest<M, D, R> {
   public getApiVersion(): string {
     return "v1";
   }

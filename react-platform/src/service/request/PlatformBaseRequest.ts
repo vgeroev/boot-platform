@@ -4,7 +4,8 @@ import { BaseRequest } from "./BaseRequest";
 export abstract class PlatformBaseRequest<
   M extends BaseModel,
   D = any,
-> extends BaseRequest<M, D> {
+  R = any,
+> extends BaseRequest<M, D, R> {
   public getApiVersion(): string {
     return "v1";
   }

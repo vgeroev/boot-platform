@@ -19,6 +19,9 @@ import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
 import { LatexEditor } from "../../component/latexeditor/LatexEditor";
 import { CreateArticleRequest } from "../../service/request/CreateArticleRequest";
 import { AbstractionLevel } from "../../model/ArticleModel";
+import WithAuthorization from "../../../../hoc/authorized/WithAuthorization";
+import { useNavigate } from "react-router-dom";
+import { getArticleRoute } from "../../route/MathsRoadMapRouteGetter";
 
 const getDefaultConfiguration = (): string => {
   return `\\Preamble{xhtml,mathjax} 
@@ -27,6 +30,18 @@ const getDefaultConfiguration = (): string => {
 \\EndPreamble`;
 };
 
+const getLatexTemplate = (): string => {
+  return `\\documentclass{article}
+\\title{My first LaTeX document}
+\\author{Johann Georg Faust\\thanks{boot-platform}}
+\\date{November 1988}
+\\begin{document}
+\\maketitle
+Template
+
+% This line here is a comment.
+\\end{document}`;
+};
 interface RenderResult {
   url?: string;
   errorMsg?: string;
@@ -47,7 +62,7 @@ const CreateArticlePage: React.FC<{}> = () => {
     CreateArticleForm | undefined
   >(undefined);
   const [tex4ht, setTex4ht] = React.useState<TeX4ht>({
-    latex: latexEditorService.getLatex() || "",
+    latex: latexEditorService.getLatex() || getLatexTemplate(),
     configuration:
       latexEditorService.getConfiguration() || getDefaultConfiguration(),
   });
@@ -62,6 +77,7 @@ const CreateArticlePage: React.FC<{}> = () => {
   );
   const createArticleRequest: CreateArticleRequest =
     useHttpRequest(CreateArticleRequest);
+  const navigate = useNavigate();
 
   const render = () => {
     setLoading(true);
@@ -112,7 +128,7 @@ const CreateArticlePage: React.FC<{}> = () => {
         configuration: tex4ht.configuration,
       },
       onSuccess: (httpResponse) => {
-        console.log(httpResponse.data);
+        navigate(getArticleRoute(httpResponse.data.article.id + ""));
       },
       handleModuleError: (httpResponse) => {
         switch (httpResponse.data.code) {
@@ -290,4 +306,4 @@ function loadIframe(
   );
 }
 
-export default CreateArticlePage;
+export default WithAuthorization(CreateArticlePage);

@@ -19,6 +19,14 @@ export class ArticleModel extends BaseModel {
     return this.getNumber("id");
   }
 
+  public get creatorUsername(): string {
+    return this.getString("creatorUsername");
+  }
+
+  public get createdAt(): Date {
+    return this.getDate("createdAt");
+  }
+
   public static parse(data: any): ArticleModel {
     return new ArticleModel(data);
   }
