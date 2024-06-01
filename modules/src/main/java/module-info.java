@@ -57,6 +57,7 @@ module org.vmalibu.modules {
 
     exports org.vmalibu.modules;
     exports org.vmalibu.modules.module;
+    exports org.vmalibu.modules.graph;
     exports org.vmalibu.modules.controller.anon.platform;
     exports org.vmalibu.modules.database.domainobject;
     exports org.vmalibu.modules.database.converter;
