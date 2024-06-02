@@ -9,7 +9,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
-import org.vmalibu.module.mathsroadmap.service.article.AbstractionLevel;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleService;
 import org.vmalibu.module.mathsroadmap.service.config.MathsRoadMapConfigService;
@@ -59,16 +58,15 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
 
     @Override
     public @NonNull ArticleDTO createByTeX4ht(@NonNull String title,
+                                              @Nullable String description,
                                               @NonNull String latex,
                                               @Nullable String configuration,
-                                              @NonNull AbstractionLevel abstractionLevel,
                                               @NonNull UserSource userSource) throws PlatformException {
         String userId = userSource.getUserId();
         Path candidatePath = getCandidatePagePath(userId);
         try {
             createPage(latex, configuration, candidatePath);
-            ArticleDTO articleDTO = articleService.create(
-                    title, latex, configuration, abstractionLevel, userSource);
+            ArticleDTO articleDTO = articleService.create(title, description, latex, configuration, userSource);
             submitCandidate(articleDTO.id(), candidatePath);
             return articleDTO;
         } finally {

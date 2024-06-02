@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
-import org.vmalibu.module.mathsroadmap.service.article.AbstractionLevel;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
 import org.vmalibu.module.mathsroadmap.service.article.pagemanager.ArticlePageManager;
 import org.vmalibu.module.security.authorization.source.UserSource;
@@ -20,6 +19,8 @@ import java.net.URI;
 @RequestMapping(MathsRoadMapConsts.REST_AUTHORIZED_PREFIX)
 @AllArgsConstructor
 public class ArticleAuthorizedController {
+
+    private static final int DESCRIPTION_MAX_LENGTH = 1024;
 
     private final ArticlePageManager articlePageManager;
 
@@ -56,10 +57,8 @@ public class ArticleAuthorizedController {
         }
         String title = request.title.trim();
 
-        if (request.abstractionLevel == null) {
-            throw GeneralExceptionFactory.buildEmptyValueException(CreateArticleRequest.JSON_ABSTRACTION_LEVEL);
-        }
-        AbstractionLevel abstractionLevel = request.abstractionLevel;
+        String description = request.description;
+        validateDescription(description);
 
         if (!StringUtils.hasText(request.latex)) {
             throw GeneralExceptionFactory.buildEmptyValueException(TeX4htPreviewArticleRequest.JSON_LATEX);
@@ -70,14 +69,21 @@ public class ArticleAuthorizedController {
 
         ArticleDTO articleDTO = articlePageManager.createByTeX4ht(
                 title,
+                description,
                 latex,
                 configuration,
-                abstractionLevel,
                 userSource
         );
 
         URI articleURI = articlePageManager.getArticleURI(articleDTO.id());
         return new ArticleResponse(articleDTO, articleURI.toString());
+    }
+
+    private void validateDescription(String description) throws PlatformException {
+        if (description != null && description.length() > DESCRIPTION_MAX_LENGTH) {
+            throw GeneralExceptionFactory.buildInvalidArgumentException(
+                    "Description exceeded max length - " + DESCRIPTION_MAX_LENGTH);
+        }
     }
 
     @Data
@@ -97,15 +103,15 @@ public class ArticleAuthorizedController {
     public static class CreateArticleRequest {
 
         static final String JSON_TITLE = "title";
-        static final String JSON_ABSTRACTION_LEVEL = "abstractionLevel";
+        static final String JSON_DESCRIPTION = "description";
         static final String JSON_LATEX = "latex";
         static final String JSON_CONFIGURATION = "configuration";
 
         @JsonProperty(JSON_TITLE)
         private String title;
 
-        @JsonProperty(JSON_ABSTRACTION_LEVEL)
-        private AbstractionLevel abstractionLevel;
+        @JsonProperty(JSON_DESCRIPTION)
+        private String description;
 
         @JsonProperty(JSON_LATEX)
         private String latex;

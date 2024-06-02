@@ -17,11 +17,15 @@ import { latexEditorService } from "../../service/latexeditor/LatexEditorService
 import { PreviewArticleRequest } from "../../service/request/PreviewArticleRequest";
 import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
 import { LatexEditor } from "../../component/latexeditor/LatexEditor";
-import { CreateArticleRequest } from "../../service/request/CreateArticleRequest";
+import {
+  CreateArticleRequest,
+  CreateArticleRequestData,
+} from "../../service/request/CreateArticleRequest";
 import { AbstractionLevel } from "../../model/ArticleModel";
 import WithAuthorization from "../../../../hoc/authorized/WithAuthorization";
 import { useNavigate } from "react-router-dom";
 import { getArticleRoute } from "../../route/MathsRoadMapRouteGetter";
+import TextArea from "antd/es/input/TextArea";
 
 const getDefaultConfiguration = (): string => {
   return `\\Preamble{xhtml,mathjax} 
@@ -54,7 +58,7 @@ interface TeX4ht {
 
 interface CreateArticleForm {
   title?: string;
-  abstractionLevel?: AbstractionLevel;
+  description?: string;
 }
 
 const CreateArticlePage: React.FC<{}> = () => {
@@ -115,18 +119,17 @@ const CreateArticlePage: React.FC<{}> = () => {
     if (!createArticleForm.title) {
       throw new Error("title should not be empty");
     }
-    if (!createArticleForm.abstractionLevel) {
-      throw new Error("abstractionLevel should not be empty");
-    }
+
+    const requestData: CreateArticleRequestData = {
+      title: createArticleForm.title.trim(),
+      description: createArticleForm.description || null,
+      latex: tex4ht.latex,
+      configuration: tex4ht.configuration,
+    };
 
     setLoading(true);
     createArticleRequest.exec({
-      data: {
-        title: createArticleForm.title?.trim(),
-        abstractionLevel: createArticleForm.abstractionLevel,
-        latex: tex4ht.latex,
-        configuration: tex4ht.configuration,
-      },
+      data: requestData,
       onSuccess: (httpResponse) => {
         navigate(getArticleRoute(httpResponse.data.article.id + ""));
       },
@@ -180,34 +183,17 @@ const CreateArticlePage: React.FC<{}> = () => {
               </Form.Item>
 
               <Form.Item<CreateArticleForm>
-                name="abstractionLevel"
-                label="Abstraction level"
-                rules={[{ required: true, message: "Field cannot be empty!" }]}
+                name="description"
+                label="Description"
               >
-                <Select
-                  onChange={(value) =>
+                <TextArea
+                  onChange={(e) => {
                     setCreateArticleForm({
                       ...createArticleForm,
-                      abstractionLevel: value,
-                    })
-                  }
-                >
-                  <Select.Option value="LOW">
-                    <div className="global-abstraction-level-color-low">
-                      Low
-                    </div>
-                  </Select.Option>
-                  <Select.Option value="MEDIUM">
-                    <div className="global-abstraction-level-color-medium">
-                      Medium
-                    </div>
-                  </Select.Option>
-                  <Select.Option value="SUPREME">
-                    <div className="global-abstraction-level-color-supreme">
-                      Supreme
-                    </div>
-                  </Select.Option>
-                </Select>
+                      description: e.target.value,
+                    });
+                  }}
+                ></TextArea>
               </Form.Item>
 
               <Form.Item wrapperCol={{ offset: 19, span: 14 }}>

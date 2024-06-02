@@ -32,6 +32,7 @@ const httpCall = <M, D = any>(
         .request<HttpResult>({
           url: request.url,
           method: request.method,
+          params: request.params,
           headers: headers,
           data: data,
           validateStatus: (status) => status < 500,
@@ -83,6 +84,7 @@ export type HttpRequestMethod = "get" | "post" | "delete" | "patch" | "put";
 export interface HttpRequest {
   method: HttpRequestMethod;
   url: string;
+  params?: any;
 }
 export interface HttpRequestHookProps<D = any> {
   request: HttpRequest;
@@ -105,7 +107,7 @@ export class ModuleError {
     private readonly _code: string,
     private readonly _parameters?: Record<string, unknown>,
     private readonly _message?: string,
-  ) { }
+  ) {}
   public get message(): string | undefined {
     return this._message;
   }

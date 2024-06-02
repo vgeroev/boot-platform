@@ -10,10 +10,8 @@ export class ArticleModel extends BaseModel {
   public get title(): string {
     return this.getString("title");
   }
-  public get abstractionLevel(): AbstractionLevel {
-    return AbstractionLevel[
-      this.getString("abstractionLevel") as keyof typeof AbstractionLevel
-    ];
+  public get description(): string | null {
+    return this.getStringNullable("description") || null;
   }
   public get id(): number {
     return this.getNumber("id");

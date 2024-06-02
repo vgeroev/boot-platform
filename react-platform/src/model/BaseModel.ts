@@ -21,6 +21,14 @@ export abstract class BaseModel {
     )!;
   }
 
+  public getStringNullable(fieldName?: string): string | null {
+    return this.getValueNullable<string>(
+      (v) => BaseModel.parsePrimitive<string>(v, "string"),
+      false,
+      fieldName,
+    )!;
+  }
+
   public getStringArrayOptional(fieldName?: string): Array<string> | undefined {
     return this.getArrayValue(
       (v) => BaseModel.parsePrimitive<string>(v, "string"),
@@ -154,13 +162,28 @@ export abstract class BaseModel {
     optional: boolean,
     fieldName?: string,
   ): T | undefined {
+    const value = this.getValueNullable<T>(parser, optional, fieldName);
+    if (value === null) {
+      throw new Error("Unexpected null");
+    }
+    return value;
+  }
+
+  private getValueNullable<T>(
+    parser: (v: any) => T | undefined,
+    optional: boolean,
+    fieldName?: string,
+  ): T | null | undefined {
     if (optional && (!fieldName || !(fieldName in this.data))) {
       return undefined;
     }
     const value: any = fieldName ? this.data[fieldName] : this.data;
-    if (value) {
+    if (value === null) {
+      return null;
+    }
+    if (value !== undefined) {
       const parsed: T | undefined = parser(value);
-      if (parsed) {
+      if (parsed !== undefined) {
         return parsed;
       }
     }
@@ -172,7 +195,7 @@ export abstract class BaseModel {
 }
 
 export interface IModelParser {
-  new(...args: any[]): any;
+  new (...args: any[]): any;
   parse(data: Record<string, unknown>): InstanceType<this>;
 }
 
@@ -180,7 +203,7 @@ export class ModelFactory<
   I extends IModelParser,
   M extends BaseModel = InstanceType<I>,
 > {
-  constructor(private readonly model: I) { }
+  constructor(private readonly model: I) {}
 
   public getModel(data: any): M {
     return this.model.parse(data);

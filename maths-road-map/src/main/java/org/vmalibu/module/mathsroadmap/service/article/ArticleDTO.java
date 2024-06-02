@@ -11,8 +11,8 @@ public record ArticleDTO(long id,
                          Date createdAt,
                          Date updatedAt,
                          String creatorUsername,
-                         AbstractionLevel abstractionLevel,
-                         String title) {
+                         String title,
+                         String description) {
 
     public static ArticleDTO from(@Nullable DBArticle article) {
         if (article == null) {
@@ -24,8 +24,8 @@ public record ArticleDTO(long id,
                 .createdAt(article.getCreatedAt())
                 .updatedAt(article.getUpdatedAt())
                 .creatorUsername(article.getCreatorUsername())
-                .abstractionLevel(article.getAbstractionLevel())
                 .title(article.getTitle())
+                .description(article.getDescription())
                 .build();
     }
 

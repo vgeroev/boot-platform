@@ -7,7 +7,7 @@ import org.vmalibu.modules.database.paging.SortField;
 
 public enum ArticleSortField implements SortField {
 
-    CREATED_AT(Sort.by(DBArticle.DB_CREATED_AT));
+    CREATED_AT(Sort.by(DBArticle.Fields.createdAt));
 
     private final Sort sort;
     ArticleSortField(Sort sort) {

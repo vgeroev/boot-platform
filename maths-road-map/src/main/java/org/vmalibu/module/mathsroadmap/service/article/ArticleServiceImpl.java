@@ -58,9 +58,9 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional(rollbackFor = PlatformException.class)
     public @NonNull ArticleDTO create(@NonNull String title,
+                                      @Nullable String description,
                                       @NonNull String latex,
                                       @Nullable String configuration,
-                                      @NonNull AbstractionLevel abstractionLevel,
                                       @NonNull UserSource userSource) throws PlatformException {
         checkArticle(title, latex);
 
@@ -71,7 +71,7 @@ public class ArticleServiceImpl implements ArticleService {
         DBArticle article = new DBArticle();
         article.setArticleLatex(articleLatex);
         article.setCreatorUsername(userSource.getUsername());
-        article.setAbstractionLevel(abstractionLevel);
+        article.setDescription(normalizeDescription(description));
         article.setTitle(title);
 
         articleDAO.save(article);
@@ -94,6 +94,10 @@ public class ArticleServiceImpl implements ArticleService {
         if (!StringUtils.hasText(body)) {
             throw GeneralExceptionFactory.buildEmptyValueException(DBArticleLatex.class, DBArticleLatex.Fields.latex);
         }
+    }
+
+    private static String normalizeDescription(String description) {
+        return StringUtils.hasText(description) ? description.trim() : null;
     }
 
     private static Specification<DBArticle> buildSpecification(

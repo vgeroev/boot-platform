@@ -14,9 +14,9 @@ public interface ArticleService {
     @NonNull PaginatedDto<ArticleDTO> findAll(@NonNull ArticlePagingRequest pagingRequest);
 
     @NonNull ArticleDTO create(@NonNull String title,
+                               @Nullable String description,
                                @NonNull String latex,
                                @Nullable String configuration,
-                               @NonNull AbstractionLevel abstractionLevel,
                                @NonNull UserSource userSource) throws PlatformException;
 
 }

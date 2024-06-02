@@ -53,6 +53,7 @@ const ArticlePage: React.FC<{}> = () => {
       <Title level={5}>
         {getArticleModel?.article.createdAt.toUTCString()}
       </Title>
+      {getArticleModel?.article.description || ""}
       <Divider></Divider>
       {/* <div className="iframe-div"> */}
       <Iframe
@@ -65,7 +66,7 @@ const ArticlePage: React.FC<{}> = () => {
         // scrolling="auto"
         // overflow="auto"
         className="iframe-article"
-      // scrolling="no"
+        // scrolling="no"
       />
       {/* </div> */}
     </Spin>

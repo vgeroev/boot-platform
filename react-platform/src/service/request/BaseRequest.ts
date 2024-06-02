@@ -15,15 +15,21 @@ export interface RequestResult<T extends BaseModel | ModuleError> {
   data: T;
 }
 
-export interface ExecOptions<M extends BaseModel, D = any, R = any> {
+export interface ExecOptions<M extends BaseModel, D = any, R = any, P = any> {
   data?: D;
   requestVariables?: R;
+  requestParams?: P;
   onSuccess?: (httpResponse: RequestResult<M>) => void;
   handleModuleError?: (httpResponse: RequestResult<ModuleError>) => boolean;
   onFinally?: () => void;
 }
 
-export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
+export abstract class BaseRequest<
+  M extends BaseModel,
+  D = any,
+  R = any,
+  P = any,
+> {
   private readonly httpCaller: HttpCaller<M, D>;
 
   constructor(
@@ -37,12 +43,16 @@ export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
   public exec({
     data,
     requestVariables,
+    requestParams,
     onSuccess,
     handleModuleError,
     onFinally,
   }: ExecOptions<M, D>): void {
     let props: HttpRequestHookProps = {
-      request: this.getHttpRequest(requestVariables),
+      request: {
+        ...this.getHttpRequest(requestVariables),
+        params: requestParams,
+      },
       model: this.modelParser,
     };
     if (data) {
@@ -106,7 +116,7 @@ export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
 }
 
 export interface IRequestBuilder {
-  new(...args: any[]): any;
+  new (...args: any[]): any;
   build(httpCallerFactory: HttpCallerFactory): InstanceType<this>;
 }
 
@@ -115,7 +125,7 @@ export class RequestFactory<
   I extends IRequestBuilder,
   R extends BaseRequest<M> = InstanceType<I>,
 > {
-  constructor(private readonly request: I) { }
+  constructor(private readonly request: I) {}
 
   public build(httpCallerFactory: HttpCallerFactory): R {
     return this.request.build(httpCallerFactory);

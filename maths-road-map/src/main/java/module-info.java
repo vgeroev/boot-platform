@@ -42,7 +42,6 @@ module org.vmalibu.module.mathsroadmap {
     exports org.vmalibu.module.mathsroadmap.controller.mathsroadmap;
     exports org.vmalibu.module.mathsroadmap.database.dao;
     exports org.vmalibu.module.mathsroadmap.database.domainobject;
-    exports org.vmalibu.module.mathsroadmap.database.converter to spring.beans;
     exports org.vmalibu.module.mathsroadmap.service.config to spring.beans, spring.core, spring.aop;
     exports org.vmalibu.module.mathsroadmap.service.article to spring.beans, spring.core, spring.aop;
     exports org.vmalibu.module.mathsroadmap.service.article.pagemanager to spring.beans, spring.core, spring.aop;

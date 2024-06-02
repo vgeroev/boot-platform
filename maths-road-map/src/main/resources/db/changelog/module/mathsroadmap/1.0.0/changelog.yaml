@@ -1,4 +1,6 @@
 databaseChangeLog:
+- preConditions:
+
 - changeSet:
     id: 1.0.0
     author: vmalibu
@@ -34,15 +36,13 @@ databaseChangeLog:
                 constraints:
                   nullable: false
             - column:
-                name: abstraction_level
-                type: smallint
-                constraints:
-                  nullable: false
-            - column:
                 name: title
                 type: varchar(255)
                 constraints:
                   nullable: false
+            - column:
+                name: description
+                type: varchar
 
       - createTable:
           tableName: maths_road_map_article_latex
