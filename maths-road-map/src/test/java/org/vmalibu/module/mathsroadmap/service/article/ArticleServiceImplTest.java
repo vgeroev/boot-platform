@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomUtils;
 import org.vmalibu.module.mathsroadmap.BaseTestClass;
-import org.vmalibu.module.mathsroadmap.TestUtils;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.util.Random;
@@ -23,22 +22,22 @@ class ArticleServiceImplTest extends BaseTestClass {
     @DisplayName("Test Case: Creating topic with correct values")
     void createWithCorrectValuesTest() throws PlatformException {
         String title = RandomStringUtils.randomAlphabetic(10);
+        String description = new Random().nextBoolean() ? RandomStringUtils.randomAlphabetic(10) : null;
         String latex = RandomStringUtils.randomAlphabetic(100);
         String configuration = new Random().nextBoolean() ? RandomStringUtils.randomAlphabetic(100) : null;
-        AbstractionLevel abstractionLevel = TestUtils.getRandomEnumValue(AbstractionLevel.class);
         String creatorUsername = RandomStringUtils.randomAlphabetic(10);
 
         ArticleDTO topic = articleService.create(
                 title,
+                description,
                 latex,
                 configuration,
-                abstractionLevel,
                 getUserSource(creatorUsername)
         );
 
         Consumer<ArticleDTO> topicChecker = t ->
                 Assertions.assertThat(t).isNotNull()
-                        .returns(abstractionLevel, ArticleDTO::abstractionLevel)
+                        .returns(description, ArticleDTO::description)
                         .returns(title, ArticleDTO::title)
                         .returns(creatorUsername, ArticleDTO::creatorUsername);
 
@@ -57,7 +56,7 @@ class ArticleServiceImplTest extends BaseTestClass {
                 RandomStringUtils.randomAlphabetic(10),
                 RandomStringUtils.randomAlphabetic(100),
                 RandomStringUtils.randomAlphabetic(100),
-                TestUtils.getRandomEnumValue(AbstractionLevel.class),
+                RandomStringUtils.randomAlphabetic(100),
                 getUserSource(RandomStringUtils.randomAlphabetic(10))
         );
 
