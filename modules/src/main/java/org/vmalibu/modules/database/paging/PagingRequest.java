@@ -32,7 +32,7 @@ public class PagingRequest {
             this.pageSize = pageSize;
         }
 
-        public T withSort(@NonNull Sort sort) {
+        public T withSort(@Nullable Sort sort) {
             this.sort = sort;
             return self();
         }
