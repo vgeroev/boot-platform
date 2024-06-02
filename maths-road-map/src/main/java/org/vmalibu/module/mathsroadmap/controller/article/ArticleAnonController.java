@@ -9,6 +9,7 @@ import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleService;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
+import org.vmalibu.module.mathsroadmap.service.article.list.ArticleSortField;
 import org.vmalibu.module.mathsroadmap.service.article.pagemanager.ArticlePageManager;
 import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.database.paging.PaginationForm;
@@ -47,6 +48,7 @@ public class ArticleAnonController {
         ArticlePaginationForm form = new ArticlePaginationForm(params);
         return articleService.findAll(
                 new ArticlePagingRequest.Builder(form.page, form.pageSize)
+                        .withSort(form.sortField, form.sortDirection)
                         .withTitlePrefix(form.titlePrefix)
                         .withCreatorUsernamePrefix(form.creatorUsernamePrefix)
                         .build()
@@ -58,12 +60,18 @@ public class ArticleAnonController {
         static final String JSON_TITLE_PREFIX = "titlePrefix";
         static final String JSON_CREATOR_USERNAME_PREFIX = "creatorUsernamePrefix";
 
+        final ArticleSortField sortField;
         final String titlePrefix;
         final String creatorUsernamePrefix;
 
         public ArticlePaginationForm(@NonNull Map<String, String> params) throws PlatformException {
             super(params);
 
+            if (params.containsKey(JSON_SORT_FIELD)) {
+                this.sortField = parseEnum(ArticleSortField.class, params, JSON_SORT_FIELD);
+            } else {
+                this.sortField = null;
+            }
             this.titlePrefix = params.getOrDefault(JSON_TITLE_PREFIX, null);
             this.creatorUsernamePrefix = params.getOrDefault(JSON_CREATOR_USERNAME_PREFIX, null);
         }
