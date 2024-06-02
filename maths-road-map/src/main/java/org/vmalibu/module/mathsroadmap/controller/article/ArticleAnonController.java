@@ -8,8 +8,6 @@ import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleService;
-import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListElement;
-import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListService;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
 import org.vmalibu.module.mathsroadmap.service.article.pagemanager.ArticlePageManager;
 import org.vmalibu.modules.database.paging.PaginatedDto;
@@ -27,7 +25,6 @@ public class ArticleAnonController {
 
     private final ArticlePageManager articlePageManager;
     private final ArticleService articleService;
-    private final ArticleListService articleListService;
 
     @GetMapping("/article/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -44,11 +41,11 @@ public class ArticleAnonController {
 
     @GetMapping("/article/list")
     @ResponseStatus(HttpStatus.OK)
-    public PaginatedDto<ArticleListElement> list(
+    public PaginatedDto<ArticleDTO> list(
             @RequestParam(required = false) final Map<String, String> params
     ) throws PlatformException {
         ArticlePaginationForm form = new ArticlePaginationForm(params);
-        return articleListService.findAll(
+        return articleService.findAll(
                 new ArticlePagingRequest.Builder(form.page, form.pageSize)
                         .withTitlePrefix(form.titlePrefix)
                         .withCreatorUsernamePrefix(form.creatorUsernamePrefix)
