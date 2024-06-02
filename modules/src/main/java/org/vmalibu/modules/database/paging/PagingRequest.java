@@ -18,7 +18,7 @@ public class PagingRequest {
     protected PagingRequest(@NonNull AbstractBuilder<?> builder) {
         this.page = builder.page;
         this.pageSize = builder.pageSize;
-        this.sort = Objects.requireNonNull(builder.sort);
+        this.sort = Objects.requireNonNullElseGet(builder.sort, Sort::unsorted);
     }
 
     public abstract static class AbstractBuilder<T extends AbstractBuilder<T>> {
