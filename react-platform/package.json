@@ -16,7 +16,7 @@
     "@types/react-dom": "^18.2.7",
     "@types/react-latex": "^2.0.3",
     "antd": "^5.9.4",
-    "axios": "^1.5.1",
+    "axios": "^1.7.2",
     "dayjs": "^1.11.10",
     "dotenv-webpack": "^8.0.1",
     "oidc-client-ts": "^3.0.0-beta.0",

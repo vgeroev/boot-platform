@@ -1,5 +1,6 @@
 import { Modal } from "antd";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import qs from "qs";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import { IModelParser, ModelFactory } from "../model/BaseModel";
 
@@ -28,15 +29,29 @@ const httpCall = <M, D = any>(
         headers = undefined;
       }
 
+      const requestConfig: AxiosRequestConfig = {
+        url: request.url,
+        method: request.method,
+        paramsSerializer: {
+          serialize: (params) => {
+            return qs.stringify(params, { arrayFormat: "brackets" });
+          },
+        },
+        validateStatus: (status) => status < 500,
+      };
+
+      if (data) {
+        requestConfig.data = data;
+      }
+      if (headers) {
+        requestConfig.headers = headers;
+      }
+      if (request.params) {
+        requestConfig.params = request.params;
+      }
+
       return await axios
-        .request<HttpResult>({
-          url: request.url,
-          method: request.method,
-          params: request.params,
-          headers: headers,
-          data: data,
-          validateStatus: (status) => status < 500,
-        })
+        .request<HttpResult>(requestConfig)
         .catch((e) => {
           console.log(e);
           Modal.error({
