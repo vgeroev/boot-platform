@@ -32,6 +32,7 @@ function App() {
     .concat(getModuleRoutes(mathsRoadMapModuleRoutes));
 
   routes.push(
+    <Route path="/authorization-redirect" element={<></>} />,
     <Route path="*" element={<BaseLayout component={<NotFound />} />} />,
   );
 
