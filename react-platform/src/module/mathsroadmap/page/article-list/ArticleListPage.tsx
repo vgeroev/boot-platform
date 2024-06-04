@@ -77,7 +77,7 @@ const ArticleListPage: React.FC<{}> = () => {
 
   const loadMore =
     !loading &&
-    pagingFilter.pageSize <= (articleListModel?.totalCount || 0) &&
+    pagingFilter.pageSize < (articleListModel?.totalCount || 0) &&
     pagingFilter.pageSize <= MAX_PAGE_SIZE - INCREMENT_PAGE_SIZE ? (
       <div
         style={{
