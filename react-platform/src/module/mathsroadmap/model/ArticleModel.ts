@@ -25,6 +25,10 @@ export class ArticleModel extends BaseModel {
     return this.getDate("createdAt");
   }
 
+  public get updatedAt(): Date {
+    return this.getDate("updatedAt");
+  }
+
   public static parse(data: any): ArticleModel {
     return new ArticleModel(data);
   }

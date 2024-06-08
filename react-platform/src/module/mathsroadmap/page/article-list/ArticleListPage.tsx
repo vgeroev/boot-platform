@@ -38,6 +38,16 @@ function prettifyDescription(article: ArticleModel): string | null {
   return description.slice(0, 255) + "...";
 }
 
+function getArticleMeta(article: ArticleModel): string {
+  const baseMetaMsg: string = `${article.creatorUsername}, ${article.createdAt.toString().split("T")[0]}`;
+  if (article.updatedAt && article.createdAt !== article.updatedAt) {
+    return (
+      baseMetaMsg + ` (updated: ${article.updatedAt.toString().split("T")[0]})`
+    );
+  }
+  return baseMetaMsg;
+}
+
 const ArticleListPage: React.FC<{}> = () => {
   const [pagingFilter, setPagingFilter] = React.useState<PagingFilter>({
     page: 0,
@@ -77,8 +87,8 @@ const ArticleListPage: React.FC<{}> = () => {
 
   const loadMore =
     !loading &&
-    pagingFilter.pageSize < (articleListModel?.totalCount || 0) &&
-    pagingFilter.pageSize <= MAX_PAGE_SIZE - INCREMENT_PAGE_SIZE ? (
+      pagingFilter.pageSize < (articleListModel?.totalCount || 0) &&
+      pagingFilter.pageSize <= MAX_PAGE_SIZE - INCREMENT_PAGE_SIZE ? (
       <div
         style={{
           textAlign: "center",
@@ -153,7 +163,7 @@ const ArticleListPage: React.FC<{}> = () => {
                         {item.data.title}
                       </Link>
                     }
-                    description={`${item.data.creatorUsername}, ${item.data.createdAt.split("T")[0]}`}
+                    description={getArticleMeta(item.data)}
                   />
                   {prettifyDescription(item.data)}
                 </List.Item>

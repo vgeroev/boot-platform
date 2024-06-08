@@ -1,14 +1,4 @@
-import {
-  Form,
-  Input,
-  Select,
-  Button,
-  Row,
-  Col,
-  Spin,
-  Divider,
-  Affix,
-} from "antd";
+import { Form, Input, Button, Row, Col, Spin, Divider, Affix } from "antd";
 import React from "react";
 import "prismjs/themes/prism-solarizedlight.css";
 import Iframe from "react-iframe";
@@ -21,7 +11,6 @@ import {
   CreateArticleRequest,
   CreateArticleRequestData,
 } from "../../service/request/CreateArticleRequest";
-import { AbstractionLevel } from "../../model/ArticleModel";
 import WithAuthorization from "../../../../hoc/authorized/WithAuthorization";
 import { useNavigate } from "react-router-dom";
 import { getArticleRoute } from "../../route/MathsRoadMapRouteGetter";

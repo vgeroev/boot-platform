@@ -24,12 +24,7 @@ export interface ExecOptions<M extends BaseModel, D = any, R = any, P = any> {
   onFinally?: () => void;
 }
 
-export abstract class BaseRequest<
-  M extends BaseModel,
-  D = any,
-  R = any,
-  P = any,
-> {
+export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
   private readonly httpCaller: HttpCaller<M, D>;
 
   constructor(
