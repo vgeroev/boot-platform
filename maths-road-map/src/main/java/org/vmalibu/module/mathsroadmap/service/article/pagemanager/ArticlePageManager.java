@@ -5,6 +5,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.module.exception.PlatformException;
+import org.vmalibu.modules.utils.OptionalField;
 
 import java.net.URI;
 
@@ -18,6 +19,11 @@ public interface ArticlePageManager {
                                        @Nullable String description,
                                        @NonNull String latex,
                                        @Nullable String configuration,
+                                       @NonNull UserSource userSource) throws PlatformException;
+
+    @NonNull ArticleDTO updateByTeX4ht(long id,
+                                       OptionalField<@NonNull String> latex,
+                                       OptionalField<@Nullable String> configuration,
                                        @NonNull UserSource userSource) throws PlatformException;
 
     @NonNull URI getArticleURI(long articleId);

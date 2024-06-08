@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.vmalibu.module.mathsroadmap.database.dao.ArticleDAO;
+import org.vmalibu.module.mathsroadmap.database.dao.ArticleLatexDAO;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleLatex;
+import org.vmalibu.module.mathsroadmap.exception.MathsRoadMapExceptionFactory;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.database.paging.DomainObjectPagination;
@@ -20,28 +22,32 @@ import org.vmalibu.modules.database.paging.DomainObjectPaginationImpl;
 import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
+import org.vmalibu.modules.utils.OptionalField;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleDAO articleDAO;
+    private final ArticleLatexDAO articleLatexDAO;
     private final DomainObjectPagination<DBArticle, ArticleDTO> domainObjectPagination;
 
     @Autowired
-    public ArticleServiceImpl(ArticleDAO articleDAO) {
+    public ArticleServiceImpl(ArticleDAO articleDAO, ArticleLatexDAO articleLatexDAO) {
         this.articleDAO = articleDAO;
+        this.articleLatexDAO = articleLatexDAO;
         this.domainObjectPagination = new DomainObjectPaginationImpl<>(articleDAO, ArticleDTO::from);
     }
 
     @Override
     @Transactional(readOnly = true)
     public @Nullable ArticleDTO findArticle(long id) {
-        Optional<DBArticle> oTopic = articleDAO.findById(id);
-        return oTopic.map(ArticleDTO::from).orElse(null);
+        Optional<DBArticle> oArticle = articleDAO.findById(id);
+        return oArticle.map(ArticleDTO::from).orElse(null);
     }
 
     @Override
@@ -53,6 +59,13 @@ public class ArticleServiceImpl implements ArticleService {
                         pagingRequest.getCreatorUsernamePrefix()
                 )
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public @Nullable ArticleLatexDTO findArticleLatex(long id) {
+        Optional<DBArticleLatex> oArticleLatex = articleLatexDAO.findById(id);
+        return oArticleLatex.map(ArticleLatexDTO::from).orElse(null);
     }
 
     @Override
@@ -78,6 +91,58 @@ public class ArticleServiceImpl implements ArticleService {
         return ArticleDTO.from(article);
     }
 
+    @Override
+    @Transactional(rollbackFor = PlatformException.class)
+    public @NonNull ArticleDTO update(long id,
+                                      @NonNull OptionalField<@NonNull String> title,
+                                      @NonNull OptionalField<@Nullable String> description,
+                                      @NonNull UserSource userSource) throws PlatformException {
+        DBArticle article = articleDAO.checkExistenceAndGet(id);
+        validateArticleBelongsToUser(article, userSource);
+
+        if (title.isPresent()) {
+            String newTitle = title.get();
+            checkTitle(newTitle);
+            article.setTitle(newTitle);
+        }
+
+        if (description.isPresent()) {
+            article.setDescription(normalizeDescription(description.get()));
+        }
+
+        return ArticleDTO.from(articleDAO.save(article));
+    }
+
+    @Override
+    @Transactional(rollbackFor = PlatformException.class)
+    public @NonNull ArticleDTO updateLatex(long id,
+                                           @NonNull OptionalField<@NonNull String> latex,
+                                           @NonNull OptionalField<@Nullable String> configuration,
+                                           @NonNull UserSource userSource) throws PlatformException {
+        DBArticle article = articleDAO.checkExistenceAndGet(id);
+        validateArticleBelongsToUser(article, userSource);
+
+        if (latex.isPresent() && configuration.isPresent()) {
+            String newLatex = latex.get();
+            checkLatex(newLatex);
+            articleLatexDAO.updateLatex(id, newLatex, configuration.get());
+        } else if (latex.isPresent()) {
+            String newLatex = latex.get();
+            checkLatex(newLatex);
+            articleLatexDAO.updateLatex(id, newLatex);
+        } else if (configuration.isPresent()) {
+            articleLatexDAO.updateConfiguration(id, configuration.get());
+        }
+
+        return ArticleDTO.from(article);
+    }
+
+    private void validateArticleBelongsToUser(DBArticle article, UserSource userSource) throws PlatformException {
+        if (!Objects.equals(article.getCreatorUsername(), userSource.getUsername())) {
+            throw MathsRoadMapExceptionFactory.buildUserDoesNotHaveAccessException(userSource.getUsername());
+        }
+    }
+
     private static void checkArticle(String title,
                                      String latex) throws PlatformException {
         checkTitle(title);
@@ -90,8 +155,8 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
-    private static void checkLatex(String body) throws PlatformException {
-        if (!StringUtils.hasText(body)) {
+    private static void checkLatex(String latex) throws PlatformException {
+        if (!StringUtils.hasText(latex)) {
             throw GeneralExceptionFactory.buildEmptyValueException(DBArticleLatex.class, DBArticleLatex.Fields.latex);
         }
     }

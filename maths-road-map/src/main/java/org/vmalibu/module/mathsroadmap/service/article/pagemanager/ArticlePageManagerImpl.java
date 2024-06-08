@@ -9,7 +9,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
+import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleLatex;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
+import org.vmalibu.module.mathsroadmap.service.article.ArticleLatexDTO;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleService;
 import org.vmalibu.module.mathsroadmap.service.config.MathsRoadMapConfigService;
 import org.vmalibu.module.mathsroadmap.service.config.NginxArticlesConfig;
@@ -18,6 +20,8 @@ import org.vmalibu.module.mathsroadmap.utils.ArticleURIUtils;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
+import org.vmalibu.modules.utils.OptionalField;
+import org.vmalibu.modules.utils.function.Supplier;
 
 import java.io.IOException;
 import java.net.URI;
@@ -62,11 +66,67 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
                                               @NonNull String latex,
                                               @Nullable String configuration,
                                               @NonNull UserSource userSource) throws PlatformException {
+        Supplier<ArticleDTO> articleGetter =
+                () -> articleService.create(title, description, latex, configuration, userSource);
+        return createArticlePage(articleGetter, latex, configuration, userSource);
+    }
+
+    @Override
+    public @NonNull ArticleDTO updateByTeX4ht(long id,
+                                              @NonNull OptionalField<@NonNull String> latex,
+                                              @NonNull OptionalField<@Nullable String> configuration,
+                                              @NonNull UserSource userSource) {
+        String userId = userSource.getUserId();
+        return articlePreviewXSync.evaluate(userId, () -> internalUpdate(id, latex, configuration, userSource));
+    }
+
+    @SneakyThrows
+    private ArticleDTO internalUpdate(long id,
+                                      OptionalField<String> latex,
+                                      OptionalField<String> configuration,
+                                      UserSource userSource) {
+        String nLatex;
+        String nConfiguration;
+        if (latex.isPresent() && configuration.isPresent()) {
+            nLatex = latex.get();
+            nConfiguration = configuration.get();
+        } else {
+            ArticleLatexDTO articleLatex = articleService.findArticleLatex(id);
+            if (articleLatex == null) {
+                throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DBArticleLatex.class, id);
+            }
+
+            if (latex.isPresent()) {
+                nLatex = latex.get();
+            } else {
+                nLatex = articleLatex.latex();
+            }
+
+            if (configuration.isPresent()) {
+                nConfiguration = configuration.get();
+            } else {
+                nConfiguration = articleLatex.configuration();
+            }
+        }
+
+        Supplier<ArticleDTO> articleGetter = () -> articleService.updateLatex(id, latex, configuration, userSource);
+        return createArticlePage(
+                articleGetter,
+                nLatex,
+                nConfiguration,
+                userSource
+        );
+    }
+
+    private ArticleDTO createArticlePage(Supplier<ArticleDTO> articleGetter,
+                                         String latex,
+                                         String configuration,
+                                         UserSource userSource) throws PlatformException {
         String userId = userSource.getUserId();
         Path candidatePath = getCandidatePagePath(userId);
         try {
             createPage(latex, configuration, candidatePath);
-            ArticleDTO articleDTO = articleService.create(title, description, latex, configuration, userSource);
+            ArticleDTO articleDTO = articleGetter.get();
             submitCandidate(articleDTO.id(), candidatePath);
             return articleDTO;
         } finally {

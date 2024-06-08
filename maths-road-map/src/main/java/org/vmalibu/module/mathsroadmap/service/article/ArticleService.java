@@ -6,10 +6,13 @@ import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.module.exception.PlatformException;
+import org.vmalibu.modules.utils.OptionalField;
 
 public interface ArticleService {
 
     @Nullable ArticleDTO findArticle(long id);
+
+    @Nullable ArticleLatexDTO findArticleLatex(long id);
 
     @NonNull PaginatedDto<ArticleDTO> findAll(@NonNull ArticlePagingRequest pagingRequest);
 
@@ -18,5 +21,15 @@ public interface ArticleService {
                                @NonNull String latex,
                                @Nullable String configuration,
                                @NonNull UserSource userSource) throws PlatformException;
+
+    @NonNull ArticleDTO update(long id,
+                               OptionalField<@NonNull String> title,
+                               OptionalField<@Nullable String> description,
+                               @NonNull UserSource userSource) throws PlatformException;
+
+    @NonNull ArticleDTO updateLatex(long id,
+                                    OptionalField<@NonNull String> latex,
+                                    OptionalField<@Nullable String> configuration,
+                                    @NonNull UserSource userSource) throws PlatformException;
 
 }
