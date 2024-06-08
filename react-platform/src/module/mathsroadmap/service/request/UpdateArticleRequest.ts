@@ -2,7 +2,6 @@ import {
   HttpCallerFactory,
   HttpRequestMethod,
 } from "../../../../hook/useHttpHook";
-import { ArticleModel } from "../../model/ArticleModel";
 import { UpdateArticleModel } from "../../model/UpdateArticleModel";
 import { MathsRoadMapBaseRequest } from "./MathsRoadMapBaseRequest";
 

@@ -1,4 +1,4 @@
-import { Form, Input, Button, Row, Col, Spin, Divider } from "antd";
+import { Form, Input, Button, Row, Col, Spin, Divider, Switch } from "antd";
 import React from "react";
 import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
 import WithAuthorization from "../../../../hoc/authorized/WithAuthorization";
@@ -25,6 +25,11 @@ const UpdateArticlePage: React.FC<{}> = () => {
   const updateArticleRequest: UpdateArticleRequest =
     useHttpRequest(UpdateArticleRequest);
   const navigate = useNavigate();
+  const [showUpdateLatexForm, setShowUpdateLatexForm] =
+    React.useState<boolean>(false);
+  const switchUpdateForm = () => {
+    setShowUpdateLatexForm(!showUpdateLatexForm);
+  };
 
   React.useEffect(() => {
     setLoading(true);
@@ -75,64 +80,84 @@ const UpdateArticlePage: React.FC<{}> = () => {
   return (
     <>
       <Spin delay={100} spinning={loading}>
-        <Divider orientation="center">Update article</Divider>
-        <Row>
-          <Col span={24}>
-            <Form
-              name="submitForm"
-              labelCol={{ span: 16 }}
-              wrapperCol={{ span: 14 }}
-              layout="horizontal"
-              disabled={false}
-              style={{ maxWidth: 1000 }}
-              autoComplete="off"
-              onFinish={() => submit()}
-              initialValues={{
-                title: updateArticleForm?.title,
-                description: updateArticleForm?.description,
-              }}
-            >
-              <Form.Item<UpdateArticleForm>
-                name="title"
-                label="Title"
-                rules={[{ required: true, message: "Field cannot be empty!" }]}
-              >
-                <Input
-                  maxLength={255}
-                  onChange={(e) =>
-                    setUpdateArticleForm({
-                      title: e.target.value,
-                      description: updateArticleForm?.description || null,
-                    })
-                  }
-                />
-              </Form.Item>
-
-              <Form.Item<UpdateArticleForm>
-                name="description"
-                label="Description"
-              >
-                <TextArea
-                  onChange={(e) => {
-                    setUpdateArticleForm({
-                      title: updateArticleForm?.title || "",
-                      description: e.target.value,
-                    });
-                  }}
-                ></TextArea>
-              </Form.Item>
-
-              <Form.Item wrapperCol={{ offset: 19, span: 14 }}>
-                <Button type="primary" htmlType="submit">
-                  Submit
-                </Button>
-              </Form.Item>
-            </Form>
-          </Col>
-        </Row>
+        <Switch onChange={switchUpdateForm} />
+        {!showUpdateLatexForm &&
+          getUpdateForm(
+            submit,
+            (value) =>
+              setUpdateArticleForm({
+                title: value,
+                description: updateArticleForm?.description || null,
+              }),
+            (value) =>
+              setUpdateArticleForm({
+                description: value,
+                title: updateArticleForm?.title || "",
+              }),
+            updateArticleForm.title,
+            updateArticleForm.description || "",
+          )}
       </Spin>
     </>
   );
 };
+
+function getUpdateForm(
+  onFinish: () => void,
+  onChangeTitle: (a: string) => void,
+  onChangeDescription: (a: string) => void,
+  initialTitle?: string,
+  initialDescription?: string,
+): React.ReactElement {
+  return (
+    <>
+      <Divider orientation="center">Update article</Divider>
+      <Row>
+        <Col span={24}>
+          <Form
+            name="submitForm"
+            labelCol={{ span: 16 }}
+            wrapperCol={{ span: 14 }}
+            layout="horizontal"
+            disabled={false}
+            style={{ maxWidth: 1000 }}
+            autoComplete="off"
+            onFinish={onFinish}
+            initialValues={{
+              title: initialTitle,
+              description: initialDescription,
+            }}
+          >
+            <Form.Item<UpdateArticleForm>
+              name="title"
+              label="Title"
+              rules={[{ required: true, message: "Field cannot be empty!" }]}
+            >
+              <Input
+                maxLength={255}
+                onChange={(e) => onChangeTitle(e.target.value)}
+              />
+            </Form.Item>
+
+            <Form.Item<UpdateArticleForm>
+              name="description"
+              label="Description"
+            >
+              <TextArea
+                onChange={(e) => onChangeDescription(e.target.value)}
+              ></TextArea>
+            </Form.Item>
+
+            <Form.Item wrapperCol={{ offset: 19, span: 14 }}>
+              <Button type="primary" htmlType="submit">
+                Submit
+              </Button>
+            </Form.Item>
+          </Form>
+        </Col>
+      </Row>
+    </>
+  );
+}
 
 export default WithAuthorization(UpdateArticlePage);
