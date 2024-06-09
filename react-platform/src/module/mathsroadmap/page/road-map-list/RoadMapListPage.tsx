@@ -4,13 +4,13 @@ import Search from "antd/es/input/Search";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
-import { ArticleListModel } from "../../model/ArticleListModel";
-import { ArticleModel } from "../../model/ArticleModel";
+import { RoadMapListModel } from "../../model/RoadMapListModel";
+import { RoadMapModel } from "../../model/RoadMapModel";
 import {
-  getArticleRoute,
-  getRoadMapListRoute,
+  getArticleListRoute,
+  getRoadMapRoute,
 } from "../../route/MathsRoadMapRouteGetter";
-import { GetArticleListRequest } from "../../service/request/GetArticleListRequest";
+import { GetRoadMapListRequest } from "../../service/request/GetRoadMapListRequest";
 
 const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
   <Space>
@@ -28,12 +28,12 @@ type PagingFilter = {
   titlePrefix?: string;
 };
 
-function prettifyDescription(article: ArticleModel): string | null {
-  if (!article.description) {
+function prettifyDescription(roadMapModel: RoadMapModel): string | null {
+  if (!roadMapModel.description) {
     return null;
   }
 
-  const description: string = article.description;
+  const description: string = roadMapModel.description;
   if (description.length < 255) {
     return description;
   }
@@ -41,27 +41,27 @@ function prettifyDescription(article: ArticleModel): string | null {
   return description.slice(0, 255) + "...";
 }
 
-function getArticleMeta(article: ArticleModel): string {
-  const baseMetaMsg: string = `${article.creatorUsername}, ${article.createdAt.toString().split("T")[0]}`;
-  if (article.updatedAt && article.createdAt !== article.updatedAt) {
+function getRoadMapMeta(roadMap: RoadMapModel): string {
+  const baseMetaMsg: string = `${roadMap.creatorUsername}, ${roadMap.createdAt.toString().split("T")[0]}`;
+  if (roadMap.updatedAt && roadMap.createdAt !== roadMap.updatedAt) {
     return (
-      baseMetaMsg + ` (updated: ${article.updatedAt.toString().split("T")[0]})`
+      baseMetaMsg + ` (updated: ${roadMap.updatedAt.toString().split("T")[0]})`
     );
   }
   return baseMetaMsg;
 }
 
-const ArticleListPage: React.FC<{}> = () => {
+const RoadMapListPage: React.FC<{}> = () => {
   const [pagingFilter, setPagingFilter] = React.useState<PagingFilter>({
     page: 0,
     pageSize: 10,
   });
   const [loading, setLoading] = React.useState<boolean>(false);
-  const [articleListModel, setArticleListModel] = React.useState<
-    ArticleListModel | undefined
+  const [roadMapListModel, setRoadMapListModel] = React.useState<
+    RoadMapListModel | undefined
   >(undefined);
-  const getArticleListRequest: GetArticleListRequest = useHttpRequest(
-    GetArticleListRequest,
+  const getRoadMapListRequest: GetRoadMapListRequest = useHttpRequest(
+    GetRoadMapListRequest,
   );
 
   React.useEffect(() => {
@@ -77,10 +77,10 @@ const ArticleListPage: React.FC<{}> = () => {
       requestParams.titlePrefix = pagingFilter.titlePrefix;
     }
 
-    getArticleListRequest.exec({
+    getRoadMapListRequest.exec({
       requestParams: requestParams,
       onSuccess: (httpResponse) => {
-        setArticleListModel(httpResponse.data);
+        setRoadMapListModel(httpResponse.data);
       },
       onFinally: () => {
         setLoading(false);
@@ -90,7 +90,7 @@ const ArticleListPage: React.FC<{}> = () => {
 
   const loadMore =
     !loading &&
-    pagingFilter.pageSize < (articleListModel?.totalCount || 0) &&
+    pagingFilter.pageSize < (roadMapListModel?.totalCount || 0) &&
     pagingFilter.pageSize <= MAX_PAGE_SIZE - INCREMENT_PAGE_SIZE ? (
       <div
         style={{
@@ -116,9 +116,9 @@ const ArticleListPage: React.FC<{}> = () => {
   return (
     <>
       <Divider orientation="left">
-        <Link to={getRoadMapListRoute()}>Link to Road maps</Link>
+        <Link to={getArticleListRoute()}>Link to Articles</Link>
       </Divider>
-      <Divider>Articles</Divider>
+      <Divider>Road maps</Divider>
       <Row>
         <Col span={9}></Col>
         <Col span={6}>
@@ -140,7 +140,7 @@ const ArticleListPage: React.FC<{}> = () => {
             loadMore={loadMore}
             itemLayout="vertical"
             size="large"
-            dataSource={articleListModel?.result}
+            dataSource={roadMapListModel?.result}
             // footer={
             //   <div>
             //     <b>ant design</b> footer part
@@ -165,11 +165,11 @@ const ArticleListPage: React.FC<{}> = () => {
                 >
                   <List.Item.Meta
                     title={
-                      <Link to={getArticleRoute(item.data.id)}>
+                      <Link to={getRoadMapRoute(item.data.id)}>
                         {item.data.title}
                       </Link>
                     }
-                    description={getArticleMeta(item.data)}
+                    description={getRoadMapMeta(item.data)}
                   />
                   {prettifyDescription(item.data)}
                 </List.Item>
@@ -183,4 +183,4 @@ const ArticleListPage: React.FC<{}> = () => {
   );
 };
 
-export default ArticleListPage;
+export default RoadMapListPage;

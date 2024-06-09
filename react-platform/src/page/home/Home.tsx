@@ -5,6 +5,7 @@ import ApplicationList, {
 } from "../../component/application/ApplicationList";
 import { useHttpRequest } from "../../hook/useHttpRequestHook";
 import { EXERCISE_SOURCE_LIST_PATH } from "../../module/exercises/route/ExercisesRouteGetter";
+import { getArticleListRoute } from "../../module/mathsroadmap/route/MathsRoadMapRouteGetter";
 import { InitializedModulesRequest } from "../../service/request/InitializedModulesRequest";
 import { getMatrix } from "../../utils/GridUtils";
 
@@ -24,7 +25,7 @@ function initApplicationMap(): Map<string, AppModule> {
     uuid: "org.vmalibu.module.mathsroadmap",
     name: "Maths Road Map",
     desc: "Articles for study math",
-    path: EXERCISE_SOURCE_LIST_PATH,
+    path: getArticleListRoute(),
   });
 
   return apps;

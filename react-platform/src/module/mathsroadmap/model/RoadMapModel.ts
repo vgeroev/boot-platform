@@ -1,6 +1,6 @@
 import { BaseModel } from "../../../model/BaseModel";
 
-export class ArticleModel extends BaseModel {
+export class RoadMapModel extends BaseModel {
   public get title(): string {
     return this.getString("title");
   }
@@ -23,7 +23,7 @@ export class ArticleModel extends BaseModel {
     return this.getDate("updatedAt");
   }
 
-  public static parse(data: any): ArticleModel {
-    return new ArticleModel(data);
+  public static parse(data: any): RoadMapModel {
+    return new RoadMapModel(data);
   }
 }

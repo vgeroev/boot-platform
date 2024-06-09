@@ -1,7 +1,10 @@
 import { SettingOutlined } from "@ant-design/icons";
 import { Dropdown, MenuProps, Space } from "antd";
 import { useNavigate } from "react-router-dom";
-import { getCreateArticleRoute } from "../module/mathsroadmap/route/MathsRoadMapRouteGetter";
+import {
+  getCreateArticleRoute,
+  getCreateRoadMapRoute,
+} from "../module/mathsroadmap/route/MathsRoadMapRouteGetter";
 
 const items: MenuProps["items"] = [
   {
@@ -11,6 +14,10 @@ const items: MenuProps["items"] = [
       {
         key: "create-article",
         label: "Create article",
+      },
+      {
+        key: "create-road-map",
+        label: "Create road-map",
       },
     ],
   },
@@ -27,6 +34,10 @@ const paths: Map<string, string> = new Map();
 paths.set(
   createKey("maths-road-map", "create-article"),
   getCreateArticleRoute(),
+);
+paths.set(
+  createKey("maths-road-map", "create-road-map"),
+  getCreateRoadMapRoute(),
 );
 
 const ModulesMenu: React.FC<{}> = () => {
