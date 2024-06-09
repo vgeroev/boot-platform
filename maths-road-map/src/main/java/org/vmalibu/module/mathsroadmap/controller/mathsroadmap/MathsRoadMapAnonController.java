@@ -9,6 +9,7 @@ import org.vmalibu.module.mathsroadmap.service.roadmap.RoadMapDTO;
 import org.vmalibu.module.mathsroadmap.service.roadmap.RoadMapService;
 import org.vmalibu.module.mathsroadmap.service.roadmap.RoadMapTreeDTO;
 import org.vmalibu.module.mathsroadmap.service.roadmap.list.RoadMapPagingRequest;
+import org.vmalibu.module.mathsroadmap.service.roadmap.list.RoadMapSortField;
 import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.database.paging.PaginationForm;
 import org.vmalibu.modules.module.exception.PlatformException;
@@ -38,6 +39,7 @@ public class MathsRoadMapAnonController {
         RoadMapPaginationForm form = new RoadMapPaginationForm(params);
         return roadMapService.findAll(
                 new RoadMapPagingRequest.Builder(form.page, form.pageSize)
+                        .withSort(form.sortField, form.sortDirection)
                         .withTitlePrefix(form.titlePrefix)
                         .withCreatorUsernamePrefix(form.creatorUsernamePrefix)
                         .build()
@@ -49,12 +51,18 @@ public class MathsRoadMapAnonController {
         static final String JSON_TITLE_PREFIX = "titlePrefix";
         static final String JSON_CREATOR_USERNAME_PREFIX = "creatorUsernamePrefix";
 
+        final RoadMapSortField sortField;
         final String titlePrefix;
         final String creatorUsernamePrefix;
 
         public RoadMapPaginationForm(@NonNull Map<String, String> params) throws PlatformException {
             super(params);
 
+            if (params.containsKey(JSON_SORT_FIELD)) {
+                this.sortField = parseEnum(RoadMapSortField.class, params, JSON_SORT_FIELD);
+            } else {
+                this.sortField = null;
+            }
             this.titlePrefix = params.getOrDefault(JSON_TITLE_PREFIX, null);
             this.creatorUsernamePrefix = params.getOrDefault(JSON_CREATOR_USERNAME_PREFIX, null);
         }
