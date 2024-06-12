@@ -186,7 +186,7 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
         }
     }
 
-    private void submitCandidate(long articleId, @NonNull Path candidatePath) throws PlatformException {
+    private void submitCandidate(long articleId, Path candidatePath) throws PlatformException {
         NginxArticlesConfig nginxArticlesConfig = mathsRoadMapConfigService.getNginxConfig().nginxArticlesConfig();
         Path pagePath = nginxArticlesConfig.dir().resolve(String.valueOf(articleId));
         try {

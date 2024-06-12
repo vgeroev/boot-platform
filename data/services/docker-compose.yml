@@ -1,6 +1,6 @@
 services:
   nginx:
-     image: nginx:latest
+     image: byjg/nginx-extras
      container_name: nginx-docker
      ports:
        - "80:80"

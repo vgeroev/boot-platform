@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
+import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleLatex;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
+import org.vmalibu.module.mathsroadmap.service.article.ArticleLatexDTO;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleService;
 import org.vmalibu.module.mathsroadmap.service.article.pagemanager.ArticlePageManager;
 import org.vmalibu.module.security.authorization.source.UserSource;
@@ -121,6 +123,18 @@ public class ArticleAuthorizedController {
 
         URI articleURI = articlePageManager.getArticleURI(articleDTO.id());
         return new ArticleResponse(articleDTO, articleURI.toString());
+    }
+
+    @GetMapping("/article-latex/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ArticleLatexDTO getArticleLatex(
+            @PathVariable("id") long id
+    ) throws PlatformException {
+        ArticleLatexDTO articleLatex = articleService.findArticleLatex(id);
+        if (articleLatex == null) {
+            throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DBArticleLatex.class, id);
+        }
+        return articleLatex;
     }
 
     @PatchMapping("/article-latex/{id}")
