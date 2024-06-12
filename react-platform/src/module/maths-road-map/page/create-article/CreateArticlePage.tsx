@@ -1,12 +1,8 @@
-import { Form, Input, Button, Row, Col, Spin, Divider, Affix } from "antd";
+import { Form, Input, Button, Row, Col, Spin, Divider, Modal } from "antd";
 import React from "react";
 import "prismjs/themes/prism-solarizedlight.css";
-import Iframe from "react-iframe";
-import "./styles.css";
 import { latexEditorService } from "../../service/latexeditor/LatexEditorService";
-import { PreviewArticleRequest } from "../../service/request/PreviewArticleRequest";
 import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
-import { LatexEditor } from "../../component/latexeditor/LatexEditor";
 import {
   CreateArticleRequest,
   CreateArticleRequestData,
@@ -15,6 +11,7 @@ import WithAuthorization from "../../../../hoc/authorized/WithAuthorization";
 import { useNavigate } from "react-router-dom";
 import { getArticleRoute } from "../../route/MathsRoadMapRouteGetter";
 import TextArea from "antd/es/input/TextArea";
+import LatexEditorWithRender from "../../component/latex-editor-with-render/LatexEditorWithRender";
 
 const getDefaultConfiguration = (): string => {
   return `\\Preamble{xhtml,mathjax} 
@@ -35,10 +32,6 @@ Template
 % This line here is a comment.
 \\end{document}`;
 };
-interface RenderResult {
-  url?: string;
-  errorMsg?: string;
-}
 
 interface TeX4ht {
   latex: string;
@@ -59,47 +52,10 @@ const CreateArticlePage: React.FC<{}> = () => {
     configuration:
       latexEditorService.getConfiguration() || getDefaultConfiguration(),
   });
-  const [renderResult, setRenderResult] = React.useState<
-    RenderResult | undefined
-  >(undefined);
-  // For iframe reloading
-  const [checksum, setChecksum] = React.useState<number>(0);
   const [loading, setLoading] = React.useState<boolean>(false);
-  const previewArticleRequest: PreviewArticleRequest = useHttpRequest(
-    PreviewArticleRequest,
-  );
   const createArticleRequest: CreateArticleRequest =
     useHttpRequest(CreateArticleRequest);
   const navigate = useNavigate();
-
-  const render = () => {
-    setLoading(true);
-
-    previewArticleRequest.exec({
-      data: {
-        latex: tex4ht.latex,
-        configuration: tex4ht.configuration,
-      },
-      onSuccess: (httpResponse) => {
-        setRenderResult({ url: httpResponse.data?.articleURL });
-      },
-      handleModuleError: (httpResponse) => {
-        switch (httpResponse.data.code) {
-          case "invalid_latex_syntax":
-            setRenderResult({
-              errorMsg: httpResponse.data.parameters?.cmdOutput + "",
-            });
-            return true;
-          default:
-            return false;
-        }
-      },
-      onFinally: () => {
-        setChecksum(checksum + 1);
-        setLoading(false);
-      },
-    });
-  };
 
   const submit = () => {
     if (!createArticleForm) {
@@ -125,8 +81,9 @@ const CreateArticlePage: React.FC<{}> = () => {
       handleModuleError: (httpResponse) => {
         switch (httpResponse.data.code) {
           case "invalid_latex_syntax":
-            setRenderResult({
-              errorMsg: httpResponse.data.parameters?.cmdOutput + "",
+            Modal.error({
+              title: "Article creation error",
+              content: httpResponse.data.parameters?.cmdOutput + "",
             });
             return true;
           default:
@@ -194,91 +151,24 @@ const CreateArticlePage: React.FC<{}> = () => {
           </Col>
         </Row>
 
-        <Row
-          justify="start"
-          style={{ marginLeft: "23px", marginBottom: "20px" }}
-        >
-          <Col span={1}>
-            <Button
-              onClick={() => {
-                latexEditorService.clearUserInput();
-                setTex4ht({ latex: "" });
-              }}
-            >
-              Clear
-            </Button>
-          </Col>
-          <Col span={1}>
-            <Button onClick={() => render()}>Render</Button>
-          </Col>
-        </Row>
-
-        <Row justify="space-evenly">
-          <Col span={11}>
-            <Row>
-              <LatexEditor
-                withHighlight
-                value={tex4ht.configuration || ""}
-                onValueChange={(code) => {
-                  setTex4ht({ ...tex4ht, configuration: code });
-                  latexEditorService.saveConfiguration(code);
-                }}
-              />
-            </Row>
-            <Row style={{ paddingTop: 10 }}>
-              <LatexEditor
-                withHighlight
-                value={tex4ht.latex}
-                onValueChange={(code) => {
-                  setTex4ht({ ...tex4ht, latex: code });
-                  latexEditorService.saveLatex(code);
-                }}
-              />
-            </Row>
-          </Col>
-          <Col span={12}>
-            <Affix offsetTop={75}>{loadIframe(checksum, renderResult)}</Affix>
-          </Col>
-        </Row>
+        <LatexEditorWithRender
+          latexGetter={() => [tex4ht.latex, tex4ht.configuration || ""]}
+          onClear={() => {
+            latexEditorService.clearUserInput();
+            setTex4ht({ latex: "" });
+          }}
+          onConfigurationChange={(configuration) => {
+            setTex4ht({ ...tex4ht, configuration: configuration });
+            latexEditorService.saveConfiguration(configuration);
+          }}
+          onLatexChange={(latex) => {
+            setTex4ht({ ...tex4ht, latex: latex });
+            latexEditorService.saveLatex(latex);
+          }}
+        />
       </Spin>
     </>
   );
 };
-
-function loadIframe(
-  checksum: number,
-  renderResult: RenderResult | undefined,
-): React.ReactNode {
-  if (!renderResult) {
-    return <div></div>;
-  }
-
-  const heightPx: number = window.screen.height - 209;
-  if (renderResult.errorMsg) {
-    return (
-      <LatexEditor
-        value={renderResult.errorMsg.trim()}
-        style={{
-          fontFamily: '"Fira code", "Fira Mono", monospace',
-          fontSize: 16,
-          color: "black",
-          height: heightPx + "px",
-          overflow: "scroll",
-        }}
-      />
-    );
-  }
-
-  return (
-    <Iframe
-      className="previewArticle"
-      allowFullScreen
-      key={checksum + ""}
-      url={renderResult.url || ""}
-      height={heightPx + "px"}
-      width="100%"
-    />
-  );
-}
 
 export default WithAuthorization(CreateArticlePage);

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   getCreateArticleRoute,
   getCreateRoadMapRoute,
-} from "../module/mathsroadmap/route/MathsRoadMapRouteGetter";
+} from "../module/maths-road-map/route/MathsRoadMapRouteGetter";
 
 const items: MenuProps["items"] = [
   {

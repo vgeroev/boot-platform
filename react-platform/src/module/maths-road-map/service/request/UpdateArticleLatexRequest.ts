@@ -10,8 +10,8 @@ export interface UpdateArticleLatexRequestVariables {
 }
 
 export interface UpdateArticleLatexRequestData {
-  title?: string;
-  description?: string | null;
+  latex?: string;
+  configuration?: string | null;
 }
 
 export class UpdateArticleLatexRequest extends MathsRoadMapBaseRequest<

@@ -1,4 +1,14 @@
-import { Form, Input, Button, Row, Col, Spin, Divider, Switch } from "antd";
+import {
+  Form,
+  Input,
+  Button,
+  Row,
+  Col,
+  Spin,
+  Divider,
+  Switch,
+  FormInstance,
+} from "antd";
 import React from "react";
 import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
 import WithAuthorization from "../../../../hoc/authorized/WithAuthorization";
@@ -7,10 +17,15 @@ import { getArticleRoute } from "../../route/MathsRoadMapRouteGetter";
 import TextArea from "antd/es/input/TextArea";
 import { UpdateArticleRequest } from "../../service/request/UpdateArticleRequest";
 import { GetArticleRequest } from "../../service/request/GetArticleRequest";
+import LatexEditorWithRender from "../../component/latex-editor-with-render/LatexEditorWithRender";
+import { GetArticleLatexRequest } from "../../service/request/GetArticleLatexRequest";
+import { UpdateArticleLatexRequest } from "../../service/request/UpdateArticleLatexRequest";
 
 interface UpdateArticleForm {
-  title: string;
-  description: string | null;
+  title?: string;
+  description?: string | null;
+  latex?: string;
+  configuration?: string | null;
 }
 
 const UpdateArticlePage: React.FC<{}> = () => {
@@ -22,16 +37,20 @@ const UpdateArticlePage: React.FC<{}> = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const getArticleRequest: GetArticleRequest =
     useHttpRequest(GetArticleRequest);
+  const getArticleLatexRequest: GetArticleLatexRequest = useHttpRequest(
+    GetArticleLatexRequest,
+  );
   const updateArticleRequest: UpdateArticleRequest =
     useHttpRequest(UpdateArticleRequest);
+  const updateArticleLatexRequest: UpdateArticleLatexRequest = useHttpRequest(
+    UpdateArticleLatexRequest,
+  );
   const navigate = useNavigate();
   const [showUpdateLatexForm, setShowUpdateLatexForm] =
     React.useState<boolean>(false);
-  const switchUpdateForm = () => {
-    setShowUpdateLatexForm(!showUpdateLatexForm);
-  };
+  const [form] = Form.useForm();
 
-  React.useEffect(() => {
+  const articleGetter = () => {
     setLoading(true);
     getArticleRequest.exec({
       requestVariables: {
@@ -39,6 +58,7 @@ const UpdateArticlePage: React.FC<{}> = () => {
       },
       onSuccess: (response) => {
         const article = response.data.article;
+
         setUpdateArticleForm({
           title: article.title,
           description: article.description,
@@ -48,18 +68,69 @@ const UpdateArticlePage: React.FC<{}> = () => {
         setLoading(false);
       },
     });
-  }, []);
+  };
+  const articleLatexGetter = () => {
+    setLoading(true);
+    getArticleLatexRequest.exec({
+      requestVariables: {
+        id: identifier,
+      },
+      onSuccess: (response) => {
+        const articleLatex = response.data;
+        setUpdateArticleForm({
+          latex: articleLatex.latex,
+          configuration: articleLatex.configuration,
+        });
+      },
+      onFinally: () => {
+        setLoading(false);
+      },
+    });
+  };
+  const switchUpdateForm = () => {
+    setShowUpdateLatexForm(!showUpdateLatexForm);
+  };
 
-  const submit = () => {
-    if (!updateArticleForm) {
-      throw new Error("Update article form is undefined");
+  React.useEffect(() => {
+    if (showUpdateLatexForm) {
+      articleLatexGetter();
+    } else {
+      articleGetter();
     }
+  }, [showUpdateLatexForm]);
 
+  React.useEffect(() => {
+    form.setFieldsValue({
+      title: updateArticleForm?.title || "",
+      description: updateArticleForm?.description || "",
+    });
+  }, [form, updateArticleForm]);
+
+  const submitArticleUpdate = () => {
     setLoading(true);
     updateArticleRequest.exec({
       data: {
-        title: updateArticleForm.title,
-        description: updateArticleForm.description,
+        title: updateArticleForm?.title,
+        description: updateArticleForm?.description,
+      },
+      requestVariables: {
+        id: identifier,
+      },
+      onSuccess: (httpResponse) => {
+        navigate(getArticleRoute(httpResponse.data.article.id));
+      },
+      onFinally: () => {
+        setLoading(false);
+      },
+    });
+  };
+
+  const submitArticleLatexUpdate = () => {
+    setLoading(true);
+    updateArticleLatexRequest.exec({
+      data: {
+        latex: updateArticleForm?.latex,
+        configuration: updateArticleForm?.configuration,
       },
       requestVariables: {
         id: identifier,
@@ -79,11 +150,13 @@ const UpdateArticlePage: React.FC<{}> = () => {
 
   return (
     <>
+      <Divider orientation="center">Update article</Divider>
       <Spin delay={100} spinning={loading}>
         <Switch onChange={switchUpdateForm} />
         {!showUpdateLatexForm &&
           getUpdateForm(
-            submit,
+            form,
+            submitArticleUpdate,
             (value) =>
               setUpdateArticleForm({
                 title: value,
@@ -94,27 +167,53 @@ const UpdateArticlePage: React.FC<{}> = () => {
                 description: value,
                 title: updateArticleForm?.title || "",
               }),
-            updateArticleForm.title,
-            updateArticleForm.description || "",
           )}
+        {showUpdateLatexForm && (
+          <div style={{ marginTop: "20px" }}>
+            <Button
+              style={{ marginBottom: "20px", marginLeft: "23px" }}
+              type="primary"
+              onClick={submitArticleLatexUpdate}
+            >
+              Submit
+            </Button>
+            <LatexEditorWithRender
+              latexGetter={() => [
+                updateArticleForm.latex || "",
+                updateArticleForm.configuration || "",
+              ]}
+              onClear={() => {
+                setUpdateArticleForm({ latex: "" });
+              }}
+              onConfigurationChange={(configuration) => {
+                setUpdateArticleForm({
+                  ...updateArticleForm,
+                  configuration: configuration,
+                });
+              }}
+              onLatexChange={(latex) => {
+                setUpdateArticleForm({ ...updateArticleForm, latex: latex });
+              }}
+            />
+          </div>
+        )}
       </Spin>
     </>
   );
 };
 
 function getUpdateForm(
+  form: FormInstance<any>,
   onFinish: () => void,
   onChangeTitle: (a: string) => void,
   onChangeDescription: (a: string) => void,
-  initialTitle?: string,
-  initialDescription?: string,
 ): React.ReactElement {
   return (
     <>
-      <Divider orientation="center">Update article</Divider>
       <Row>
         <Col span={24}>
           <Form
+            form={form}
             name="submitForm"
             labelCol={{ span: 16 }}
             wrapperCol={{ span: 14 }}
@@ -123,10 +222,6 @@ function getUpdateForm(
             style={{ maxWidth: 1000 }}
             autoComplete="off"
             onFinish={onFinish}
-            initialValues={{
-              title: initialTitle,
-              description: initialDescription,
-            }}
           >
             <Form.Item<UpdateArticleForm>
               name="title"

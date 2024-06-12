@@ -3,7 +3,7 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import NotFound from "./component/notfound/NotFound";
 import BaseLayout from "./layout/BaseLayout";
 import { moduleRoutes as exerciseModuleRoutes } from "./module/exercises/route/ExercisesRouteGetter";
-import { moduleRoutes as mathsRoadMapModuleRoutes } from "./module/mathsroadmap/route/MathsRoadMapRouteGetter";
+import { moduleRoutes as mathsRoadMapModuleRoutes } from "./module/maths-road-map/route/MathsRoadMapRouteGetter";
 import Home from "./page/home/Home";
 import { ModuleRoute } from "./route/ModuleRoute";
 

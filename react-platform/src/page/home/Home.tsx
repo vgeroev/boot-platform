@@ -5,7 +5,7 @@ import ApplicationList, {
 } from "../../component/application/ApplicationList";
 import { useHttpRequest } from "../../hook/useHttpRequestHook";
 import { EXERCISE_SOURCE_LIST_PATH } from "../../module/exercises/route/ExercisesRouteGetter";
-import { getArticleListRoute } from "../../module/mathsroadmap/route/MathsRoadMapRouteGetter";
+import { getArticleListRoute } from "../../module/maths-road-map/route/MathsRoadMapRouteGetter";
 import { InitializedModulesRequest } from "../../service/request/InitializedModulesRequest";
 import { getMatrix } from "../../utils/GridUtils";
 
