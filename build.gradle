@@ -91,7 +91,7 @@ allprojects {
 
     bootJar {
         //launchScript()
-        archiveFileName = project.name + '.jar'
+        archiveFileName = project.name + '-' + project.version + '.jar'
         mainClass = 'org.vmalibu.modules.entrypoint.AppStarter'
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
