@@ -1,5 +1,6 @@
 package org.vmalibu.module.mathsroadmap.service.config;
 
+import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import java.net.URL;
 import java.nio.file.Path;
 
 @Service
+@Slf4j
 public class MathsRoadMapConfigServiceImpl implements MathsRoadMapConfigService {
 
     private final NginxConfig nginxConfig;
@@ -19,6 +21,7 @@ public class MathsRoadMapConfigServiceImpl implements MathsRoadMapConfigService 
                                          @Value("${maths-road-map.nginx.articles.preview.dir}") Path articlesPreviewDir,
                                          @Value("${maths-road-map.nginx.articles.dir}") Path articlesDir) {
         this.nginxConfig = buildNginxConfig(scheme, host, port, articlesPreviewDir, articlesDir);
+        log.info("Nginx config: {}", nginxConfig);
     }
 
     @Override

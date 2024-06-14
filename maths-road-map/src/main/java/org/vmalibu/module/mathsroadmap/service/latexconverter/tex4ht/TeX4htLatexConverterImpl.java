@@ -65,7 +65,9 @@ public class TeX4htLatexConverterImpl implements TeX4htLatexConverter {
     private static void exec(Path destinationDir,
                              Path latexPath,
                              Path configurationPath) throws IOException, PlatformException {
-        Process process = Runtime.getRuntime().exec(getCommand(destinationDir, latexPath, configurationPath));
+        String command = getCommand(destinationDir, latexPath, configurationPath);
+        log.debug("Running make4ht command {} ...", command);
+        Process process = Runtime.getRuntime().exec(command);
         try {
             process.waitFor(30, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
