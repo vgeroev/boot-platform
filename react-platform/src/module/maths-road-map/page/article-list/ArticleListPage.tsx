@@ -25,7 +25,7 @@ const INCREMENT_PAGE_SIZE = 20;
 type PagingFilter = {
   page: number;
   pageSize: number;
-  titlePrefix?: string;
+  searchText?: string;
 };
 
 function prettifyDescription(article: ArticleModel): string | null {
@@ -73,8 +73,8 @@ const ArticleListPage: React.FC<{}> = () => {
       sortField: "CREATED_AT",
       sortDirection: "DESC",
     };
-    if (pagingFilter.titlePrefix) {
-      requestParams.titlePrefix = pagingFilter.titlePrefix;
+    if (pagingFilter.searchText) {
+      requestParams.searchText = pagingFilter.searchText;
     }
 
     getArticleListRequest.exec({
@@ -90,8 +90,8 @@ const ArticleListPage: React.FC<{}> = () => {
 
   const loadMore =
     !loading &&
-    pagingFilter.pageSize < (articleListModel?.totalCount || 0) &&
-    pagingFilter.pageSize <= MAX_PAGE_SIZE - INCREMENT_PAGE_SIZE ? (
+      pagingFilter.pageSize < (articleListModel?.totalCount || 0) &&
+      pagingFilter.pageSize <= MAX_PAGE_SIZE - INCREMENT_PAGE_SIZE ? (
       <div
         style={{
           textAlign: "center",
@@ -126,7 +126,7 @@ const ArticleListPage: React.FC<{}> = () => {
             placeholder="Title"
             loading={loading}
             onSearch={(value) =>
-              setPagingFilter({ ...pagingFilter, titlePrefix: value })
+              setPagingFilter({ ...pagingFilter, searchText: value })
             }
           />
         </Col>
