@@ -1,39 +1,22 @@
 package org.vmalibu.module.mathsroadmap;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.entrypoint.AppStarter;
 
 @SpringBootTest(classes = AppStarter.class)
-@Testcontainers
+@Import(PostgresConfig.class)
 public class BaseTestClass {
-
-    private static final String DATABASE_NAME = "test-db";
 
     @Autowired
     private DatabaseCleanup databaseCleanup;
-
-    private static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:14.7")
-            .withDatabaseName(DATABASE_NAME);
-
-    @BeforeAll
-    static void beforeAll() {
-        postgres.start();
-    }
-
-    @BeforeAll
-    static void afterAll() {
-        postgres.stop();
-    }
 
     @BeforeEach
     public void cleanupDatabase() {
@@ -42,14 +25,11 @@ public class BaseTestClass {
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
-        registry.add("hibernate.dialect", postgres::getJdbcUrl);
-        registry.add("spring.datasource.url", () ->"jdbc:tc:postgresql:14.7:///" + DATABASE_NAME);
-        registry.add("spring.datasource.username", postgres::getUsername);
-        registry.add("spring.datasource.password", postgres::getPassword);
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
         registry.add("spring.jpa.properties.hibernate.show_sql", () -> "true");
         registry.add("spring.jpa.properties.hibernate.use_sql_comments", () -> "true");
         registry.add("spring.jpa.properties.hibernate.format_sql", () ->"true");
+        registry.add("jwkSetUri", () ->"http://stub");
     }
 
     protected UserSource getUserSource(String userId, String username) {
