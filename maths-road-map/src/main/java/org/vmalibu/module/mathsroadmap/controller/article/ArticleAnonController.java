@@ -49,7 +49,7 @@ public class ArticleAnonController {
         return articleService.findAll(
                 new ArticlePagingRequest.Builder(form.page, form.pageSize)
                         .withSort(form.sortField, form.sortDirection)
-                        .withTitlePrefix(form.titlePrefix)
+                        .withSearchText(form.searchText)
                         .withCreatorUsernamePrefix(form.creatorUsernamePrefix)
                         .build()
         );
@@ -57,11 +57,11 @@ public class ArticleAnonController {
 
     public static class ArticlePaginationForm extends PaginationForm {
 
-        static final String JSON_TITLE_PREFIX = "titlePrefix";
+        static final String JSON_SEARCH_TEXT = "searchText";
         static final String JSON_CREATOR_USERNAME_PREFIX = "creatorUsernamePrefix";
 
         final ArticleSortField sortField;
-        final String titlePrefix;
+        final String searchText;
         final String creatorUsernamePrefix;
 
         public ArticlePaginationForm(@NonNull Map<String, String> params) throws PlatformException {
@@ -72,7 +72,7 @@ public class ArticleAnonController {
             } else {
                 this.sortField = null;
             }
-            this.titlePrefix = params.getOrDefault(JSON_TITLE_PREFIX, null);
+            this.searchText = params.getOrDefault(JSON_SEARCH_TEXT, null);
             this.creatorUsernamePrefix = params.getOrDefault(JSON_CREATOR_USERNAME_PREFIX, null);
         }
 

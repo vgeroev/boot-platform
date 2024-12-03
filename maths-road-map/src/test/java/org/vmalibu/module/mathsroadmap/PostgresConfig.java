@@ -15,6 +15,7 @@ public class PostgresConfig {
     @ServiceConnection
     public PostgreSQLContainer<?> postgreSQLContainer() {
         return new PostgreSQLContainer<>("postgres:14.7")
+                .withUsername("username")
                 .withDatabaseName(DATABASE_NAME)
                 .withInitScript(INIT_SCRIPT_PATH);
     }

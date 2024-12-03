@@ -6,17 +6,17 @@ import org.vmalibu.modules.database.paging.PagingRequest;
 
 public class ArticlePagingRequest extends PagingRequest {
 
-    private final String titlePrefix;
+    private final String searchText;
     private final String creatorUsernamePrefix;
 
     public ArticlePagingRequest(@NonNull Builder builder) {
         super(builder);
-        this.titlePrefix = builder.titlePrefix;
+        this.searchText = builder.searchText;
         this.creatorUsernamePrefix = builder.creatorUsernamePrefix;
     }
 
-    public @Nullable String getTitlePrefix() {
-        return titlePrefix;
+    public @Nullable String getSearchText() {
+        return searchText;
     }
 
     public @Nullable String getCreatorUsernamePrefix() {
@@ -25,15 +25,15 @@ public class ArticlePagingRequest extends PagingRequest {
 
     public static class Builder extends PagingRequest.AbstractBuilder<Builder> {
 
-        private String titlePrefix;
+        private String searchText;
         private String creatorUsernamePrefix;
 
         public Builder(int page, int pageSize) {
             super(page, pageSize);
         }
 
-        public Builder withTitlePrefix(@Nullable String titlePrefix) {
-            this.titlePrefix = titlePrefix;
+        public Builder withSearchText(@Nullable String searchText) {
+            this.searchText = searchText;
             return self();
         }
 

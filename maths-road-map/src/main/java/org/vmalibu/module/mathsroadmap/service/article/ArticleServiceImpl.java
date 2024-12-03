@@ -1,8 +1,6 @@
 package org.vmalibu.module.mathsroadmap.service.article;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import static org.vmalibu.modules.utils.database.DatabaseFunctionNames.*;
 
 @Service
 public class ArticleServiceImpl implements ArticleService {
@@ -55,7 +55,7 @@ public class ArticleServiceImpl implements ArticleService {
         return domainObjectPagination.findAll(
                 pagingRequest,
                 buildSpecification(
-                        pagingRequest.getTitlePrefix(),
+                        pagingRequest.getSearchText(),
                         pagingRequest.getCreatorUsernamePrefix()
                 )
         );
@@ -162,7 +162,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private static String normalizeDescription(String description) {
-        return StringUtils.hasText(description) ? description.trim() : null;
+        // I'am using empty string instead of null because ('abc' || null) = null in PostgresSQL
+        return StringUtils.hasText(description) ? description.trim() : "";
     }
 
     private static Specification<DBArticle> buildSpecification(
@@ -173,7 +174,7 @@ public class ArticleServiceImpl implements ArticleService {
             List<Predicate> predicates = new ArrayList<>();
 
             if (titlePrefix != null) {
-                predicates.add(getPrefixPredicate(root, cb, DBArticle.Fields.title, titlePrefix));
+                predicates.add(getTitleAndDescriptionSearch(root, cb, titlePrefix));
             }
 
             if (creatorUsernamePrefix != null) {
@@ -182,6 +183,18 @@ public class ArticleServiceImpl implements ArticleService {
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
+    }
+
+    private static Predicate getTitleAndDescriptionSearch(
+            Root<DBArticle> root,
+            CriteriaBuilder cb,
+            String value
+    ) {
+        Path<String> title = root.get(DBArticle.DB_TITLE);
+        Path<String> description = root.get(DBArticle.DB_DESCRIPTION);
+        Expression<String> concat = cb.function(CONCAT_TRIPLE, String.class, title, cb.literal(' '), description);
+        Expression<Boolean> trgm = cb.function(PG_TRGM_CONTAINED_BY, Boolean.class, cb.literal(value), concat);
+        return cb.equal(trgm, true);
     }
 
     private static Predicate getPrefixPredicate(
