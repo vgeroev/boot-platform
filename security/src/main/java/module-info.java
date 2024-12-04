@@ -19,8 +19,12 @@ module org.vmalibu.module.security {
     requires spring.core;
     requires spring.web;
     requires spring.webmvc;
+    requires spring.data.jpa;
+    requires spring.data.commons;
+    requires spring.tx;
     requires jakarta.annotation;
     requires jakarta.persistence;
+    requires com.fasterxml.jackson.annotation;
     requires org.checkerframework.checker.qual;
 
     exports org.vmalibu.module.security.service.privilege;
