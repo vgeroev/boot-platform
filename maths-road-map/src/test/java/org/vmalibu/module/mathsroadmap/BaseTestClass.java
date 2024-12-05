@@ -7,9 +7,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.entrypoint.AppStarter;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 @SpringBootTest(classes = AppStarter.class)
 @Import(PostgresConfig.class)
@@ -32,25 +33,12 @@ public class BaseTestClass {
         registry.add("jwkSetUri", () ->"http://stub");
     }
 
-    protected UserSource getUserSource(String userId, String username) {
-        return new UserSource() {
-            @Override
-            public @NonNull String getUserId() {
-                return userId;
-            }
-
-            @Override
-            public @NonNull String getUsername() {
-                return username;
-            }
-        };
-    }
-
     protected UserSource getUserSource(String username) {
         return new UserSource() {
+
             @Override
-            public @NonNull String getUserId() {
-                return RandomStringUtils.randomAlphabetic(10);
+            public long getId() {
+                return ThreadLocalRandom.current().nextLong();
             }
 
             @Override

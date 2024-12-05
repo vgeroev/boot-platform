@@ -54,9 +54,9 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
     public @NonNull URI createPreviewByTeX4ht(@NonNull String latex,
                                               @Nullable String configuration,
                                               @NonNull UserSource userSource) {
-        String userId = userSource.getUserId();
-        String dirname = getPreviewDirname(userId);
-        articlePreviewXSync.execute(userId, () -> internalCreatePreviewPage(latex, configuration, dirname));
+        String username = userSource.getUsername();
+        String dirname = getPreviewDirname(username);
+        articlePreviewXSync.execute(username, () -> internalCreatePreviewPage(latex, configuration, dirname));
         return ArticleURIUtils.getArticlePreviewURI(getNginxURI(), dirname);
     }
 
@@ -76,8 +76,8 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
                                               @NonNull OptionalField<@NonNull String> latex,
                                               @NonNull OptionalField<@Nullable String> configuration,
                                               @NonNull UserSource userSource) {
-        String userId = userSource.getUserId();
-        return articlePreviewXSync.evaluate(userId, () -> internalUpdate(id, latex, configuration, userSource));
+        String username = userSource.getUsername();
+        return articlePreviewXSync.evaluate(username, () -> internalUpdate(id, latex, configuration, userSource));
     }
 
     @SneakyThrows
@@ -122,8 +122,8 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
                                          String latex,
                                          String configuration,
                                          UserSource userSource) throws PlatformException {
-        String userId = userSource.getUserId();
-        Path candidatePath = getCandidatePagePath(userId);
+        String username = userSource.getUsername();
+        Path candidatePath = getCandidatePagePath(username);
         try {
             createPage(latex, configuration, candidatePath);
             ArticleDTO articleDTO = articleGetter.get();
@@ -173,14 +173,14 @@ public class ArticlePageManagerImpl implements ArticlePageManager {
         tex4htLatexConverter.toHtml(latex, pagePath, configuration);
     }
 
-    private static String getPreviewDirname(String userId) {
-        return hashUserId(userId);
+    private static String getPreviewDirname(String username) {
+        return hashUserId(username);
     }
 
-    private static Path getCandidatePagePath(String userId) throws PlatformException {
+    private static Path getCandidatePagePath(String username) throws PlatformException {
         UUID uuid = UUID.randomUUID();
         try {
-            return Files.createTempDirectory("article-candidate-" + hashUserId(userId) + "-" + uuid);
+            return Files.createTempDirectory("article-candidate-" + hashUserId(username) + "-" + uuid);
         } catch (IOException e) {
             throw GeneralExceptionFactory.buildIOErrorException(e);
         }
