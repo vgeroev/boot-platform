@@ -4,7 +4,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 
 public interface UserSource {
 
-    @NonNull String getUserId();
+    long getId();
 
     @NonNull String getUsername();
 

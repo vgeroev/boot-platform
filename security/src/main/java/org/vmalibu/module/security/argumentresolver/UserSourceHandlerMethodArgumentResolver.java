@@ -4,16 +4,22 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import org.vmalibu.module.security.authorization.source.UserSource;
+import org.vmalibu.module.security.authorization.source.builder.UserSourceBuilder;
 
-import java.util.Objects;
+import java.util.List;
 
 public class UserSourceHandlerMethodArgumentResolver implements HandlerMethodArgumentResolver {
+
+    private final List<UserSourceBuilder> builders;
+
+    public UserSourceHandlerMethodArgumentResolver(@NonNull List<UserSourceBuilder> userSourceBuilders) {
+        this.builders = List.copyOf(userSourceBuilders);
+    }
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
@@ -26,28 +32,16 @@ public class UserSourceHandlerMethodArgumentResolver implements HandlerMethodArg
                                   NativeWebRequest webRequest,
                                   WebDataBinderFactory binderFactory) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return getUserSource(authentication);
+        return buildUserSource(authentication);
     }
 
-    // TODO Kostyl' :) Need to be refactored.
-    private UserSource getUserSource(Authentication authentication) {
-        if (!(authentication instanceof JwtAuthenticationToken jwtAuthenticationToken)) {
-            throw new IllegalStateException("Unexpected authentication " + authentication.getClass());
+    private UserSource buildUserSource(Authentication authentication) {
+        for (UserSourceBuilder builder : builders) {
+            if (builder.supports(authentication)) {
+                return builder.build(authentication);
+            }
         }
 
-        return new UserSource() {
-            @Override
-            public @NonNull String getUserId() {
-                return authentication.getName();
-            }
-
-            @Override
-            public @NonNull String getUsername() {
-                return Objects.requireNonNull(
-                        jwtAuthenticationToken.getTokenAttributes().get("preferred_username")
-                ).toString();
-            }
-
-        };
+        throw new IllegalStateException("Unexpected authentication: " + authentication.getClass());
     }
 }

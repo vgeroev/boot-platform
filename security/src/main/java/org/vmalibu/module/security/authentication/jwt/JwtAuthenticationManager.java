@@ -23,11 +23,11 @@ import org.vmalibu.module.security.access.AbstractPrivilege;
 import org.vmalibu.module.security.access.AccessOp;
 import org.vmalibu.module.security.access.PrivilegeAuthority;
 import org.vmalibu.module.security.service.privilege.PrivilegeGetter;
+import org.vmalibu.module.security.service.user.UserDTO;
+import org.vmalibu.module.security.service.user.UserService;
+import org.vmalibu.module.security.utils.JwtUtils;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class JwtAuthenticationManager implements AuthenticationManager {
@@ -37,12 +37,15 @@ public class JwtAuthenticationManager implements AuthenticationManager {
 
     private final PrivilegeGetter privilegeGetter;
     private final JwtAuthenticationProvider jwtAuthenticationProvider;
+    private final UserService userService;
 
     @Autowired
     public JwtAuthenticationManager(@Value("${jwkSetUri}") String jwkUri,
-                                    @NonNull PrivilegeGetter privilegeGetter) {
+                                    @NonNull PrivilegeGetter privilegeGetter,
+                                    @NonNull UserService userService) {
         this.privilegeGetter = privilegeGetter;
         this.jwtAuthenticationProvider = buildJwtAuthenticationProvider(buildJwtDecoder(jwkUri));
+        this.userService = userService;
     }
 
     @Override
@@ -59,10 +62,20 @@ public class JwtAuthenticationManager implements AuthenticationManager {
                 }
             }
 
-            return new JwtAuthenticationToken(
-                    jwtAuthenticationToken.getToken(),
+            Jwt jwt = jwtAuthenticationToken.getToken();
+            String username = Objects.requireNonNull(JwtUtils.retrieveUsername(jwt));
+            UserDTO userDTO = userService.findByUsername(username);
+            if (userDTO == null) {
+                throw new AuthenticationServiceException("There is no user with such username: " + username);
+            }
+
+            return new JwtAuthenticationTokenExt(
+                    jwt,
                     privilegeAuthorities,
-                    jwtAuthenticationToken.getName());
+                    jwtAuthenticationToken.getName(),
+                    userDTO.id(),
+                    username
+            );
         } else {
             throw new AuthenticationServiceException("Unknown authentication token: " + newAuthentication);
         }

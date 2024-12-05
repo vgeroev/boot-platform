@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.vmalibu.module.security.argumentresolver.UserSourceHandlerMethodArgumentResolver;
+import org.vmalibu.module.security.authorization.source.builder.AppUserSourceBuilder;
+import org.vmalibu.module.security.authorization.source.builder.JwtUserSourceBuilder;
 import org.vmalibu.modules.web.configuration.MainWebConfiguration;
 
 import java.util.List;
@@ -15,7 +17,14 @@ public class AuthWebConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new UserSourceHandlerMethodArgumentResolver());
+        resolvers.add(
+                new UserSourceHandlerMethodArgumentResolver(
+                        List.of(
+                                new AppUserSourceBuilder(),
+                                new JwtUserSourceBuilder()
+                        )
+                )
+        );
     }
 }
 
