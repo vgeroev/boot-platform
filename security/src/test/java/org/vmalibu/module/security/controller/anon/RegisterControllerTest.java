@@ -15,10 +15,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
+import org.vmalibu.module.security.SecurityModuleConsts;
 import org.vmalibu.module.security.WebMvcTestBaseClass;
 import org.vmalibu.module.security.service.user.UserDTO;
 import org.vmalibu.module.security.service.user.UserService;
-import org.vmalibu.modules.PlatformConsts;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -161,6 +161,6 @@ class RegisterControllerTest extends WebMvcTestBaseClass {
     }
 
     private static String path(String relPath) {
-        return PlatformConsts.REST_ANON_PREFIX + relPath;
+        return SecurityModuleConsts.REST_ANON_PREFIX + relPath;
     }
 }

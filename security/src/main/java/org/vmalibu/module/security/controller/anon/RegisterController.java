@@ -7,14 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.vmalibu.module.security.SecurityModuleConsts;
 import org.vmalibu.module.security.service.user.UserDTO;
 import org.vmalibu.module.security.service.user.UserService;
-import org.vmalibu.modules.PlatformConsts;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 @RestController
-@RequestMapping(PlatformConsts.REST_ANON_PREFIX)
+@RequestMapping(SecurityModuleConsts.REST_ANON_PREFIX)
 @AllArgsConstructor
 public class RegisterController {
 
