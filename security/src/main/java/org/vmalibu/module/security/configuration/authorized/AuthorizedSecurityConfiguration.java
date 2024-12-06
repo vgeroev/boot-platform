@@ -30,6 +30,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.vmalibu.module.security.authentication.jwt.JwtAuthenticationManager;
 import org.vmalibu.module.security.authorization.manager.CustomAuthorizationManager;
 import org.vmalibu.module.security.configuration.authorized.flow.AuthFlow;
+import org.vmalibu.module.security.configuration.authorized.flow.AuthFlowRequestMatcher;
 import org.vmalibu.module.security.configuration.authorized.flow.JwtAuthFlow;
 import org.vmalibu.module.security.configuration.authorized.flow.SessionBasedAuthFlow;
 

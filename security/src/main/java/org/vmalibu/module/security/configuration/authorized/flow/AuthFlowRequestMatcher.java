@@ -1,12 +1,10 @@
-package org.vmalibu.module.security.configuration.authorized;
+package org.vmalibu.module.security.configuration.authorized.flow;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.vmalibu.module.security.configuration.authorized.flow.AuthFlow;
-import org.vmalibu.module.security.configuration.authorized.flow.AuthFlowResolver;
 
 import java.util.List;
 import java.util.Set;

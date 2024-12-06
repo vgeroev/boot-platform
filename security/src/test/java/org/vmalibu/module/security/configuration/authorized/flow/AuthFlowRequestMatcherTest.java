@@ -9,7 +9,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.web.firewall.RequestRejectedException;
 import org.springframework.security.web.util.matcher.RequestMatcher;
-import org.vmalibu.module.security.configuration.authorized.AuthFlowRequestMatcher;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
