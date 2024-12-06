@@ -4,6 +4,7 @@ import NotFound from "./component/notfound/NotFound";
 import BaseLayout from "./layout/BaseLayout";
 import { moduleRoutes as exerciseModuleRoutes } from "./module/exercises/route/ExercisesRouteGetter";
 import { moduleRoutes as mathsRoadMapModuleRoutes } from "./module/maths-road-map/route/MathsRoadMapRouteGetter";
+import { moduleRoutes as securityRoutes } from "./module/security/route/SecurityRouteGetter";
 import Home from "./page/home/Home";
 import { ModuleRoute } from "./route/ModuleRoute";
 
@@ -23,12 +24,14 @@ function getModuleRoutes(
 
 function App() {
   let routes: Array<React.ReactElement> = [];
+  const homeRoute = "/home";
   routes.push(
-    <Route path="/home" element={<BaseLayout component={<Home />} />} />,
-    <Route path="/" element={<Navigate to="/home" replace />} />,
+    <Route path={homeRoute} element={<BaseLayout component={<Home />} />} />,
+    <Route path="/" element={<Navigate to={homeRoute} replace />} />,
   );
   routes = routes
     .concat(getModuleRoutes(exerciseModuleRoutes))
+    .concat(getModuleRoutes(securityRoutes))
     .concat(getModuleRoutes(mathsRoadMapModuleRoutes));
 
   routes.push(

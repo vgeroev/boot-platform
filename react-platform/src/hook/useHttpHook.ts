@@ -19,15 +19,15 @@ const httpCall = <M, D = any>(
       model,
     }: HttpRequestHookProps<D>): Promise<HttpResponse<M | ModuleError>> => {
       let headers: any;
-      if (authorized) {
-        const token = authState?.user?.access_token;
-        if (!token) {
-          authState.signinRedirect();
-        }
-        headers = { Authorization: `Bearer ${token}` };
-      } else {
-        headers = undefined;
-      }
+      // if (authorized) {
+      //   const token = authState?.user?.access_token;
+      //   if (!token) {
+      //     authState.signinRedirect();
+      //   }
+      //   headers = { Authorization: `Bearer ${token}` };
+      // } else {
+      //   headers = undefined;
+      // }
 
       const requestConfig: AxiosRequestConfig = {
         url: request.url,
@@ -122,7 +122,7 @@ export class ModuleError {
     private readonly _code: string,
     private readonly _parameters?: Record<string, unknown>,
     private readonly _message?: string,
-  ) {}
+  ) { }
   public get message(): string | undefined {
     return this._message;
   }

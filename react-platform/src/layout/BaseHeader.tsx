@@ -3,8 +3,16 @@ import React from "react";
 import { Header } from "antd/es/layout/layout";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import LoggedUserInfo from "./LoggedUserInfo";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Spinner from "../component/spinner/Spinner";
+import {
+  getLoginRoute,
+  getRegisterRoute,
+} from "../module/security/route/SecurityRoutes";
+import { useHttpRequest } from "../hook/useHttpRequestHook";
+import { GetLoggedInUser } from "../module/security/service/request/GetLoggedInUserRequest";
+import { UserModel } from "../module/security/model/UserModel";
+import { LogoutRequest } from "../module/security/service/request/LogoutRequest";
 
 const hStyle: React.CSSProperties = {
   textAlign: "center",
@@ -38,30 +46,52 @@ function getHeaderTitle(pathname: string): string {
 }
 
 const BaseHeader: React.FC<{}> = () => {
-  const auth: AuthContextProps = useAuth();
   const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const getLoggedInUserRequest = useHttpRequest(GetLoggedInUser);
+  const logoutRequest = useHttpRequest(LogoutRequest);
+  const [loggedInUser, setLoggedInUser] = React.useState<UserModel | undefined>(
+    undefined,
+  );
 
-  if (auth.isLoading || auth.error) {
-    return <Spinner />;
-  } else if (auth.error) {
-    console.error("Auth error", auth.error);
-    return <Alert message={auth.error} type="error" showIcon />;
-  }
+  React.useEffect(() => {
+    getLoggedInUserRequest.exec({
+      onCompletion: (response) => {
+        const status = response.status;
+        if (status === 200) {
+          setLoggedInUser(UserModel.parse(response.data));
+        } else {
+          console.log("Failed to fetch user ", response);
+          setLoggedInUser(undefined);
+        }
+      },
+    });
+  }, []);
 
   let authStatusBar: React.ReactElement;
-  if (auth.isAuthenticated) {
-    const username: string = auth.user?.profile.preferred_username || "";
-    const onLogout = () => {
-      auth.removeUser();
-      auth.signoutRedirect();
-    };
-
-    authStatusBar = <LoggedUserInfo username={username} onLogout={onLogout} />;
+  if (loggedInUser) {
+    authStatusBar = (
+      <LoggedUserInfo
+        username={loggedInUser.username}
+        onLogout={() => {
+          logoutRequest.exec({
+            onCompletion: () => {
+              navigate(getLoginRoute());
+            },
+          });
+        }}
+      />
+    );
   } else {
     authStatusBar = (
-      <Button type="primary" onClick={() => void auth.signinRedirect()}>
-        Log in
-      </Button>
+      <>
+        <Button type="primary" onClick={() => navigate(getLoginRoute())}>
+          Log in
+        </Button>
+        <Button type="default" onClick={() => navigate(getRegisterRoute())}>
+          Sign up
+        </Button>
+      </>
     );
   }
 

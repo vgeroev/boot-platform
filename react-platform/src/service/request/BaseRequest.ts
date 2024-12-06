@@ -1,5 +1,4 @@
 import { Modal } from "antd";
-import { AuthContextProps } from "react-oidc-context";
 import {
   HttpCaller,
   HttpCallerFactory,
@@ -9,8 +8,9 @@ import {
   ModuleError,
 } from "../../hook/useHttpHook";
 import { BaseModel, IModelParser } from "../../model/BaseModel";
+import { getLoginRoute } from "../../module/security/route/SecurityRoutes";
 
-export interface RequestResult<T extends BaseModel | ModuleError> {
+export interface RequestResult<T extends BaseModel | ModuleError | any> {
   status: number;
   data: T;
 }
@@ -22,6 +22,7 @@ export interface ExecOptions<M extends BaseModel, D = any, R = any, P = any> {
   onSuccess?: (httpResponse: RequestResult<M>) => void;
   handleModuleError?: (httpResponse: RequestResult<ModuleError>) => boolean;
   onFinally?: () => void;
+  onCompletion?: (httpResponse: RequestResult<any>) => void;
 }
 
 export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
@@ -42,10 +43,11 @@ export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
     onSuccess,
     handleModuleError,
     onFinally,
+    onCompletion,
   }: ExecOptions<M, D>): void {
     let props: HttpRequestHookProps = {
       request: {
-        ...this.getHttpRequest(requestVariables),
+        ...this.constructHttpRequest(requestVariables),
         params: requestParams,
       },
       model: this.modelParser,
@@ -57,12 +59,20 @@ export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
     const promise: Promise<void> = this.httpCaller
       .exec(props)
       .then((httpResponse) => {
-        if (httpResponse.httpStatus === 401) {
-          const auth: AuthContextProps = this.httpCaller.authState;
-          auth.signinRedirect();
+        const response: ModuleError | M | undefined = httpResponse.data;
+        if (onCompletion) {
+          onCompletion({ status: httpResponse.httpStatus, data: response });
+          return;
         }
 
-        const response: ModuleError | M | undefined = httpResponse.data;
+        if (
+          httpResponse.httpStatus === 401 ||
+          httpResponse.httpStatus === 403
+        ) {
+          window.location.href = getLoginRoute();
+          return;
+        }
+
         if (!response) {
           throw new Error("No response in " + httpResponse);
         }
@@ -101,7 +111,7 @@ export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
 
   public abstract getRelativeApiPath(requestVariables?: R): string;
 
-  private getHttpRequest(requestVariables?: R): HttpRequest {
+  public constructHttpRequest(requestVariables?: R): HttpRequest {
     const authPath: string = this.isAuthorized() ? "authorized" : "anon";
     return {
       method: this.getHttpRequestMethod(),
@@ -111,7 +121,7 @@ export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
 }
 
 export interface IRequestBuilder {
-  new (...args: any[]): any;
+  new(...args: any[]): any;
   build(httpCallerFactory: HttpCallerFactory): InstanceType<this>;
 }
 
@@ -120,7 +130,7 @@ export class RequestFactory<
   I extends IRequestBuilder,
   R extends BaseRequest<M> = InstanceType<I>,
 > {
-  constructor(private readonly request: I) {}
+  constructor(private readonly request: I) { }
 
   public build(httpCallerFactory: HttpCallerFactory): R {
     return this.request.build(httpCallerFactory);
