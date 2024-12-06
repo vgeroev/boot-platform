@@ -63,11 +63,6 @@ public class AuthorizedSecurityConfiguration {
         this.passwordEncoder = passwordEncoder;
     }
 
-//    @Bean
-//    public MapSessionRepository sessionRepository() {
-//        return new MapSessionRepository(new ConcurrentHashMap<>());
-//    }
-
     @Bean
     @Order(1)
     SecurityFilterChain sessionBasedFilterChain(HttpSecurity http) throws Exception {

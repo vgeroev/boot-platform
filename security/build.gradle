@@ -31,6 +31,10 @@ configurations {
     test_integrationCompileOnly.extendsFrom testCompileOnly
 }
 
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
 dependencies {
     implementation project(":modules")
 
