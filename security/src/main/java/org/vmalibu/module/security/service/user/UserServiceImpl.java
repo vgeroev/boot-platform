@@ -11,8 +11,6 @@ import org.vmalibu.module.security.database.domainobject.DBUser;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
-import java.util.Optional;
-
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -47,8 +45,8 @@ public class UserServiceImpl implements UserService {
     }
 
     private void checkUsernameUniqueness(String username) throws PlatformException {
-        Optional<DBUser> byUsername = userDAO.findByUsername(username);
-        if (byUsername.isPresent()) {
+        boolean exists = userDAO.isExistByUsername(username);
+        if (exists) {
             throw GeneralExceptionFactory.buildNotUniqueDomainObjectException(DBUser.class, DBUser.DB_USERNAME, username);
         }
     }

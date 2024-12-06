@@ -16,6 +16,9 @@ public interface UserDAO extends PaginatedDomainObjectRepository<DBUser> {
     @Query("from DBUser where username = :username")
     Optional<DBUser> findByUsername(@Param("username") String username);
 
+    @Query("select count(u.id) > 0 from DBUser u where u.username = :username")
+    boolean isExistByUsername(@Param("username") String username);
+
     @NonNull
     default DBUser checkExistenceAndGet(long id) throws PlatformException {
         return PaginatedDomainObjectRepository.super.checkExistenceAndGet(id, DBUser.class);
