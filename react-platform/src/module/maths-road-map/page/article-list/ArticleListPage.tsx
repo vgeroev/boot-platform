@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
 import { ArticleListModel } from "../../model/ArticleListModel";
 import { ArticleModel } from "../../model/ArticleModel";
+import { ArticleWithCreatorModel } from "../../model/ArticleWithCreatorModel";
 import {
   getArticleRoute,
   getRoadMapListRoute,
@@ -41,8 +42,8 @@ function prettifyDescription(article: ArticleModel): string | null {
   return description.slice(0, 255) + "...";
 }
 
-function getArticleMeta(article: ArticleModel): string {
-  const baseMetaMsg: string = `${article.creatorUsername}, ${article.createdAt.toString().split("T")[0]}`;
+function getArticleMeta(article: ArticleWithCreatorModel): string {
+  const baseMetaMsg: string = `${article.creator.username}, ${article.createdAt.toString().split("T")[0]}`;
   if (article.updatedAt && article.createdAt !== article.updatedAt) {
     return (
       baseMetaMsg + ` (updated: ${article.updatedAt.toString().split("T")[0]})`

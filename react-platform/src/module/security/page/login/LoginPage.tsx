@@ -1,6 +1,6 @@
 import { Button, Form, FormProps, Input, Modal, Spin, Typography } from "antd";
 import React from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
 import { LoginForm, LoginRequest } from "../../service/request/LoginRequest";
 import "./styles.css";
@@ -14,7 +14,6 @@ const LoginPage: React.FC<{}> = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const loginRequest: LoginRequest = useHttpRequest(LoginRequest);
   const navigate = useNavigate();
-  const location = useLocation();
 
   const submit: FormProps<FieldType>["onFinish"] = (values) => {
     const username: string | undefined = values.username?.trim();

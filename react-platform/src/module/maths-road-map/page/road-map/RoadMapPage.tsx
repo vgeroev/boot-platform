@@ -44,7 +44,7 @@ const RoadMapPage: React.FC<{}> = () => {
           <Title level={2}>{roadMap?.title}</Title>
         </Col>
       </Row>
-      <Title level={5}>{roadMap?.creatorUsername}</Title>
+      <Title level={5}>{roadMap?.creator.username}</Title>
       <Title level={5}>{roadMap?.createdAt.toUTCString()}</Title>
       {roadMap?.description}
       <Divider>Articles tree</Divider>

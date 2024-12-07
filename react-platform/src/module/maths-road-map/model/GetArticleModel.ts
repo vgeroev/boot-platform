@@ -1,9 +1,9 @@
 import { BaseModel } from "../../../model/BaseModel";
-import { ArticleModel } from "./ArticleModel";
+import { ArticleWithCreatorModel } from "./ArticleWithCreatorModel";
 
 export class GetArticleModel extends BaseModel {
-    public get article(): ArticleModel {
-        return this.getModel(ArticleModel, "article");
+    public get article(): ArticleWithCreatorModel {
+        return this.getModel(ArticleWithCreatorModel, "article");
     }
     public get url(): string {
         return this.getString("url");

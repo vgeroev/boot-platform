@@ -1,7 +1,7 @@
 import { BaseModel } from "../../../model/BaseModel";
 import { UserModel } from "../../security/model/UserModel";
 
-export class RoadMapModel extends BaseModel {
+export class ArticleWithCreatorModel extends BaseModel {
   public get title(): string {
     return this.getString("title");
   }
@@ -13,7 +13,7 @@ export class RoadMapModel extends BaseModel {
   }
 
   public get creator(): UserModel {
-    return this.getModel(UserModel, "creator");
+    return this.getModel<UserModel>(UserModel, "creator");
   }
 
   public get createdAt(): Date {
@@ -24,7 +24,7 @@ export class RoadMapModel extends BaseModel {
     return this.getDate("updatedAt");
   }
 
-  public static parse(data: any): RoadMapModel {
-    return new RoadMapModel(data);
+  public static parse(data: any): ArticleWithCreatorModel {
+    return new ArticleWithCreatorModel(data);
   }
 }

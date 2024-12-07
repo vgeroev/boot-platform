@@ -58,7 +58,7 @@ const ArticlePage: React.FC<{}> = () => {
           </Title>
         </Col>
       </Row>
-      <Title level={5}>{getArticleModel?.article.creatorUsername}</Title>
+      <Title level={5}>{getArticleModel?.article.creator.username}</Title>
       <Title level={5}>
         {getArticleModel?.article.createdAt.toUTCString()}
       </Title>

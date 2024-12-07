@@ -42,7 +42,7 @@ function prettifyDescription(roadMapModel: RoadMapModel): string | null {
 }
 
 function getRoadMapMeta(roadMap: RoadMapModel): string {
-  const baseMetaMsg: string = `${roadMap.creatorUsername}, ${roadMap.createdAt.toString().split("T")[0]}`;
+  const baseMetaMsg: string = `${roadMap.creator.username}, ${roadMap.createdAt.toString().split("T")[0]}`;
   if (roadMap.updatedAt && roadMap.createdAt !== roadMap.updatedAt) {
     return (
       baseMetaMsg + ` (updated: ${roadMap.updatedAt.toString().split("T")[0]})`
@@ -90,8 +90,8 @@ const RoadMapListPage: React.FC<{}> = () => {
 
   const loadMore =
     !loading &&
-    pagingFilter.pageSize < (roadMapListModel?.totalCount || 0) &&
-    pagingFilter.pageSize <= MAX_PAGE_SIZE - INCREMENT_PAGE_SIZE ? (
+      pagingFilter.pageSize < (roadMapListModel?.totalCount || 0) &&
+      pagingFilter.pageSize <= MAX_PAGE_SIZE - INCREMENT_PAGE_SIZE ? (
       <div
         style={{
           textAlign: "center",
