@@ -31,6 +31,7 @@ module org.vmalibu.modules {
     requires spring.aspects;
     requires spring.aop;
     requires spring.tx;
+    requires liquibase.core;
     requires com.zaxxer.hikari;
     requires org.hibernate.orm.core;
     requires org.hibernate.commons.annotations;
@@ -59,6 +60,7 @@ module org.vmalibu.modules {
     exports org.vmalibu.modules.module;
     exports org.vmalibu.modules.graph;
     exports org.vmalibu.modules.controller.anon.platform;
+    exports org.vmalibu.modules.database.changelog;
     exports org.vmalibu.modules.database.domainobject;
     exports org.vmalibu.modules.database.converter;
     exports org.vmalibu.modules.database.domainobject.listener;

@@ -6,10 +6,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.vmalibu.modules.graph.GraphTraverser;
 import org.vmalibu.modules.module.AbstractModule;
 import org.vmalibu.modules.module.exception.PlatformException;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -85,28 +85,13 @@ public class PlatformManagerImpl implements PlatformManager {
     }
 
     private void checkAndSortModuleDependencies() {
-        List<AbstractModule<?>> result = new ArrayList<>();
-        while (result.size() != modules.size()) {
-            AbstractModule<?> next = null;
-            for (AbstractModule<?> module : modules) {
-                if (!result.contains(module)) {
-                    boolean isNext = modules.stream().allMatch(
-                            m -> !module.getConfig().getDependencies().contains(m.getClass()) || result.contains(m));
-                    if (isNext) {
-                        next = module;
-                        break;
-                    }
-                }
-            }
-
-            if (next == null) {
-                throw new IllegalStateException("Modules have circular dependencies");
-            }
-
-            result.add(next);
-        }
-
-        modules = Collections.unmodifiableList(result);
+        modules = Collections.unmodifiableList(
+                GraphTraverser.simpleDependencyTreeConstructor(
+                        modules,
+                        (n1, n2) -> n1.getConfig().getDependencies().contains(n2.getClass()),
+                        () -> new IllegalStateException("Modules have circular dependencies")
+                )
+        );
     }
 
 }

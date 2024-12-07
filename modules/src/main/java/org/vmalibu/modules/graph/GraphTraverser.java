@@ -4,7 +4,9 @@ import lombok.experimental.UtilityClass;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @UtilityClass
 public class GraphTraverser {
@@ -15,6 +17,40 @@ public class GraphTraverser {
     ) {
         DepthIterator<N> iterator = new DepthIterator<>(nodesGetter, root);
         return new NodeIterable<>(iterator);
+    }
+
+    public static <N, X extends Throwable> @NonNull List<N> simpleDependencyTreeConstructor(
+            @NonNull Collection<N> graph,
+            @NonNull BiPredicate<N, N> dependencyResolver,
+            @NonNull Supplier<X> onCircularDependencies) throws X {
+        List<N> result = new ArrayList<>();
+        while (result.size() != graph.size()) {
+            N next = null;
+            for (N node : graph) {
+                if (!result.contains(node)) {
+                    boolean isNext = graph.stream()
+                            .allMatch(n -> !dependencyResolver.test(node, n) || result.contains(n));
+                    if (isNext) {
+                        next = node;
+                        break;
+                    }
+                }
+            }
+
+            if (next == null) {
+                throw onCircularDependencies.get();
+            }
+
+            result.add(next);
+        }
+
+        return result;
+    }
+
+    public static <N> @NonNull List<N> simpleDependencyTreeConstructor(
+            @NonNull Collection<N> graph,
+            @NonNull BiPredicate<N, N> dependencyResolver) {
+        return simpleDependencyTreeConstructor(graph, dependencyResolver, () -> new IllegalStateException("There is a circular dependency"));
     }
 
     public static <I, N extends GraphNode<I>> @NonNull List<N> getFirstCycle(
@@ -57,6 +93,14 @@ public class GraphTraverser {
 
         DepthIterator(Function<N, Iterable<N>> nodesGetter, N root) {
             super(new LinkedList<>(), Deque::pollLast, nodesGetter, root);
+        }
+
+    }
+
+    private static class BreadthIterator<N> extends GraphIterator<N, Deque<N>> {
+
+        BreadthIterator(Function<N, Iterable<N>> nodesGetter, N root) {
+            super(new LinkedList<>(), Deque::pollFirst, nodesGetter, root);
         }
 
     }
