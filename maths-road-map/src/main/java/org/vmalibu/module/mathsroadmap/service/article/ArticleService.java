@@ -13,6 +13,8 @@ public interface ArticleService {
 
     @Nullable ArticleDTO findArticle(long id);
 
+    @Nullable ArticleWithCreatorDTO findWithCreator(long id);
+
     @Nullable ArticleLatexDTO findArticleLatex(long id);
 
     @NonNull PaginatedDto<ArticleListElement> findAll(@NonNull ArticlePagingRequest pagingRequest);

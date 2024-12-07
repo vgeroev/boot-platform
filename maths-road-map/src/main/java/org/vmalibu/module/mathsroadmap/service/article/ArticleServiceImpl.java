@@ -57,6 +57,13 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional(readOnly = true)
+    public @Nullable ArticleWithCreatorDTO findWithCreator(long id) {
+        Optional<DBArticle> oArticle = articleDAO.findArticleWithCreator(id);
+        return oArticle.map(ArticleWithCreatorDTO::from).orElse(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public @NonNull PaginatedDto<ArticleListElement> findAll(@NonNull ArticlePagingRequest pagingRequest) {
         return domainObjectPagination.findAll(
                 pagingRequest,

@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface RoadMapDAO extends PaginatedDomainObjectRepository<DBRoadMap> {
 
     @Query("from DBRoadMap r join fetch r.creator where r.id = :id")
-    Optional<DBRoadMap> findRoadMapWithUser(@Param("id") long id);
+    Optional<DBRoadMap> findWithCreator(@Param("id") long id);
 
     @NonNull
     default DBRoadMap checkExistenceAndGet(long id) throws PlatformException {

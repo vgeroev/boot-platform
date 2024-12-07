@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
-import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleService;
+import org.vmalibu.module.mathsroadmap.service.article.ArticleWithCreatorDTO;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListElement;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticleSortField;
@@ -30,15 +30,15 @@ public class ArticleAnonController {
 
     @GetMapping("/article/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ArticleResponse getArticle(
+    public ArticleWithCreatorResponse getArticle(
             @PathVariable("id") long id
     ) throws PlatformException {
-        ArticleDTO article = articleService.findArticle(id);
+        ArticleWithCreatorDTO article = articleService.findWithCreator(id);
         if (article == null) {
             throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DBArticle.class, id);
         }
         URI articleURI = articlePageManager.getArticleURI(article.id());
-        return new ArticleResponse(article, articleURI.toString());
+        return new ArticleWithCreatorResponse(article, articleURI.toString());
     }
 
     @GetMapping("/article/list")

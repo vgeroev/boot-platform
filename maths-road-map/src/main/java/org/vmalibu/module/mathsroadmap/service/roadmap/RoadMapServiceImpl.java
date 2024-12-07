@@ -108,13 +108,11 @@ public class RoadMapServiceImpl implements RoadMapService {
     @Override
     @Transactional(readOnly = true, rollbackFor = PlatformException.class)
     public @NonNull RoadMapTreeDTO getTree(long id) throws PlatformException {
+        DBRoadMap roadMap = roadMapDAO.findWithCreator(id)
+                .orElseThrow(() -> GeneralExceptionFactory.buildNotFoundDomainObjectException(DBRoadMap.class, id));
         List<DBRoadMapTreeEdge> tree = roadMapTreeEdgeDAO.findTree(id);
-        DBRoadMap roadMap;
         if (tree.isEmpty()) {
-            roadMap = roadMapDAO.checkExistenceAndGet(id);
-            return new RoadMapTreeDTO(RoadMapDTO.from(roadMap), List.of(), List.of());
-        } else {
-            roadMap = tree.iterator().next().getRoadMap();
+            return new RoadMapTreeDTO(RoadMapWithCreatorDTO.from(roadMap), List.of(), List.of());
         }
 
         return buildTree(roadMap, tree);
@@ -125,7 +123,8 @@ public class RoadMapServiceImpl implements RoadMapService {
     public @NonNull RoadMapTreeDTO replaceTree(long id,
                                                @NonNull Set<ArticleEdge> articleEdges,
                                                @NonNull UserSource userSource) throws PlatformException {
-        DBRoadMap roadMap = roadMapDAO.checkExistenceAndGet(id);
+        DBRoadMap roadMap = roadMapDAO.findWithCreator(id)
+                .orElseThrow(() -> GeneralExceptionFactory.buildNotFoundDomainObjectException(DBRoadMap.class, id));
         validateRoadMapBelongsToUser(roadMap, userSource);
         validateThatTree(articleEdges);
 
@@ -219,7 +218,7 @@ public class RoadMapServiceImpl implements RoadMapService {
         }
 
         return new RoadMapTreeDTO(
-                RoadMapDTO.from(roadMap),
+                RoadMapWithCreatorDTO.from(roadMap),
                 List.copyOf(articlesDTO.values()),
                 roadMapEdgesDTO
         );

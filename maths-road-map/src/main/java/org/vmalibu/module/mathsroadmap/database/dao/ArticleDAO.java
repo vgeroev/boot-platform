@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface ArticleDAO extends PaginatedDomainObjectRepository<DBArticle> {
 
     @Query("from DBArticle a join fetch a.creator where a.id = :id")
-    Optional<DBArticle> findArticleWithUser(@Param("id") long id);
+    Optional<DBArticle> findArticleWithCreator(@Param("id") long id);
 
     @NonNull
     default DBArticle checkExistenceAndGet(long id) throws PlatformException {
