@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Supplier;
 
-@Service
+//@Service
 public class ModuleSettingsServiceImpl implements ModuleSettingsService {
 
     private static final String OPTION_DATA_DIR = "data_dir";
