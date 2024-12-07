@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.0.2
+      author: vmalibu
+      changes:
+        - sqlFile:
+            path: changelog.sql
+            relativeToChangelogFile: true

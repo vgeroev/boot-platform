@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.0.5
+      author: vmalibu
+      changes:
+        - sqlFile:
+            path: sql/alter_article_table.sql
+            relativeToChangelogFile: true
+        - sqlFile:
+            path: sql/alter_road_map_table.sql
+            relativeToChangelogFile: true
