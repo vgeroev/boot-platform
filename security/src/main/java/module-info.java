@@ -34,6 +34,7 @@ module org.vmalibu.module.security {
     exports org.vmalibu.module.security.database.domainobject;
     exports org.vmalibu.module.security.controller.authorized;
     exports org.vmalibu.module.security.controller.anon;
+    exports org.vmalibu.module.security.database.dao;
     exports org.vmalibu.module.security.service.user;
     exports org.vmalibu.module.security.authentication.jwt;
     exports org.vmalibu.module.security.authorization.manager;

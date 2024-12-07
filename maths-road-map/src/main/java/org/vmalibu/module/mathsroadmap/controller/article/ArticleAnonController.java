@@ -8,6 +8,7 @@ import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleService;
+import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListElement;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticleSortField;
 import org.vmalibu.module.mathsroadmap.service.article.pagemanager.ArticlePageManager;
@@ -42,7 +43,7 @@ public class ArticleAnonController {
 
     @GetMapping("/article/list")
     @ResponseStatus(HttpStatus.OK)
-    public PaginatedDto<ArticleDTO> list(
+    public PaginatedDto<ArticleListElement> list(
             @RequestParam(required = false) final Map<String, String> params
     ) throws PlatformException {
         ArticlePaginationForm form = new ArticlePaginationForm(params);
@@ -50,7 +51,6 @@ public class ArticleAnonController {
                 new ArticlePagingRequest.Builder(form.page, form.pageSize)
                         .withSort(form.sortField, form.sortDirection)
                         .withSearchText(form.searchText)
-                        .withCreatorUsernamePrefix(form.creatorUsernamePrefix)
                         .build()
         );
     }
@@ -58,11 +58,9 @@ public class ArticleAnonController {
     public static class ArticlePaginationForm extends PaginationForm {
 
         static final String JSON_SEARCH_TEXT = "searchText";
-        static final String JSON_CREATOR_USERNAME_PREFIX = "creatorUsernamePrefix";
 
         final ArticleSortField sortField;
         final String searchText;
-        final String creatorUsernamePrefix;
 
         public ArticlePaginationForm(@NonNull Map<String, String> params) throws PlatformException {
             super(params);
@@ -73,7 +71,6 @@ public class ArticleAnonController {
                 this.sortField = null;
             }
             this.searchText = params.getOrDefault(JSON_SEARCH_TEXT, null);
-            this.creatorUsernamePrefix = params.getOrDefault(JSON_CREATOR_USERNAME_PREFIX, null);
         }
 
         @Override

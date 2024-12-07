@@ -3,6 +3,7 @@ package org.vmalibu.module.mathsroadmap.service.roadmap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.vmalibu.module.mathsroadmap.service.roadmap.graph.ArticleEdge;
+import org.vmalibu.module.mathsroadmap.service.roadmap.list.RoadMapListElement;
 import org.vmalibu.module.mathsroadmap.service.roadmap.list.RoadMapPagingRequest;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.database.paging.PaginatedDto;
@@ -18,7 +19,7 @@ public interface RoadMapService {
                                @Nullable String description,
                                @NonNull UserSource userSource) throws PlatformException;
 
-    @NonNull PaginatedDto<RoadMapDTO> findAll(@NonNull RoadMapPagingRequest pagingRequest);
+    @NonNull PaginatedDto<RoadMapListElement> findAll(@NonNull RoadMapPagingRequest pagingRequest);
 
     @NonNull RoadMapDTO update(long id,
                                @NonNull String title,

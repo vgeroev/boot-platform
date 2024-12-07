@@ -13,8 +13,11 @@ import org.vmalibu.module.mathsroadmap.database.dao.ArticleLatexDAO;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleLatex;
 import org.vmalibu.module.mathsroadmap.exception.MathsRoadMapExceptionFactory;
+import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListElement;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
 import org.vmalibu.module.security.authorization.source.UserSource;
+import org.vmalibu.module.security.database.dao.UserDAO;
+import org.vmalibu.module.security.database.domainobject.DBUser;
 import org.vmalibu.modules.database.paging.DomainObjectPagination;
 import org.vmalibu.modules.database.paging.DomainObjectPaginationImpl;
 import org.vmalibu.modules.database.paging.PaginatedDto;
@@ -34,13 +37,15 @@ public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleDAO articleDAO;
     private final ArticleLatexDAO articleLatexDAO;
-    private final DomainObjectPagination<DBArticle, ArticleDTO> domainObjectPagination;
+    private final UserDAO userDAO;
+    private final DomainObjectPagination<DBArticle, ArticleListElement> domainObjectPagination;
 
     @Autowired
-    public ArticleServiceImpl(ArticleDAO articleDAO, ArticleLatexDAO articleLatexDAO) {
+    public ArticleServiceImpl(ArticleDAO articleDAO, ArticleLatexDAO articleLatexDAO, UserDAO userDAO) {
         this.articleDAO = articleDAO;
         this.articleLatexDAO = articleLatexDAO;
-        this.domainObjectPagination = new DomainObjectPaginationImpl<>(articleDAO, ArticleDTO::from);
+        this.userDAO = userDAO;
+        this.domainObjectPagination = new DomainObjectPaginationImpl<>(articleDAO, ArticleListElement::from);
     }
 
     @Override
@@ -52,12 +57,11 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional(readOnly = true)
-    public @NonNull PaginatedDto<ArticleDTO> findAll(@NonNull ArticlePagingRequest pagingRequest) {
+    public @NonNull PaginatedDto<ArticleListElement> findAll(@NonNull ArticlePagingRequest pagingRequest) {
         return domainObjectPagination.findAll(
                 pagingRequest,
                 buildSpecification(
-                        pagingRequest.getSearchText(),
-                        pagingRequest.getCreatorUsernamePrefix()
+                        pagingRequest.getSearchText()
                 )
         );
     }
@@ -77,6 +81,7 @@ public class ArticleServiceImpl implements ArticleService {
                                       @Nullable String configuration,
                                       @NonNull UserSource userSource) throws PlatformException {
         checkArticle(title, latex);
+        DBUser user = userDAO.checkExistenceAndGet(userSource.getId());
 
         DBArticleLatex articleLatex = new DBArticleLatex();
         articleLatex.setLatex(latex);
@@ -84,7 +89,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         DBArticle article = new DBArticle();
         article.setArticleLatex(articleLatex);
-        article.setCreatorUsername(userSource.getUsername());
+        article.setCreator(user);
         article.setDescription(normalizeDescription(description));
         article.setTitle(title);
 
@@ -139,7 +144,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private void validateArticleBelongsToUser(DBArticle article, UserSource userSource) throws PlatformException {
-        if (!Objects.equals(article.getCreatorUsername(), userSource.getUsername())) {
+        if (!Objects.equals(article.getCreator().getId(), userSource.getId())) {
             throw MathsRoadMapExceptionFactory.buildUserDoesNotHaveAccessException(userSource.getUsername());
         }
     }
@@ -168,25 +173,22 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private static Specification<DBArticle> buildSpecification(
-            String titlePrefix,
-            String creatorUsernamePrefix
+            String searchText
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            if (titlePrefix != null) {
-                predicates.add(getTitleAndDescriptionSearch(root, cb, titlePrefix));
-            }
+            root.fetch(DBArticle.Fields.creator, JoinType.LEFT);
 
-            if (creatorUsernamePrefix != null) {
-                predicates.add(getPrefixPredicate(root, cb, DBArticle.Fields.creatorUsername, creatorUsernamePrefix));
+            if (searchText != null) {
+                predicates.add(getSearchTextPredicate(root, cb, searchText));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 
-    private static Predicate getTitleAndDescriptionSearch(
+    private static Predicate getSearchTextPredicate(
             Root<DBArticle> root,
             CriteriaBuilder cb,
             String value
@@ -196,16 +198,6 @@ public class ArticleServiceImpl implements ArticleService {
         Expression<String> concat = cb.function(CONCAT_TRIPLE, String.class, title, cb.literal(' '), description);
         Expression<Boolean> trgm = cb.function(PG_TRGM_CONTAINED_BY, Boolean.class, cb.literal(value), concat);
         return cb.equal(trgm, true);
-    }
-
-    private static Predicate getPrefixPredicate(
-            Root<DBArticle> root,
-            CriteriaBuilder cb,
-            String fieldName,
-            String field
-    ) {
-        jakarta.persistence.criteria.Path<String> path = root.get(fieldName);
-        return cb.like(path, field + "%");
     }
 
 }

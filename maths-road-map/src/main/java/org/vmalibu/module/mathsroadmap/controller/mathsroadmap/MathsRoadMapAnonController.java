@@ -5,9 +5,9 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
-import org.vmalibu.module.mathsroadmap.service.roadmap.RoadMapDTO;
 import org.vmalibu.module.mathsroadmap.service.roadmap.RoadMapService;
 import org.vmalibu.module.mathsroadmap.service.roadmap.RoadMapTreeDTO;
+import org.vmalibu.module.mathsroadmap.service.roadmap.list.RoadMapListElement;
 import org.vmalibu.module.mathsroadmap.service.roadmap.list.RoadMapPagingRequest;
 import org.vmalibu.module.mathsroadmap.service.roadmap.list.RoadMapSortField;
 import org.vmalibu.modules.database.paging.PaginatedDto;
@@ -33,7 +33,7 @@ public class MathsRoadMapAnonController {
 
     @GetMapping("/list")
     @ResponseStatus(HttpStatus.OK)
-    public PaginatedDto<RoadMapDTO> list(
+    public PaginatedDto<RoadMapListElement> list(
             @RequestParam(required = false) final Map<String, String> params
     ) throws PlatformException {
         RoadMapPaginationForm form = new RoadMapPaginationForm(params);
@@ -41,7 +41,6 @@ public class MathsRoadMapAnonController {
                 new RoadMapPagingRequest.Builder(form.page, form.pageSize)
                         .withSort(form.sortField, form.sortDirection)
                         .withTitlePrefix(form.titlePrefix)
-                        .withCreatorUsernamePrefix(form.creatorUsernamePrefix)
                         .build()
         );
     }
@@ -49,11 +48,9 @@ public class MathsRoadMapAnonController {
     public static class RoadMapPaginationForm extends PaginationForm {
 
         static final String JSON_TITLE_PREFIX = "titlePrefix";
-        static final String JSON_CREATOR_USERNAME_PREFIX = "creatorUsernamePrefix";
 
         final RoadMapSortField sortField;
         final String titlePrefix;
-        final String creatorUsernamePrefix;
 
         public RoadMapPaginationForm(@NonNull Map<String, String> params) throws PlatformException {
             super(params);
@@ -64,7 +61,6 @@ public class MathsRoadMapAnonController {
                 this.sortField = null;
             }
             this.titlePrefix = params.getOrDefault(JSON_TITLE_PREFIX, null);
-            this.creatorUsernamePrefix = params.getOrDefault(JSON_CREATOR_USERNAME_PREFIX, null);
         }
 
         @Override

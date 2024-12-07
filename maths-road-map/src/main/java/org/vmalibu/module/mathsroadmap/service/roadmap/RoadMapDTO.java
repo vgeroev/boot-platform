@@ -10,7 +10,7 @@ import java.util.Date;
 public record RoadMapDTO(long id,
                          Date createdAt,
                          Date updatedAt,
-                         String creatorUsername,
+                         long creatorId,
                          String title,
                          String description) {
 
@@ -23,7 +23,7 @@ public record RoadMapDTO(long id,
                 .id(mathsRoadMap.getId())
                 .createdAt(mathsRoadMap.getCreatedAt())
                 .updatedAt(mathsRoadMap.getUpdatedAt())
-                .creatorUsername(mathsRoadMap.getCreatorUsername())
+                .creatorId(mathsRoadMap.getCreator().getId())
                 .title(mathsRoadMap.getTitle())
                 .description(mathsRoadMap.getDescription())
                 .build();

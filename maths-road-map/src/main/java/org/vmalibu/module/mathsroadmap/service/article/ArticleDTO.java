@@ -10,7 +10,7 @@ import java.util.Date;
 public record ArticleDTO(long id,
                          Date createdAt,
                          Date updatedAt,
-                         String creatorUsername,
+                         long userId,
                          String title,
                          String description) {
 
@@ -23,7 +23,7 @@ public record ArticleDTO(long id,
                 .id(article.getId())
                 .createdAt(article.getCreatedAt())
                 .updatedAt(article.getUpdatedAt())
-                .creatorUsername(article.getCreatorUsername())
+                .userId(article.getCreator().getId())
                 .title(article.getTitle())
                 .description(article.getDescription())
                 .build();

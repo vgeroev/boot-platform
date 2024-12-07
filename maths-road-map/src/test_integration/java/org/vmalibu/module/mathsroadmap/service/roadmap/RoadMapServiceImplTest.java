@@ -6,13 +6,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vmalibu.module.mathsroadmap.BaseTestClass;
-import org.vmalibu.module.mathsroadmap.database.dao.ArticleDAO;
-import org.vmalibu.module.mathsroadmap.database.dao.RoadMapDAO;
-import org.vmalibu.module.mathsroadmap.database.dao.RoadMapTreeEdgeDAO;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBRoadMap;
 import org.vmalibu.module.mathsroadmap.exception.MathsRoadMapExceptionFactory;
 import org.vmalibu.module.mathsroadmap.service.roadmap.graph.ArticleEdge;
+import org.vmalibu.module.security.authorization.source.AppUserSource;
 import org.vmalibu.module.security.authorization.source.UserSource;
+import org.vmalibu.module.security.service.user.UserDTO;
+import org.vmalibu.module.security.service.user.UserService;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
@@ -21,12 +21,11 @@ import java.util.function.Consumer;
 
 class RoadMapServiceImplTest extends BaseTestClass {
 
-    private final RoadMapServiceImpl roadMapService;
+    @Autowired
+    private RoadMapServiceImpl roadMapService;
 
     @Autowired
-    public RoadMapServiceImplTest(RoadMapDAO roadMapDAO, RoadMapTreeEdgeDAO roadMapTreeEdgeDAO, ArticleDAO articleDAO) {
-        roadMapService = new RoadMapServiceImpl(roadMapDAO, roadMapTreeEdgeDAO, articleDAO);
-    }
+    private UserService userService;
 
     @Test
     @DisplayName("Test Case: Getting row by invalid id. Awaiting null")
@@ -49,13 +48,14 @@ class RoadMapServiceImplTest extends BaseTestClass {
     void createTest() throws PlatformException {
         String title = RandomStringUtils.randomAlphabetic(10);
         String description =  RandomStringUtils.randomAlphabetic(10);
-        UserSource userSource = getUserSource(RandomStringUtils.randomAlphabetic(10));
+        UserDTO user = createUser();
+        UserSource userSource = new AppUserSource(user.id(), user.username(), user.password());
 
         Consumer<RoadMapDTO> checker = t ->
                 Assertions.assertThat(t).isNotNull()
                         .returns(title, RoadMapDTO::title)
                         .returns(description, RoadMapDTO::description)
-                        .returns(userSource.getUsername(), RoadMapDTO::creatorUsername);
+                        .returns(userSource.getId(), RoadMapDTO::creatorId);
 
         RoadMapDTO roadMapDTO = roadMapService.create(title, description, userSource);
         checker.accept(roadMapDTO);
@@ -68,7 +68,8 @@ class RoadMapServiceImplTest extends BaseTestClass {
     void getTreeWhenThereIsNoTreeForRoadMapTest() throws PlatformException {
         String title = RandomStringUtils.randomAlphabetic(10);
         String description =  RandomStringUtils.randomAlphabetic(10);
-        UserSource userSource = getUserSource(RandomStringUtils.randomAlphabetic(10));
+        UserDTO user = createUser();
+        UserSource userSource = new AppUserSource(user.id(), user.username(), user.password());
         RoadMapDTO roadMapDTO = roadMapService.create(title, description, userSource);
 
         RoadMapTreeDTO tree = roadMapService.getTree(roadMapDTO.id());
@@ -83,7 +84,8 @@ class RoadMapServiceImplTest extends BaseTestClass {
     void replaceTreeWhenArticleGraphIsNotATreeTest() throws PlatformException {
         String title = RandomStringUtils.randomAlphabetic(10);
         String description =  RandomStringUtils.randomAlphabetic(10);
-        UserSource userSource = getUserSource(RandomStringUtils.randomAlphabetic(10));
+        UserDTO user = createUser();
+        UserSource userSource = new AppUserSource(user.id(), user.username(), user.password());
         RoadMapDTO roadMapDTO = roadMapService.create(title, description, userSource);
 
         Assertions.assertThatThrownBy(() -> {
@@ -175,5 +177,11 @@ class RoadMapServiceImplTest extends BaseTestClass {
 //                .returns(0, t -> t.tree().size())
 //                .returns(0, t -> t.articles().size());
 //    }
+
+    private UserDTO createUser() throws PlatformException {
+        String username = org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.randomAlphabetic(10);
+        String password = org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.randomAlphabetic(10);
+        return userService.create(username, password);
+    }
 
 }

@@ -10,6 +10,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
+import org.vmalibu.module.security.database.domainobject.DBUser;
 import org.vmalibu.modules.database.domainobject.IdentityGeneratedDomainObject;
 
 import java.util.Date;
@@ -28,7 +29,7 @@ public class DBArticle extends IdentityGeneratedDomainObject {
 
     public static final String DB_CREATED_AT = "created_at";
     public static final String DB_UPDATED_AT = "updated_at";
-    public static final String DB_CREATOR_USERNAME = "creator_username";
+    public static final String DB_CREATOR_ID = "creator_id";
     public static final String DB_TITLE = "title";
     public static final String DB_DESCRIPTION = "description";
 
@@ -44,8 +45,9 @@ public class DBArticle extends IdentityGeneratedDomainObject {
     @Column(name = DB_UPDATED_AT)
     private Date updatedAt;
 
-    @Column(name = DB_CREATOR_USERNAME, nullable = false)
-    private String creatorUsername;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = DB_CREATOR_ID, nullable = false)
+    private DBUser creator;
 
     @Column(name = DB_TITLE, nullable = false)
     private String title;

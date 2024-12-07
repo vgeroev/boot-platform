@@ -7,18 +7,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomUtils;
 import org.vmalibu.module.mathsroadmap.BaseTestClass;
+import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListElement;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
+import org.vmalibu.module.security.authorization.source.AppUserSource;
+import org.vmalibu.module.security.service.user.UserDTO;
+import org.vmalibu.module.security.service.user.UserService;
 import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
-
 
 class ArticleServiceImplTest extends BaseTestClass {
 
     @Autowired
-    private ArticleService articleService;
+    private ArticleServiceImpl articleService;
+    @Autowired
+    private UserService userService;
 
     @Test
     @DisplayName("Test Case: Creating article with correct values")
@@ -26,26 +32,26 @@ class ArticleServiceImplTest extends BaseTestClass {
         String title = RandomStringUtils.randomAlphabetic(10);
         String description = RandomStringUtils.randomAlphabetic(10);
         String latex = RandomStringUtils.randomAlphabetic(100);
-        String configuration = new Random().nextBoolean() ? RandomStringUtils.randomAlphabetic(100) : null;
-        String creatorUsername = RandomStringUtils.randomAlphabetic(10);
+        String configuration = ThreadLocalRandom.current().nextBoolean() ? RandomStringUtils.randomAlphabetic(100) : null;
+        UserDTO user = createUser();
 
-        ArticleDTO topic = articleService.create(
+        ArticleDTO article = articleService.create(
                 title,
                 description,
                 latex,
                 configuration,
-                getUserSource(creatorUsername)
+                new AppUserSource(user.id(), user.username(), user.password())
         );
 
-        Consumer<ArticleDTO> topicChecker = t ->
+        Consumer<ArticleDTO> articleChecker = t ->
                 Assertions.assertThat(t).isNotNull()
                         .returns(description, ArticleDTO::description)
                         .returns(title, ArticleDTO::title)
-                        .returns(creatorUsername, ArticleDTO::creatorUsername);
+                        .returns(user.id(), ArticleDTO::userId);
 
-        topicChecker.accept(topic);
-        Assertions.assertThat(articleService.findArticle(topic.id())).isNotNull()
-                .satisfies(topicChecker);
+        articleChecker.accept(article);
+        Assertions.assertThat(articleService.findArticle(article.id())).isNotNull()
+                .satisfies(articleChecker);
     }
 
     @Test
@@ -53,13 +59,14 @@ class ArticleServiceImplTest extends BaseTestClass {
     void findArticleWhenThereIsNoRowWithSuchIdTest() throws PlatformException {
         long badId = RandomUtils.nextLong(10, Long.MAX_VALUE);
         Assertions.assertThat(articleService.findArticle(badId)).isNull();
+        UserDTO user = createUser();
 
         articleService.create(
                 RandomStringUtils.randomAlphabetic(10),
                 RandomStringUtils.randomAlphabetic(100),
                 RandomStringUtils.randomAlphabetic(100),
                 RandomStringUtils.randomAlphabetic(100),
-                getUserSource(RandomStringUtils.randomAlphabetic(10))
+                new AppUserSource(user.id(), user.username(), user.password())
         );
 
         Assertions.assertThat(articleService.findArticle(badId)).isNull();
@@ -72,14 +79,14 @@ class ArticleServiceImplTest extends BaseTestClass {
         String description1 = "desc1";
         String latex = RandomStringUtils.randomAlphabetic(10);
         String configuration = new Random().nextBoolean() ? RandomStringUtils.randomAlphabetic(10) : null;
-        String creatorUsername = RandomStringUtils.randomAlphabetic(10);
+        UserDTO user = createUser();
 
         ArticleDTO articleDTO1 = articleService.create(
                 title1,
                 description1,
                 latex,
                 configuration,
-                getUserSource(creatorUsername)
+                new AppUserSource(user.id(), user.username(), user.password())
         );
 
         String title2 = "title2";
@@ -90,7 +97,7 @@ class ArticleServiceImplTest extends BaseTestClass {
                 description2,
                 latex,
                 configuration,
-                getUserSource(creatorUsername)
+                new AppUserSource(user.id(), user.username(), user.password())
         );
 
         String title3 = "Algebra";
@@ -101,19 +108,19 @@ class ArticleServiceImplTest extends BaseTestClass {
                 description3,
                 latex,
                 configuration,
-                getUserSource(creatorUsername)
+                new AppUserSource(user.id(), user.username(), user.password())
         );
 
         //--------------------------------------------------------------------------------------------------------------
 
-        PaginatedDto<ArticleDTO> result = articleService.findAll(
+        PaginatedDto<ArticleListElement> result = articleService.findAll(
                 new ArticlePagingRequest.Builder(0, Integer.MAX_VALUE)
                         .withSearchText("title")
                         .build()
         );
         Assertions.assertThat(result.getTotalCount()).isEqualTo(2);
         Assertions.assertThat(result.getResult())
-                .map(ArticleDTO::id)
+                .map(ArticleListElement::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO1.id()))
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()));
 
@@ -124,7 +131,7 @@ class ArticleServiceImplTest extends BaseTestClass {
         );
         Assertions.assertThat(result.getTotalCount()).isEqualTo(3);
         Assertions.assertThat(result.getResult())
-                .map(ArticleDTO::id)
+                .map(ArticleListElement::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO1.id()))
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()))
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO3.id()));
@@ -136,7 +143,7 @@ class ArticleServiceImplTest extends BaseTestClass {
         );
         Assertions.assertThat(result.getTotalCount()).isEqualTo(3);
         Assertions.assertThat(result.getResult())
-                .map(ArticleDTO::id)
+                .map(ArticleListElement::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()))
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()))
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO3.id()));
@@ -148,7 +155,7 @@ class ArticleServiceImplTest extends BaseTestClass {
         );
         Assertions.assertThat(result.getTotalCount()).isEqualTo(2);
         Assertions.assertThat(result.getResult())
-                .map(ArticleDTO::id)
+                .map(ArticleListElement::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()))
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()));
 
@@ -159,8 +166,14 @@ class ArticleServiceImplTest extends BaseTestClass {
         );
         Assertions.assertThat(result.getTotalCount()).isEqualTo(1);
         Assertions.assertThat(result.getResult())
-                .map(ArticleDTO::id)
+                .map(ArticleListElement::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO3.id()));
+    }
+
+    private UserDTO createUser() throws PlatformException {
+        String username = RandomStringUtils.randomAlphabetic(10);
+        String password = RandomStringUtils.randomAlphabetic(10);
+        return userService.create(username, password);
     }
 
 

@@ -1,10 +1,7 @@
 package org.vmalibu.module.mathsroadmap.service.roadmap;
 
 import com.google.common.base.Functions;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.Path;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.data.jpa.domain.Specification;
@@ -22,8 +19,11 @@ import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
 import org.vmalibu.module.mathsroadmap.service.roadmap.graph.ArticleEdge;
 import org.vmalibu.module.mathsroadmap.service.roadmap.graph.ArticleGraphNode;
 import org.vmalibu.module.mathsroadmap.service.roadmap.graph.ArticleTreeValidator;
+import org.vmalibu.module.mathsroadmap.service.roadmap.list.RoadMapListElement;
 import org.vmalibu.module.mathsroadmap.service.roadmap.list.RoadMapPagingRequest;
 import org.vmalibu.module.security.authorization.source.UserSource;
+import org.vmalibu.module.security.database.dao.UserDAO;
+import org.vmalibu.module.security.database.domainobject.DBUser;
 import org.vmalibu.modules.database.domainobject.DomainObject;
 import org.vmalibu.modules.database.paging.DomainObjectPagination;
 import org.vmalibu.modules.database.paging.DomainObjectPaginationImpl;
@@ -42,13 +42,18 @@ public class RoadMapServiceImpl implements RoadMapService {
     private final RoadMapDAO roadMapDAO;
     private final RoadMapTreeEdgeDAO roadMapTreeEdgeDAO;
     private final ArticleDAO articleDAO;
-    private final DomainObjectPagination<DBRoadMap, RoadMapDTO> domainObjectPagination;
+    private final UserDAO userDAO;
+    private final DomainObjectPagination<DBRoadMap, RoadMapListElement> domainObjectPagination;
 
-    public RoadMapServiceImpl(RoadMapDAO roadMapDAO, RoadMapTreeEdgeDAO roadMapTreeEdgeDAO, ArticleDAO articleDAO) {
+    public RoadMapServiceImpl(RoadMapDAO roadMapDAO,
+                              RoadMapTreeEdgeDAO roadMapTreeEdgeDAO,
+                              ArticleDAO articleDAO,
+                              UserDAO userDAO) {
         this.roadMapDAO = roadMapDAO;
         this.roadMapTreeEdgeDAO = roadMapTreeEdgeDAO;
         this.articleDAO = articleDAO;
-        this.domainObjectPagination = new DomainObjectPaginationImpl<>(roadMapDAO, RoadMapDTO::from);
+        this.domainObjectPagination = new DomainObjectPaginationImpl<>(roadMapDAO, RoadMapListElement::from);
+        this.userDAO = userDAO;
     }
 
     @Override
@@ -66,10 +71,12 @@ public class RoadMapServiceImpl implements RoadMapService {
             throw GeneralExceptionFactory.buildEmptyValueException(DBRoadMap.class, DBRoadMap.DB_TITLE);
         }
 
+        DBUser user = userDAO.checkExistenceAndGet(userSource.getId());
+
         DBRoadMap roadMap = new DBRoadMap();
         roadMap.setTitle(title.trim());
         roadMap.setDescription(normalizeDescription(description));
-        roadMap.setCreatorUsername(userSource.getUsername());
+        roadMap.setCreator(user);
 
         return RoadMapDTO.from(roadMapDAO.save(roadMap));
     }
@@ -91,7 +98,7 @@ public class RoadMapServiceImpl implements RoadMapService {
 
     @Override
     @Transactional(readOnly = true)
-    public @NonNull PaginatedDto<RoadMapDTO> findAll(@NonNull RoadMapPagingRequest pagingRequest) {
+    public @NonNull PaginatedDto<RoadMapListElement> findAll(@NonNull RoadMapPagingRequest pagingRequest) {
         return domainObjectPagination.findAll(
                 pagingRequest,
                 buildSpecification(pagingRequest)
@@ -154,7 +161,7 @@ public class RoadMapServiceImpl implements RoadMapService {
     }
 
     private void validateRoadMapBelongsToUser(DBRoadMap roadMap, UserSource userSource) throws PlatformException {
-        if (!Objects.equals(roadMap.getCreatorUsername(), userSource.getUsername())) {
+        if (!Objects.equals(roadMap.getCreator().getId(), userSource.getId())) {
             throw MathsRoadMapExceptionFactory.buildUserDoesNotHaveAccessException(userSource.getUsername());
         }
     }
@@ -224,14 +231,11 @@ public class RoadMapServiceImpl implements RoadMapService {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
+            root.fetch(DBRoadMap.Fields.creator, JoinType.LEFT);
+
             String titlePrefix = pagingRequest.getTitlePrefix();
             if (titlePrefix != null) {
-                predicates.add(getPrefixPredicate(root, cb, DBArticle.Fields.title, titlePrefix));
-            }
-
-            String creatorUsernamePrefix = pagingRequest.getCreatorUsernamePrefix();
-            if (creatorUsernamePrefix != null) {
-                predicates.add(getPrefixPredicate(root, cb, DBArticle.Fields.creatorUsername, creatorUsernamePrefix));
+                predicates.add(getPrefixPredicate(root, cb, DBRoadMap.Fields.title, titlePrefix));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
