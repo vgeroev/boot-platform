@@ -86,11 +86,7 @@ public class AuthorizedSecurityConfiguration {
                         .logoutRequestMatcher(new AntPathRequestMatcher(PATH_LOGOUT, "POST"))
                         .invalidateHttpSession(true)
                         .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
-                        .addLogoutHandler(
-                                new HeaderWriterLogoutHandler(
-                                        new ClearSiteDataHeaderWriter(ClearSiteDataHeaderWriter.Directive.COOKIES)
-                                )
-                        )
+                        .deleteCookies(SessionBasedAuthFlow.SESSION_ID)
                 )
                 .anonymous(AbstractHttpConfigurer::disable);
 
