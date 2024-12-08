@@ -46,6 +46,7 @@ module org.vmalibu.modules {
     opens org.vmalibu.modules.web.configuration to spring.core;
     opens org.vmalibu.modules.threadpool to spring.core;
     opens org.vmalibu.modules.entrypoint to spring.aop, spring.core;
+    opens org.vmalibu.modules.liquibase to spring.core;
     opens org.vmalibu.modules.module.settings to spring.beans, spring.context, spring.core;
     opens org.vmalibu.modules.settings to spring.beans, spring.context, spring.core;
     opens org.vmalibu.modules.database.domainobject;
@@ -60,6 +61,7 @@ module org.vmalibu.modules {
     exports org.vmalibu.modules.module;
     exports org.vmalibu.modules.graph;
     exports org.vmalibu.modules.controller.anon.platform;
+    exports org.vmalibu.modules.liquibase;
     exports org.vmalibu.modules.database.changelog;
     exports org.vmalibu.modules.database.domainobject;
     exports org.vmalibu.modules.database.converter;
