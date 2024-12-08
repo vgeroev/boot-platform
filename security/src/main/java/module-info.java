@@ -35,6 +35,7 @@ module org.vmalibu.module.security {
     exports org.vmalibu.module.security.controller.authorized;
     exports org.vmalibu.module.security.controller.anon;
     exports org.vmalibu.module.security.database.dao;
+    exports org.vmalibu.module.security.database.changelog to spring.beans;
     exports org.vmalibu.module.security.service.user;
     exports org.vmalibu.module.security.authentication.jwt;
     exports org.vmalibu.module.security.authorization.manager;
@@ -42,6 +43,7 @@ module org.vmalibu.module.security {
     exports org.vmalibu.module.security.authorization.controller.privilege;
     exports org.vmalibu.module.security.authorization.source;
     exports org.vmalibu.module.security.configuration to spring.beans, spring.context;
+    exports org.vmalibu.module.security.configuration.authorized.filter to spring.beans, spring.core, spring.context;
     exports org.vmalibu.module.security.configuration.authorized to spring.beans, spring.core, spring.context;
     exports org.vmalibu.module.security.configuration.anonymous to spring.beans, spring.core, spring.context;
 
@@ -56,4 +58,5 @@ module org.vmalibu.module.security {
     opens org.vmalibu.module.security.authorization.controller to spring.core;
     opens org.vmalibu.module.security.authorization.manager to spring.core;
     opens org.vmalibu.module.security.configuration.authorized.flow to spring.core;
+    opens org.vmalibu.module.security.configuration.authorized.filter to spring.core;
 }

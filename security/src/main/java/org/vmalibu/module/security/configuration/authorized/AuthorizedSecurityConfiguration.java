@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
 import org.springframework.security.authorization.AuthorizationManagers;
@@ -15,24 +14,24 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.SessionManagementConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
+import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.vmalibu.module.security.authentication.jwt.JwtAuthenticationManager;
 import org.vmalibu.module.security.authorization.manager.CustomAuthorizationManager;
+import org.vmalibu.module.security.configuration.authorized.filter.ExtraAuthSessionFilters;
 import org.vmalibu.module.security.configuration.authorized.flow.AuthFlow;
 import org.vmalibu.module.security.configuration.authorized.flow.AuthFlowRequestMatcher;
 import org.vmalibu.module.security.configuration.authorized.flow.JwtAuthFlow;
 import org.vmalibu.module.security.configuration.authorized.flow.SessionBasedAuthFlow;
+import org.vmalibu.module.security.configuration.authorized.session.SendErrorAuthenticationFailureHandler;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,41 +46,38 @@ public class AuthorizedSecurityConfiguration {
 
     private final JwtAuthenticationManager jwtAuthenticationManager;
     private final AuthorizationManager<HttpServletRequest> authorizationManager;
+    private final ExtraAuthSessionFilters extraAuthSessionFilters;
     private final List<AuthFlow> authFlows;
-    private final UserDetailsService userDetailsService;
-    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public AuthorizedSecurityConfiguration(
             JwtAuthenticationManager jwtAuthenticationManager,
             @Autowired(required = false) List<? extends CustomAuthorizationManager> authorizationManagers,
-            UserDetailsService userDetailsService,
-            PasswordEncoder passwordEncoder) {
+            ExtraAuthSessionFilters extraAuthSessionFilters) {
         this.jwtAuthenticationManager = jwtAuthenticationManager;
         this.authorizationManager = getAuthorizationManager(authorizationManagers == null ? List.of() : authorizationManagers);
+        this.extraAuthSessionFilters = extraAuthSessionFilters;
         this.authFlows = List.of(new SessionBasedAuthFlow(), new JwtAuthFlow());
-        this.userDetailsService = userDetailsService;
-        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Bean
+    // Without this Bean session management will not work
+    HttpSessionEventPublisher httpSessionEventPublisher() {
+        return new HttpSessionEventPublisher();
     }
 
     @Bean
     @Order(1)
     SecurityFilterChain sessionBasedFilterChain(HttpSecurity http) throws Exception {
-        UsernamePasswordAuthenticationFilter authFilter = new UsernamePasswordAuthenticationFilter();
-        authFilter.setAuthenticationSuccessHandler(
-                (request, response, authentication) -> response.setStatus(HttpStatus.OK.value()));
-        authFilter.setAuthenticationFailureHandler(
-                (request, response, exception) -> response.setStatus(HttpStatus.UNAUTHORIZED.value()));
-        authFilter.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(PATH_LOGIN, "POST"));
-        DaoAuthenticationProvider authenticationProvider = daoAuthProvider();
-        authFilter.setAuthenticationManager(authenticationProvider::authenticate);
-        authFilter.setSecurityContextRepository(new HttpSessionSecurityContextRepository());
-
-        DefaultSecurityFilterChain filterChain = http
+        http
                 .securityMatcher(API_PATTERN)
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
+                .securityContext(s -> s.securityContextRepository(new HttpSessionSecurityContextRepository()))
                 .sessionManagement(sessionManagement ->
-                        sessionManagement.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        sessionManagement
+                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                                .sessionAuthenticationFailureHandler(new SendErrorAuthenticationFailureHandler())
                                 .sessionFixation(SessionManagementConfigurer.SessionFixationConfigurer::newSession)
                                 .maximumSessions(1)
                                 .maxSessionsPreventsLogin(true)
@@ -96,20 +92,14 @@ public class AuthorizedSecurityConfiguration {
                                 )
                         )
                 )
-                .anonymous(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(ar -> ar.anyRequest().authenticated())
-                .addFilterAt(authFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new AuthorizationFilter(authorizationManager), AuthorizationFilter.class)
-                .build();
+                .anonymous(AbstractHttpConfigurer::disable);
+
+        AntPathRequestMatcher loginRequestMatcher = new AntPathRequestMatcher(PATH_LOGIN, "POST");
+        DefaultSecurityFilterChain filterChain = extraAuthSessionFilters.addFilters(http, loginRequestMatcher)
+                        .addFilter(getAuthorizationFilter())
+                        .build();
 
         return buildFilterChain(filterChain, SessionBasedAuthFlow.class, true);
-    }
-
-    private DaoAuthenticationProvider daoAuthProvider() {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService);
-        authenticationProvider.setPasswordEncoder(passwordEncoder);
-        return authenticationProvider;
     }
 
     @Bean
@@ -118,6 +108,7 @@ public class AuthorizedSecurityConfiguration {
         DefaultSecurityFilterChain filterChain = http
                 .securityMatcher(API_PATTERN)
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
                 .sessionManagement(sessionManagement ->
                         sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -125,8 +116,7 @@ public class AuthorizedSecurityConfiguration {
                         oauth2.jwt(jwt -> jwt.authenticationManager(jwtAuthenticationManager))
                 )
                 .anonymous(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(ar -> ar.anyRequest().authenticated())
-                .addFilterBefore(new AuthorizationFilter(authorizationManager), AuthorizationFilter.class)
+                .addFilter(getAuthorizationFilter())
                 .build();
 
         return buildFilterChain(filterChain, JwtAuthFlow.class, false);
@@ -140,6 +130,9 @@ public class AuthorizedSecurityConfiguration {
         return new DefaultSecurityFilterChain(newRequestMatcher, filterChain.getFilters());
     }
 
+    private AuthorizationFilter getAuthorizationFilter() {
+        return new AuthorizationFilter(authorizationManager);
+    }
 
     private static AuthorizationManager<HttpServletRequest> getAuthorizationManager(
             List<? extends CustomAuthorizationManager> authorizationManagers
