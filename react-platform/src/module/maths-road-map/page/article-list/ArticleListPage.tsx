@@ -116,9 +116,6 @@ const ArticleListPage: React.FC<{}> = () => {
 
   return (
     <>
-      <Divider orientation="left">
-        <Link to={getRoadMapListRoute()}>Link to Road maps</Link>
-      </Divider>
       <Divider>Articles</Divider>
       <Row>
         <Col span={9}></Col>
