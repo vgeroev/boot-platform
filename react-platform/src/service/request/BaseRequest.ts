@@ -31,9 +31,8 @@ export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
   constructor(
     private readonly modelParser: IModelParser,
     httpCallerFactory: HttpCallerFactory,
-    authorized: boolean,
   ) {
-    this.httpCaller = httpCallerFactory.newInstance<M, D>(authorized);
+    this.httpCaller = httpCallerFactory.newInstance<M, D>();
   }
 
   public exec({
@@ -99,9 +98,7 @@ export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
     }
   }
 
-  public isAuthorized(): boolean {
-    return this.httpCaller.isAuthorized;
-  }
+  public abstract isAuthorized(): boolean;
 
   public abstract getApiVersion(): string;
 

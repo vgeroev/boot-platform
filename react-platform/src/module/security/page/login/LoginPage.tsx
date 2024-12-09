@@ -32,7 +32,7 @@ const LoginPage: React.FC<{}> = () => {
 
     setLoading(true);
     loginRequest.exec({
-      requestVariables: requestData,
+      data: requestData,
       onCompletion: (response) => {
         const status = response.status;
         if (status === 200) {

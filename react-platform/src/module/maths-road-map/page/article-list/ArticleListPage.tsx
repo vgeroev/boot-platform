@@ -7,10 +7,7 @@ import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
 import { ArticleListModel } from "../../model/ArticleListModel";
 import { ArticleModel } from "../../model/ArticleModel";
 import { ArticleWithCreatorModel } from "../../model/ArticleWithCreatorModel";
-import {
-  getArticleRoute,
-  getRoadMapListRoute,
-} from "../../route/MathsRoadMapRouteGetter";
+import { getArticleRoute } from "../../route/MathsRoadMapRouteGetter";
 import { GetArticleListRequest } from "../../service/request/GetArticleListRequest";
 
 const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (

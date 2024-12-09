@@ -7,7 +7,11 @@ import { MathsRoadMapBaseRequest } from "./MathsRoadMapBaseRequest";
 
 export class GetRoadMapListRequest extends MathsRoadMapBaseRequest<RoadMapListModel> {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(RoadMapListModel, httpCallerFactory, false);
+    super(RoadMapListModel, httpCallerFactory);
+  }
+
+  public isAuthorized(): boolean {
+    return false;
   }
 
   public getHttpRequestMethod(): HttpRequestMethod {

@@ -15,7 +15,11 @@ export class GetArticleLatexRequest extends MathsRoadMapBaseRequest<
   GetArticleLatexRequestVariables
 > {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(ArticleLatexModel, httpCallerFactory, true);
+    super(ArticleLatexModel, httpCallerFactory);
+  }
+
+  public isAuthorized(): boolean {
+    return true;
   }
 
   public getHttpRequestMethod(): HttpRequestMethod {

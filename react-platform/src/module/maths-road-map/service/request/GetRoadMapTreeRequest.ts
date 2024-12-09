@@ -15,7 +15,11 @@ export class GetRoadMapTreeRequest extends MathsRoadMapBaseRequest<
   GetRoadMapTreeVariables
 > {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(RoadMapTreeModel, httpCallerFactory, false);
+    super(RoadMapTreeModel, httpCallerFactory);
+  }
+
+  public isAuthorized(): boolean {
+    return false;
   }
 
   public getHttpRequestMethod(): HttpRequestMethod {

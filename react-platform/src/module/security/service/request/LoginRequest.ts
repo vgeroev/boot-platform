@@ -1,44 +1,29 @@
 import {
   HttpCallerFactory,
-  HttpRequest,
   HttpRequestMethod,
 } from "../../../../hook/useHttpHook";
 import { EmptyModel } from "../../../../model/EmptyModel";
-import { BaseRequest } from "../../../../service/request/BaseRequest";
+import { SecurityBaseRequest } from "./SecurityBaseRequest";
 
 export interface LoginForm {
   username: string;
   password: string;
 }
 
-export class LoginRequest extends BaseRequest<EmptyModel, any, LoginForm> {
+export class LoginRequest extends SecurityBaseRequest<EmptyModel, LoginForm> {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(EmptyModel, httpCallerFactory, false);
+    super(EmptyModel, httpCallerFactory);
   }
 
-  public getApiVersion(): string {
-    throw new Error("Method not implemented.");
-  }
-
-  public getModule(): string {
-    throw new Error("Method not implemented.");
+  public isAuthorized(): boolean {
+    return true;
   }
 
   public getHttpRequestMethod(): HttpRequestMethod {
-    throw new Error("Method not implemented.");
+    return "post";
   }
-
-  public getRelativeApiPath(requestVariables?: LoginForm | undefined): string {
-    throw new Error("Method not implemented.");
-  }
-
-  public constructHttpRequest(requestVariables: LoginForm): HttpRequest {
-    const username: string = requestVariables.username;
-    const password: string = requestVariables.password;
-    return {
-      method: "post",
-      url: `/authorized/login?username=${username}&password=${password}`,
-    };
+  public getRelativeApiPath(): string {
+    return "login";
   }
 
   public static build(httpCallerFactory: HttpCallerFactory): LoginRequest {

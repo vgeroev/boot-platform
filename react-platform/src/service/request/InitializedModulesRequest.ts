@@ -4,7 +4,11 @@ import { PlatformBaseRequest } from "./PlatformBaseRequest";
 
 export class InitializedModulesRequest extends PlatformBaseRequest<InitializedModulesModel> {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(InitializedModulesModel, httpCallerFactory, false);
+    super(InitializedModulesModel, httpCallerFactory);
+  }
+
+  public isAuthorized(): boolean {
+    return false;
   }
 
   public getHttpRequestMethod(): HttpRequestMethod {

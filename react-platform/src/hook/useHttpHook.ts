@@ -7,11 +7,9 @@ import { IModelParser, ModelFactory } from "../model/BaseModel";
 type HttpResult = Record<"moduleError" | "data", any>;
 
 const httpCall = <M, D = any>(
-  authorized: boolean,
   authState: AuthContextProps,
 ): HttpCaller<M, D> => {
   return {
-    isAuthorized: authorized,
     authState: authState,
     exec: async ({
       request,
@@ -109,12 +107,11 @@ export interface HttpRequestHookProps<D = any> {
 
 export interface HttpCaller<M = {}, D = any> {
   exec: (x: HttpRequestHookProps<D>) => Promise<HttpResponse<M | ModuleError>>;
-  isAuthorized: boolean;
   authState: AuthContextProps;
 }
 
 export interface HttpCallerFactory {
-  newInstance: <M, D = any>(authorized: boolean) => HttpCaller<M, D>;
+  newInstance: <M, D = any>() => HttpCaller<M, D>;
 }
 
 export class ModuleError {
@@ -142,12 +139,8 @@ export interface HttpResponse<R> {
 export const useHttpCallerFactory = (): HttpCallerFactory => {
   const auth: AuthContextProps = useAuth();
   return {
-    newInstance: <M = {}, D = any>(authorized: boolean): HttpCaller<M, D> => {
-      if (authorized) {
-        return httpCall<M>(true, auth);
-      } else {
-        return httpCall<M>(false, auth);
-      }
+    newInstance: <M = {}, D = any>(): HttpCaller<M, D> => {
+      return httpCall<M>(auth);
     },
   };
 };

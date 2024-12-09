@@ -24,7 +24,11 @@ export class ReplaceRoadMapTreeRequest extends MathsRoadMapBaseRequest<
   RoadMapReplaceTreeRequestVariables
 > {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(RoadMapTreeModel, httpCallerFactory, true);
+    super(RoadMapTreeModel, httpCallerFactory);
+  }
+
+  public isAuthorized(): boolean {
+    return true;
   }
 
   public getHttpRequestMethod(): HttpRequestMethod {

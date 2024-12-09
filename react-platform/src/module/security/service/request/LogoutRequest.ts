@@ -1,37 +1,24 @@
 import {
   HttpCallerFactory,
-  HttpRequest,
   HttpRequestMethod,
 } from "../../../../hook/useHttpHook";
 import { EmptyModel } from "../../../../model/EmptyModel";
-import { BaseRequest } from "../../../../service/request/BaseRequest";
+import { SecurityBaseRequest } from "./SecurityBaseRequest";
 
-export class LogoutRequest extends BaseRequest<EmptyModel, {}, {}> {
+export class LogoutRequest extends SecurityBaseRequest<EmptyModel, {}, {}> {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(EmptyModel, httpCallerFactory, false);
+    super(EmptyModel, httpCallerFactory);
   }
 
-  public getApiVersion(): string {
-    throw new Error("Method not implemented.");
-  }
-
-  public getModule(): string {
-    throw new Error("Method not implemented.");
+  public isAuthorized(): boolean {
+    return true;
   }
 
   public getHttpRequestMethod(): HttpRequestMethod {
-    throw new Error("Method not implemented.");
+    return "post";
   }
-
-  public getRelativeApiPath(requestVariables?: {} | undefined): string {
-    throw new Error("Method not implemented.");
-  }
-
-  public constructHttpRequest(requestVariables: {}): HttpRequest {
-    return {
-      method: "post",
-      url: `/authorized/logout`,
-    };
+  public getRelativeApiPath(): string {
+    return "logout";
   }
 
   public static build(httpCallerFactory: HttpCallerFactory): LogoutRequest {

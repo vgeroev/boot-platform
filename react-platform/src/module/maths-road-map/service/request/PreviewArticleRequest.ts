@@ -15,7 +15,11 @@ export class PreviewArticleRequest extends MathsRoadMapBaseRequest<
   PreviewArticleRequestData
 > {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(PreviewArticleModel, httpCallerFactory, true);
+    super(PreviewArticleModel, httpCallerFactory);
+  }
+
+  public isAuthorized(): boolean {
+    return true;
   }
 
   public getHttpRequestMethod(): HttpRequestMethod {

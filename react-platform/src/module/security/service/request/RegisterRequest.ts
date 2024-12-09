@@ -15,7 +15,7 @@ export class RegisterRequest extends SecurityBaseRequest<
   RegisterForm
 > {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(UserModel, httpCallerFactory, false);
+    super(UserModel, httpCallerFactory);
   }
 
   public isAuthorized(): boolean {

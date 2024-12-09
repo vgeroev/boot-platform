@@ -17,7 +17,11 @@ export class CreateArticleRequest extends MathsRoadMapBaseRequest<
   CreateArticleRequestData
 > {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(CreateArticleModel, httpCallerFactory, true);
+    super(CreateArticleModel, httpCallerFactory);
+  }
+
+  public isAuthorized(): boolean {
+    return true;
   }
 
   public getHttpRequestMethod(): HttpRequestMethod {

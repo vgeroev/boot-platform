@@ -7,7 +7,7 @@ import { SecurityBaseRequest } from "./SecurityBaseRequest";
 
 export class GetLoggedInUser extends SecurityBaseRequest<UserModel> {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(UserModel, httpCallerFactory, true);
+    super(UserModel, httpCallerFactory);
   }
 
   public isAuthorized(): boolean {
