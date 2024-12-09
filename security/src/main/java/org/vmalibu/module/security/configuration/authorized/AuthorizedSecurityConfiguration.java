@@ -17,13 +17,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.intercept.AuthorizationFilter;
-import org.springframework.security.web.authentication.logout.HeaderWriterLogoutHandler;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.header.writers.ClearSiteDataHeaderWriter;
 import org.springframework.security.web.session.HttpSessionEventPublisher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
+import org.vmalibu.module.security.SecurityModuleConsts;
 import org.vmalibu.module.security.authentication.jwt.JwtAuthenticationManager;
 import org.vmalibu.module.security.authorization.manager.CustomAuthorizationManager;
 import org.vmalibu.module.security.configuration.authorized.filter.ExtraAuthSessionFilters;
@@ -41,8 +40,8 @@ import java.util.stream.Collectors;
 public class AuthorizedSecurityConfiguration {
 
     private static final String API_PATTERN = "/authorized/**";
-    public static final String PATH_LOGIN = "/authorized/login";
-    public static final String PATH_LOGOUT = "/authorized/logout";
+    public static final String PATH_LOGIN = SecurityModuleConsts.REST_AUTHORIZED_PREFIX + "/login";
+    public static final String PATH_LOGOUT = SecurityModuleConsts.REST_AUTHORIZED_PREFIX + "/logout";
 
     private final JwtAuthenticationManager jwtAuthenticationManager;
     private final AuthorizationManager<HttpServletRequest> authorizationManager;

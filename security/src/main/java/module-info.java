@@ -25,6 +25,7 @@ module org.vmalibu.module.security {
     requires jakarta.annotation;
     requires jakarta.persistence;
     requires com.fasterxml.jackson.annotation;
+    requires com.fasterxml.jackson.databind;
     requires org.checkerframework.checker.qual;
 
     exports org.vmalibu.module.security.service.privilege;
@@ -58,5 +59,5 @@ module org.vmalibu.module.security {
     opens org.vmalibu.module.security.authorization.controller to spring.core;
     opens org.vmalibu.module.security.authorization.manager to spring.core;
     opens org.vmalibu.module.security.configuration.authorized.flow to spring.core;
-    opens org.vmalibu.module.security.configuration.authorized.filter to spring.core;
+    opens org.vmalibu.module.security.configuration.authorized.filter to spring.core, com.fasterxml.jackson.databind;
 }

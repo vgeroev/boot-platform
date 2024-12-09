@@ -1,5 +1,8 @@
 package org.vmalibu.module.security.configuration.authorized.filter;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
@@ -40,12 +44,26 @@ public class ExtraAuthSessionFilters {
 
     private static class ExtUsernamePasswordAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
+        private final ThreadLocal<UsernamePassword> credentialsStorage = new ThreadLocal<>();
         private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder
                 .getContextHolderStrategy();
+
+        private static final ObjectMapper objectMapper = new ObjectMapper();
+
+        @Override
+        protected String obtainPassword(HttpServletRequest request) {
+            return loadCredentials(request).password;
+        }
+
+        @Override
+        protected String obtainUsername(HttpServletRequest request) {
+            return loadCredentials(request).username;
+        }
 
         @Override
         public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
             Authentication authentication = super.attemptAuthentication(request, response);
+            credentialsStorage.remove();
             if (authentication != null) {
                 SecurityContext context = securityContextHolderStrategy.createEmptyContext();
                 context.setAuthentication(authentication);
@@ -65,13 +83,51 @@ public class ExtraAuthSessionFilters {
                 super.successfulAuthentication(request, response, chain, authResult);
             }
         }
+
+        private UsernamePassword loadCredentials(HttpServletRequest request) {
+            UsernamePassword credentials = credentialsStorage.get();
+            if (credentials != null) {
+                return credentials;
+            }
+
+            String payload;
+            try {
+                payload = request.getReader().lines().collect(Collectors.joining());
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
+            }
+
+            try {
+                credentials = objectMapper.readValue(payload, UsernamePassword.class);
+            } catch (JsonProcessingException e) {
+                UsernamePassword empty = UsernamePassword.empty();
+                credentialsStorage.set(empty);
+                return empty;
+            }
+
+            credentialsStorage.set(credentials);
+
+            return credentials;
+        }
+
+        private static class UsernamePassword {
+
+            @JsonProperty("username")
+            private String username;
+            @JsonProperty("password")
+            private String password;
+
+            static UsernamePassword empty() {
+                return new UsernamePassword();
+            }
+        }
     }
 
-    private static class CheckingAuthenticationFilter extends OncePerRequestFilter {
+    private static class CheckingLoginFilter extends OncePerRequestFilter {
 
         private final RequestMatcher requestMatcher;
 
-        CheckingAuthenticationFilter(RequestMatcher requestMatcher) {
+        CheckingLoginFilter(RequestMatcher requestMatcher) {
             this.requestMatcher = requestMatcher;
         }
 
@@ -103,7 +159,7 @@ public class ExtraAuthSessionFilters {
 
         return httpSecurity
                 .addFilter(authFilter)
-                .addFilterAfter(new CheckingAuthenticationFilter(loginMatcher), SessionManagementFilter.class);
+                .addFilterAfter(new CheckingLoginFilter(loginMatcher), SessionManagementFilter.class);
     }
 
     private DaoAuthenticationProvider daoAuthProvider() {
