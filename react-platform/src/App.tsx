@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import NotFound from "./component/notfound/NotFound";
+import { UserProvider } from "./hook/UserContext";
 import BaseLayout from "./layout/BaseLayout";
 import { moduleRoutes as exerciseModuleRoutes } from "./module/exercises/route/ExercisesRouteGetter";
 import { moduleRoutes as mathsRoadMapModuleRoutes } from "./module/maths-road-map/route/MathsRoadMapRouteGetter";
@@ -35,14 +36,15 @@ function App() {
     .concat(getModuleRoutes(mathsRoadMapModuleRoutes));
 
   routes.push(
-    <Route path="/authorization-redirect" element={<></>} />,
     <Route path="*" element={<BaseLayout component={<NotFound />} />} />,
   );
 
   return (
-    <BrowserRouter>
-      <Routes>{routes}</Routes>
-    </BrowserRouter>
+    <UserProvider>
+      <BrowserRouter>
+        <Routes>{routes}</Routes>
+      </BrowserRouter>
+    </UserProvider>
   );
 }
 

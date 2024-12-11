@@ -1,5 +1,5 @@
 import { Alert, Button } from "antd";
-import React from "react";
+import React, { useContext } from "react";
 import { Header } from "antd/es/layout/layout";
 import { AuthContextProps, useAuth } from "react-oidc-context";
 import LoggedUserInfo from "./LoggedUserInfo";
@@ -13,6 +13,7 @@ import { useHttpRequest } from "../hook/useHttpRequestHook";
 import { GetLoggedInUser } from "../module/security/service/request/GetLoggedInUserRequest";
 import { UserModel } from "../module/security/model/UserModel";
 import { LogoutRequest } from "../module/security/service/request/LogoutRequest";
+import { UserContext } from "../hook/UserContext";
 
 const hStyle: React.CSSProperties = {
   textAlign: "center",
@@ -50,35 +51,34 @@ const BaseHeader: React.FC<{}> = () => {
   const navigate = useNavigate();
   const getLoggedInUserRequest = useHttpRequest(GetLoggedInUser);
   const logoutRequest = useHttpRequest(LogoutRequest);
-  const [loggedInUser, setLoggedInUser] = React.useState<UserModel | undefined>(
-    undefined,
-  );
+  const { user, setUser } = useContext(UserContext);
 
   React.useEffect(() => {
     getLoggedInUserRequest.exec({
       onCompletion: (response) => {
         const status = response.status;
         if (status === 200) {
-          setLoggedInUser(UserModel.parse(response.data));
+          setUser(UserModel.parse(response.data));
         } else {
           console.log("Failed to fetch user ", response);
-          setLoggedInUser(undefined);
+          setUser(undefined);
         }
       },
     });
   }, []);
 
   let authStatusBar: React.ReactElement;
-  if (loggedInUser) {
+  if (user) {
     authStatusBar = (
       <LoggedUserInfo
-        username={loggedInUser.username}
+        username={user.username}
         onLogout={() => {
           logoutRequest.exec({
             onCompletion: () => {
               navigate(getLoginRoute());
             },
           });
+          setUser(undefined);
         }}
       />
     );
