@@ -7,6 +7,7 @@ plugins {
 }
 
 ext.moduleName = 'org.vmalibu.modules'
+apply from: "frontend.gradle"
 
 allprojects {
 
@@ -74,46 +75,21 @@ allprojects {
         useJUnitPlatform()
     }
 
-//    task integrationTest(type: Test) {
-//        testClassesDirs = sourceSets.test_integration.output.classesDirs
-//        classpath = sourceSets.test_integration.runtimeClasspath
-//    }
-//
-//    check.dependsOn integrationTest
-
     tasks.withType(JavaCompile) {
         options.encoding = 'UTF-8'
     }
-
 
     springBoot {
         mainClass = "org.vmalibu.modules.entrypoint.AppStarter"
     }
 
     bootJar {
-        //launchScript()
-        archiveFileName = project.name + '-' + project.version + '.jar'
+        archiveFileName = 'boot-platform.jar'
         mainClass = 'org.vmalibu.modules.entrypoint.AppStarter'
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-
-//        from sourceSets.main.output
-//
-//        dependsOn configurations.runtimeClasspath
-//        from {
-//            configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
-//        }
-
     }
 
-//    jar {
-//        //zip64=true
-//        enabled = false
-//    }
-    
-    
 }
-
 
 dependencies {
     implementation project(':modules')
@@ -121,7 +97,3 @@ dependencies {
     implementation project(':maths-road-map')
 //    implementation project(':exercises')
 }
-
-
-
-

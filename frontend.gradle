@@ -1,0 +1,30 @@
+def reactAppDir = file("$projectDir/react-platform")
+def reactBuildDir = file("$reactAppDir/build")
+def resourcesDir = file("$projectDir/modules/src/main/resources/static")
+
+task cleanReact(type: Exec) {
+    workingDir reactAppDir
+    commandLine "yarn", "clean"
+}
+
+task installReact(type: Exec) {
+    dependsOn cleanReact
+    workingDir reactAppDir
+    commandLine "yarn", "install"
+}
+
+task buildReact(type: Exec) {
+    dependsOn installReact
+    workingDir reactAppDir
+    commandLine "yarn", "build"
+}
+
+task copyReactBuild(type: Copy) {
+    dependsOn buildReact
+    from reactBuildDir
+    into resourcesDir
+}
+
+tasks.named("processResources") {
+    dependsOn(copyReactBuild)
+}

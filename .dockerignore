@@ -1,0 +1,11 @@
+.idea
+.gradle
+build
+out
+data
+exercises
+gradlew.bat
+react-platform/node_modules
+react-platform/yarn.lock
+react-platform/package-lock.json
+.gitignore
