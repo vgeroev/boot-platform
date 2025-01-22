@@ -1,7 +1,6 @@
 import { Alert, Button } from "antd";
 import React, { useContext } from "react";
 import { Header } from "antd/es/layout/layout";
-import { AuthContextProps, useAuth } from "react-oidc-context";
 import LoggedUserInfo from "./LoggedUserInfo";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Spinner from "../component/spinner/Spinner";

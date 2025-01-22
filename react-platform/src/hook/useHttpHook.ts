@@ -1,16 +1,13 @@
 import { Modal } from "antd";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import qs from "qs";
-import { AuthContextProps, useAuth } from "react-oidc-context";
 import { IModelParser, ModelFactory } from "../model/BaseModel";
 
 type HttpResult = Record<"moduleError" | "data", any>;
 
 const httpCall = <M, D = any>(
-  authState: AuthContextProps,
 ): HttpCaller<M, D> => {
   return {
-    authState: authState,
     exec: async ({
       request,
       data,
@@ -107,7 +104,6 @@ export interface HttpRequestHookProps<D = any> {
 
 export interface HttpCaller<M = {}, D = any> {
   exec: (x: HttpRequestHookProps<D>) => Promise<HttpResponse<M | ModuleError>>;
-  authState: AuthContextProps;
 }
 
 export interface HttpCallerFactory {
@@ -137,10 +133,9 @@ export interface HttpResponse<R> {
 }
 
 export const useHttpCallerFactory = (): HttpCallerFactory => {
-  const auth: AuthContextProps = useAuth();
   return {
     newInstance: <M = {}, D = any>(): HttpCaller<M, D> => {
-      return httpCall<M>(auth);
+      return httpCall<M>();
     },
   };
 };

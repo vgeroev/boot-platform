@@ -4,7 +4,6 @@ import ApplicationList, {
   AppModule,
 } from "../../component/application/ApplicationList";
 import { useHttpRequest } from "../../hook/useHttpRequestHook";
-import { EXERCISE_SOURCE_LIST_PATH } from "../../module/exercises/route/ExercisesRouteGetter";
 import { getArticleListRoute } from "../../module/maths-road-map/route/MathsRoadMapRouteGetter";
 import { InitializedModulesRequest } from "../../service/request/InitializedModulesRequest";
 import { getMatrix } from "../../utils/GridUtils";
@@ -13,13 +12,6 @@ const applications: Map<string, AppModule> = initApplicationMap();
 
 function initApplicationMap(): Map<string, AppModule> {
   const apps: Map<string, AppModule> = new Map();
-
-  apps.set("org.vmalibu.module.exercises", {
-    uuid: "org.vmalibu.module.exercises",
-    name: "Exercises",
-    desc: "Your exercise solvings",
-    path: EXERCISE_SOURCE_LIST_PATH,
-  });
 
   apps.set("org.vmalibu.module.mathsroadmap", {
     uuid: "org.vmalibu.module.mathsroadmap",

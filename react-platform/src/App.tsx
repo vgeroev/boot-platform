@@ -3,7 +3,6 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import NotFound from "./component/notfound/NotFound";
 import { UserProvider } from "./hook/UserContext";
 import BaseLayout from "./layout/BaseLayout";
-import { moduleRoutes as exerciseModuleRoutes } from "./module/exercises/route/ExercisesRouteGetter";
 import { moduleRoutes as mathsRoadMapModuleRoutes } from "./module/maths-road-map/route/MathsRoadMapRouteGetter";
 import { moduleRoutes as securityRoutes } from "./module/security/route/SecurityRouteGetter";
 import Home from "./page/home/Home";
@@ -31,7 +30,6 @@ function App() {
     <Route path="/" element={<Navigate to={homeRoute} replace />} />,
   );
   routes = routes
-    .concat(getModuleRoutes(exerciseModuleRoutes))
     .concat(getModuleRoutes(securityRoutes))
     .concat(getModuleRoutes(mathsRoadMapModuleRoutes));
 
