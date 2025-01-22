@@ -39,7 +39,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "clean": "rm -rf node_modules/.cache build dist"
+    "clean": "rm -rf node_modules yarn.lock package-lock.json build && yarn cache clean"
   },
   "eslintConfig": {
     "extends": [
