@@ -70,7 +70,6 @@ module org.vmalibu.modules {
     exports org.vmalibu.modules.database.repository;
     exports org.vmalibu.modules.module.exception;
     exports org.vmalibu.modules.web.configuration;
-    exports org.vmalibu.modules.web.exception.advice;
     exports org.vmalibu.modules.web.advice;
     exports org.vmalibu.modules.threadpool;
     exports org.vmalibu.modules.settings;

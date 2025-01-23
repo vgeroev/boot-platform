@@ -1,4 +1,4 @@
-package org.vmalibu.modules.web.exception.advice;
+package org.vmalibu.modules.web.advice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.vmalibu.modules.module.exception.PlatformException;
@@ -10,7 +10,7 @@ import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 
 import java.util.function.Function;
 
-@RestControllerAdvice
+@RestControllerAdvice(basePackages = "org.vmalibu")
 @Slf4j
 public class ExceptionControllerAdvice {
 
