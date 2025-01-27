@@ -76,7 +76,8 @@ public class UserController {
                     )
             }
     )
-    public void addAccessRole(@PathVariable("id") long id, @PathVariable("accessRoleId") long accessRoleId) throws PlatformException {
+    public void addAccessRole(@Parameter(description = "ID of the user") @PathVariable("id") long id,
+                              @Parameter(description = "ID of the access role") @PathVariable("accessRoleId") long accessRoleId) throws PlatformException {
         userService.addAccessRole(id, accessRoleId);
     }
 
@@ -106,7 +107,8 @@ public class UserController {
                     )
             }
     )
-    public void removeAccessRole(@PathVariable("id") long id, @PathVariable("accessRoleId") long accessRoleId) throws PlatformException {
+    public void removeAccessRole(@Parameter(description = "ID of the user") @PathVariable("id") long id,
+                                 @Parameter(description = "ID of the access role") @PathVariable("accessRoleId") long accessRoleId) throws PlatformException {
         userService.removeAccessRole(id, accessRoleId);
     }
 }
