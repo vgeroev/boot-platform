@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
+import org.vmalibu.module.security.access.struct.AccessOp;
 import org.vmalibu.module.security.access.struct.AccessOpCollection;
 import org.vmalibu.module.security.access.struct.PrivilegeAuthority;
 import org.vmalibu.module.security.authorization.controller.ControllerAuthDetails;
@@ -74,7 +75,10 @@ public class PrivilegeAuthorizationManager implements CustomAuthorizationManager
             if (!(grantedAuthority instanceof PrivilegeAuthority privilegeAuthority)) {
                 throw new IllegalStateException("Granted authority is not PrivilegeAuthority: " + grantedAuthority);
             }
-            privileges.put(privilegeAuthority.getKey(), privilegeAuthority.getAccessOpCollection());
+            privileges.put(
+                    privilegeAuthority.getKey(),
+                    new AccessOpCollection(privilegeAuthority.getAccessOps().toArray(new AccessOp[0]))
+            );
         }
 
         return privileges;

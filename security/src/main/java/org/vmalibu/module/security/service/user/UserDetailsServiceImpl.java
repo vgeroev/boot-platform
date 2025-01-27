@@ -32,7 +32,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private Collection<PrivilegeAuthority> toAuthorities(Map<String, Set<AccessOp>> privileges) {
         List<PrivilegeAuthority> authorities = new ArrayList<>(privileges.size());
         for (Map.Entry<String, Set<AccessOp>> entry : privileges.entrySet()) {
-            authorities.add(new PrivilegeAuthority(entry.getKey(), entry.getValue().toArray(new AccessOp[0])));
+            authorities.add(new PrivilegeAuthority(entry.getKey(), entry.getValue()));
         }
         return authorities;
     }

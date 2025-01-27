@@ -58,7 +58,7 @@ public class JwtAuthenticationManager implements AuthenticationManager {
             for (Map.Entry<String, AbstractPrivilege> privilege : privilegeGetter.getAvailablePrivileges().entrySet()) {
                 Set<AccessOp> accessOps = privilegePretenders.get(privilege.getKey());
                 if (accessOps != null) {
-                    privilegeAuthorities.add(new PrivilegeAuthority(privilege.getKey(), accessOps.toArray(new AccessOp[0])));
+                    privilegeAuthorities.add(new PrivilegeAuthority(privilege.getKey(), accessOps));
                 }
             }
 
