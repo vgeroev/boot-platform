@@ -111,11 +111,11 @@ public class PrivilegeAuthorizationManager implements CustomAuthorizationManager
     private AuthorizationDecision resolveByAndJoinType(Map<String, AccessOpCollection> privileges,
                                                        Map<String, AccessOpCollection> controllerPrivileges) {
         for (Map.Entry<String, AccessOpCollection> entry : controllerPrivileges.entrySet()) {
-            if (!privileges.containsKey(entry.getKey())) {
+            AccessOpCollection sourceOpCollection = privileges.get(entry.getKey());
+            if (sourceOpCollection == null) {
                 return ACCESS_DENIED;
             }
 
-            AccessOpCollection sourceOpCollection = privileges.get(entry.getKey());
             if (!sourceOpCollection.contains(entry.getValue())) {
                 return ACCESS_DENIED;
             }
@@ -127,11 +127,9 @@ public class PrivilegeAuthorizationManager implements CustomAuthorizationManager
     private AuthorizationDecision resolveByOrJoinType(Map<String, AccessOpCollection> privileges,
                                                       Map<String, AccessOpCollection> controllerPrivileges) {
         for (Map.Entry<String, AccessOpCollection> entry : controllerPrivileges.entrySet()) {
-            if (privileges.containsKey(entry.getKey())) {
-                AccessOpCollection sourceOpCollection = privileges.get(entry.getKey());
-                if (sourceOpCollection.contains(entry.getValue())) {
-                    return ACCESS_GRANTED;
-                }
+            AccessOpCollection sourceOpCollection = privileges.get(entry.getKey());
+            if (sourceOpCollection != null && sourceOpCollection.contains(entry.getValue())) {
+                return ACCESS_GRANTED;
             }
         }
 
