@@ -15,6 +15,7 @@ import org.vmalibu.module.security.service.user.UserService;
 import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.module.exception.PlatformException;
 
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
@@ -40,7 +41,7 @@ class ArticleServiceImplTest extends BaseTestClass {
                 description,
                 latex,
                 configuration,
-                new AppUserSource(user.id(), user.username(), user.password())
+                new AppUserSource(user.id(), user.username(), user.password(), List.of())
         );
 
         Consumer<ArticleDTO> articleChecker = t ->
@@ -66,7 +67,7 @@ class ArticleServiceImplTest extends BaseTestClass {
                 RandomStringUtils.randomAlphabetic(100),
                 RandomStringUtils.randomAlphabetic(100),
                 RandomStringUtils.randomAlphabetic(100),
-                new AppUserSource(user.id(), user.username(), user.password())
+                new AppUserSource(user.id(), user.username(), user.password(), List.of())
         );
 
         Assertions.assertThat(articleService.findArticle(badId)).isNull();
@@ -86,7 +87,7 @@ class ArticleServiceImplTest extends BaseTestClass {
                 description1,
                 latex,
                 configuration,
-                new AppUserSource(user.id(), user.username(), user.password())
+                new AppUserSource(user.id(), user.username(), user.password(), List.of())
         );
 
         String title2 = "title2";
@@ -97,7 +98,7 @@ class ArticleServiceImplTest extends BaseTestClass {
                 description2,
                 latex,
                 configuration,
-                new AppUserSource(user.id(), user.username(), user.password())
+                new AppUserSource(user.id(), user.username(), user.password(), List.of())
         );
 
         String title3 = "Algebra";
@@ -108,7 +109,7 @@ class ArticleServiceImplTest extends BaseTestClass {
                 description3,
                 latex,
                 configuration,
-                new AppUserSource(user.id(), user.username(), user.password())
+                new AppUserSource(user.id(), user.username(), user.password(), List.of())
         );
 
         //--------------------------------------------------------------------------------------------------------------

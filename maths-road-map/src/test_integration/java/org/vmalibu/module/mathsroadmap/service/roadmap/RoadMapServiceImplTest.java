@@ -16,6 +16,7 @@ import org.vmalibu.module.security.service.user.UserService;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -49,7 +50,7 @@ class RoadMapServiceImplTest extends BaseTestClass {
         String title = RandomStringUtils.randomAlphabetic(10);
         String description =  RandomStringUtils.randomAlphabetic(10);
         UserDTO user = createUser();
-        UserSource userSource = new AppUserSource(user.id(), user.username(), user.password());
+        UserSource userSource = new AppUserSource(user.id(), user.username(), user.password(), List.of());
 
         Consumer<RoadMapDTO> checker = t ->
                 Assertions.assertThat(t).isNotNull()
@@ -69,7 +70,7 @@ class RoadMapServiceImplTest extends BaseTestClass {
         String title = RandomStringUtils.randomAlphabetic(10);
         String description =  RandomStringUtils.randomAlphabetic(10);
         UserDTO user = createUser();
-        UserSource userSource = new AppUserSource(user.id(), user.username(), user.password());
+        UserSource userSource = new AppUserSource(user.id(), user.username(), user.password(), List.of());
         RoadMapDTO roadMapDTO = roadMapService.create(title, description, userSource);
 
         RoadMapTreeDTO tree = roadMapService.getTree(roadMapDTO.id());
@@ -85,7 +86,7 @@ class RoadMapServiceImplTest extends BaseTestClass {
         String title = RandomStringUtils.randomAlphabetic(10);
         String description =  RandomStringUtils.randomAlphabetic(10);
         UserDTO user = createUser();
-        UserSource userSource = new AppUserSource(user.id(), user.username(), user.password());
+        UserSource userSource = new AppUserSource(user.id(), user.username(), user.password(), List.of());
         RoadMapDTO roadMapDTO = roadMapService.create(title, description, userSource);
 
         Assertions.assertThatThrownBy(() -> {
