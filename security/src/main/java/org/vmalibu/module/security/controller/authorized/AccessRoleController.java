@@ -204,7 +204,7 @@ public class AccessRoleController {
         @Schema(
                 description = "Updated privileges for the access role",
                 example = "{\"privilege_key\": [\"READ\",\"WRITE\"], \"another_privilege_key\": [\"EXECUTE\"]}",
-                type = "string"
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
         public void setPrivileges(Map<String, Set<AccessOp>> privileges) {
             this.privileges = OptionalField.of(privileges);
