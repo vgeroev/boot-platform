@@ -189,7 +189,12 @@ public class AccessRoleController {
         private OptionalField<String> name = OptionalField.empty();
         private OptionalField<Map<String, Set<AccessOp>>> privileges = OptionalField.empty();
 
-        @Schema(description = "Updated name of the access role", example = "Admin", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+        @Schema(
+                description = "Updated name of the access role",
+                example = "Admin",
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED,
+                type = "string"
+        )
         @JsonProperty(JSON_NAME)
         public void setName(String name) {
             this.name = OptionalField.of(name);
@@ -198,7 +203,8 @@ public class AccessRoleController {
         @JsonProperty(JSON_PRIVILEGES)
         @Schema(
                 description = "Updated privileges for the access role",
-                example = "{\"privilege_key\": [\"READ\",\"WRITE\"], \"another_privilege_key\": [\"EXECUTE\"]}"
+                example = "{\"privilege_key\": [\"READ\",\"WRITE\"], \"another_privilege_key\": [\"EXECUTE\"]}",
+                type = "string"
         )
         public void setPrivileges(Map<String, Set<AccessOp>> privileges) {
             this.privileges = OptionalField.of(privileges);
