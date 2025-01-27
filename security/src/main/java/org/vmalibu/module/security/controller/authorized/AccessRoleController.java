@@ -154,7 +154,7 @@ public class AccessRoleController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
             summary = "Delete an access role",
-            description = "(AccessRolePrivilege) Removes an access role from the system by its ID.",
+            description = "(AccessRolePrivilege: DELETE) Removes an access role from the system by its ID.",
             responses = {
                     @ApiResponse(
                             responseCode = "204",
