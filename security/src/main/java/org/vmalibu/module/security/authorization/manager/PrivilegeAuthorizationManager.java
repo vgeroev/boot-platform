@@ -1,10 +1,10 @@
 package org.vmalibu.module.security.authorization.manager;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -27,16 +27,14 @@ import java.util.function.Supplier;
 
 @Slf4j
 @Component
+@AllArgsConstructor
 public class PrivilegeAuthorizationManager implements CustomAuthorizationManager {
 
     protected static final AuthorizationDecision ACCESS_GRANTED = new AuthorizationDecision(true);
     protected static final AuthorizationDecision ACCESS_DENIED = new AuthorizationDecision(false);
 
-    @Autowired
-    protected ControllerMappingInfoGetter controllerMappingInfoGetter;
-    @Autowired
-    protected RequestMappingHandlerMapping handlerMapping;
-
+    private final ControllerMappingInfoGetter controllerMappingInfoGetter;
+    private final RequestMappingHandlerMapping handlerMapping;
 
     @Override
     public @Nullable AuthorizationDecision check(@NonNull Supplier<Authentication> authenticationSupplier,
@@ -100,33 +98,39 @@ public class PrivilegeAuthorizationManager implements CustomAuthorizationManager
     private AuthorizationDecision resolveAuthorizationDecision(Map<String, AccessOpCollection> privileges,
                                                                Map<String, AccessOpCollection> controllerPrivileges,
                                                                PrivilegeJoinType privilegeJoinType) {
-        if (privilegeJoinType == PrivilegeJoinType.AND) {
-            for (Map.Entry<String, AccessOpCollection> entry : controllerPrivileges.entrySet()) {
-                if (!privileges.containsKey(entry.getKey())) {
-                    return ACCESS_DENIED;
-                }
-
-                AccessOpCollection sourceOpCollection = privileges.get(entry.getKey());
-                if (!sourceOpCollection.contains(entry.getValue())) {
-                    return ACCESS_DENIED;
-                }
-            }
-
-            return ACCESS_GRANTED;
-        } else if (privilegeJoinType == PrivilegeJoinType.OR) {
-            for (Map.Entry<String, AccessOpCollection> entry : controllerPrivileges.entrySet()) {
-                if (privileges.containsKey(entry.getKey())) {
-                    AccessOpCollection sourceOpCollection = privileges.get(entry.getKey());
-                    if (sourceOpCollection.contains(entry.getValue())) {
-                        return ACCESS_GRANTED;
-                    }
-                }
-            }
-
-            return ACCESS_DENIED;
-        } else {
-            throw new IllegalStateException("Unknown privilege join type: " + privilegeJoinType);
-        }
+        return switch (privilegeJoinType) {
+            case AND -> resolveByAndJoinType(privileges, controllerPrivileges);
+            case OR -> resolveByOrJoinType(privileges, controllerPrivileges);
+        };
     }
 
+    private AuthorizationDecision resolveByAndJoinType(Map<String, AccessOpCollection> privileges,
+                                                       Map<String, AccessOpCollection> controllerPrivileges) {
+        for (Map.Entry<String, AccessOpCollection> entry : controllerPrivileges.entrySet()) {
+            if (!privileges.containsKey(entry.getKey())) {
+                return ACCESS_DENIED;
+            }
+
+            AccessOpCollection sourceOpCollection = privileges.get(entry.getKey());
+            if (!sourceOpCollection.contains(entry.getValue())) {
+                return ACCESS_DENIED;
+            }
+        }
+
+        return ACCESS_GRANTED;
+    }
+
+    private AuthorizationDecision resolveByOrJoinType(Map<String, AccessOpCollection> privileges,
+                                                      Map<String, AccessOpCollection> controllerPrivileges) {
+        for (Map.Entry<String, AccessOpCollection> entry : controllerPrivileges.entrySet()) {
+            if (privileges.containsKey(entry.getKey())) {
+                AccessOpCollection sourceOpCollection = privileges.get(entry.getKey());
+                if (sourceOpCollection.contains(entry.getValue())) {
+                    return ACCESS_GRANTED;
+                }
+            }
+        }
+
+        return ACCESS_DENIED;
+    }
 }
