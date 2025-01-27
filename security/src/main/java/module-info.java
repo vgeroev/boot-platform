@@ -56,6 +56,7 @@ module org.vmalibu.module.security {
     opens org.vmalibu.module.security.database.domainobject to org.hibernate.orm.core, spring.core, spring.beans;
     opens org.vmalibu.module.security.database.dao to spring.data.commons;
     opens org.vmalibu.module.security.service.user to spring.core;
+    opens org.vmalibu.module.security.service.accessrole to spring.core;
     opens org.vmalibu.module.security.controller.authorized to spring.beans;
     opens org.vmalibu.module.security.controller.anon to spring.beans;
     opens org.vmalibu.module.security.configuration.authorized to spring.core;
