@@ -1,5 +1,10 @@
 package org.vmalibu.module.security.controller.authorized;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +22,7 @@ import org.vmalibu.modules.module.exception.PlatformException;
 
 @RestController
 @RequestMapping(SecurityModuleConsts.REST_AUTHORIZED_PREFIX + "/user")
+@Tag(name = "User Management", description = "Endpoints for managing users")
 @AllArgsConstructor
 public class UserController {
 
@@ -24,7 +30,18 @@ public class UserController {
 
     @GetMapping("/logged-in")
     @ResponseStatus(HttpStatus.OK)
-    public UserDTO getLoggedInUser(UserSource userSource) throws PlatformException {
+    @Operation(
+            summary = "Get the currently logged-in user",
+            description = "Retrieves details of the currently authenticated user.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "User details retrieved successfully",
+                            content = @Content(mediaType = "application/json")
+                    )
+            }
+    )
+    public UserDTO getLoggedInUser(@Parameter(hidden = true) UserSource userSource) throws PlatformException {
         long id = userSource.getId();
         UserDTO user = userService.findById(id);
         if (user == null) {
@@ -41,6 +58,24 @@ public class UserController {
             )
     )
     @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            summary = "Assign an access role to a user",
+            description = "(UserPrivilege: WRITE) Grants a specified access role to the given user.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Access role added successfully"
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden - Insufficient privileges"
+                    ),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "User or access role not found"
+                    )
+            }
+    )
     public void addAccessRole(@PathVariable("id") long id, @PathVariable("accessRoleId") long accessRoleId) throws PlatformException {
         userService.addAccessRole(id, accessRoleId);
     }
@@ -53,6 +88,24 @@ public class UserController {
             )
     )
     @ResponseStatus(HttpStatus.OK)
+    @Operation(
+            summary = "Remove an access role from a user",
+            description = "(UserPrivilege: WRITE) Revokes a specified access role from the given user.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Access role removed successfully"
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden - Insufficient privileges"
+                    ),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "User or access role not found"
+                    )
+            }
+    )
     public void removeAccessRole(@PathVariable("id") long id, @PathVariable("accessRoleId") long accessRoleId) throws PlatformException {
         userService.removeAccessRole(id, accessRoleId);
     }

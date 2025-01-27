@@ -42,4 +42,7 @@ RUN apt-get -y update  \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 EXPOSE 8078 8078
-CMD ["/var/lib/jdk/bin/java","-XX:+UseG1GC", "-Xmx512m","-server","-jar", "/var/lib/boot-platform/jar/boot-platform.jar"]
+CMD [
+    "/var/lib/jdk/bin/java","-XX:+UseG1GC", "-Xmx512m","-server","-jar", "/var/lib/boot-platform/jar/boot-platform.jar",
+    "--springdoc.api-docs.enabled=false"
+    ]

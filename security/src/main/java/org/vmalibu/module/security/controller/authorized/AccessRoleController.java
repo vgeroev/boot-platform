@@ -1,6 +1,12 @@
 package org.vmalibu.module.security.controller.authorized;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.http.HttpStatus;
@@ -23,6 +29,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping(SecurityModuleConsts.REST_AUTHORIZED_PREFIX + "/access-role")
+@Tag(name = "Access Roles", description = "Endpoints for managing access roles")
 @AllArgsConstructor
 public class AccessRoleController {
 
@@ -36,7 +43,26 @@ public class AccessRoleController {
             )
     )
     @ResponseStatus(HttpStatus.OK)
-    public AccessRoleDTO getAccessRole(@PathVariable("id") long id) {
+    @Operation(
+            summary = "Get access role by ID",
+            description = "(AccessRolePrivilege: READ) Retrieves an access role based on the provided role ID.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Access role retrieved successfully",
+                            content = @Content(mediaType = "application/json")
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden - Insufficient privileges"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Access role not found"
+                    )
+            }
+    )
+    public AccessRoleDTO getAccessRole(@Parameter(description = "ID of the access role") @PathVariable("id") long id) {
         return accessRoleService.findById(id);
     }
 
@@ -48,6 +74,25 @@ public class AccessRoleController {
             )
     )
     @ResponseStatus(HttpStatus.CREATED)
+    @Operation(
+            summary = "Create a new access role",
+            description = "(AccessRolePrivilege: WRITE) Creates a new access role with the specified name.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "201",
+                            description = "Access role created successfully",
+                            content = @Content(mediaType = "application/json")
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden - Insufficient privileges"
+                    ),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "Invalid input - name is empty"
+                    )
+            }
+    )
     public AccessRoleDTO create(@RequestBody CreateAccessRoleRequest request) throws PlatformException {
         if (!StringUtils.hasText(request.name)) {
             throw GeneralExceptionFactory.buildEmptyValueException(DBAccessRole.class, DBAccessRole.Fields.name);
@@ -64,7 +109,26 @@ public class AccessRoleController {
             )
     )
     @ResponseStatus(HttpStatus.OK)
-    public AccessRoleDTO update(@PathVariable("id") long id, @RequestBody UpdateAccessRoleRequest request) throws PlatformException {
+    @Operation(
+            summary = "Update an existing access role",
+            description = "(AccessRolePrivilege: WRITE) Updates an access role's name and privileges.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Access role updated successfully",
+                            content = @Content(mediaType = "application/json")
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden - Insufficient privileges"
+                    ),
+                    @ApiResponse(
+                            responseCode = "409",
+                            description = "name/privileges is empty or there is no access role by such ID"
+                    )
+            }
+    )
+    public AccessRoleDTO update(@Parameter(description = "ID of the access role") @PathVariable("id") long id, @RequestBody UpdateAccessRoleRequest request) throws PlatformException {
         if (request.name.isPresent()) {
             String name = request.name.get();
             if (!StringUtils.hasText(name)) {
@@ -88,7 +152,21 @@ public class AccessRoleController {
             )
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void remove(@PathVariable("id") long id) throws PlatformException {
+    @Operation(
+            summary = "Delete an access role",
+            description = "(AccessRolePrivilege) Removes an access role from the system by its ID.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Access role removed successfully"
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Forbidden - Insufficient privileges"
+                    )
+            }
+    )
+    public void remove(@Parameter(description = "ID of the access role") @PathVariable("id") long id) throws PlatformException {
         accessRoleService.remove(id);
     }
 
@@ -97,6 +175,7 @@ public class AccessRoleController {
 
         static final String JSON_NAME = "name";
 
+        @Schema(description = "Name of the new access role", example = "Admin", requiredMode = Schema.RequiredMode.REQUIRED)
         @JsonProperty(JSON_NAME)
         private String name;
     }
@@ -110,12 +189,17 @@ public class AccessRoleController {
         private OptionalField<String> name = OptionalField.empty();
         private OptionalField<Map<String, Set<AccessOp>>> privileges = OptionalField.empty();
 
+        @Schema(description = "Updated name of the access role", example = "Admin", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
         @JsonProperty(JSON_NAME)
         public void setName(String name) {
             this.name = OptionalField.of(name);
         }
 
         @JsonProperty(JSON_PRIVILEGES)
+        @Schema(
+                description = "Updated privileges for the access role",
+                example = "{\"privilege_key\": [\"READ\",\"WRITE\"], \"another_privilege_key\": [\"EXECUTE\"]}"
+        )
         public void setPrivileges(Map<String, Set<AccessOp>> privileges) {
             this.privileges = OptionalField.of(privileges);
         }
