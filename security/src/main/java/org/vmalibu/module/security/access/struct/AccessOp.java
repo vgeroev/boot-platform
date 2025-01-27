@@ -1,4 +1,4 @@
-package org.vmalibu.module.security.access;
+package org.vmalibu.module.security.access.struct;
 
 import lombok.Getter;
 

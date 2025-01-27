@@ -2,11 +2,12 @@ package org.vmalibu.module.security.controller.authorized;
 
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.vmalibu.module.security.SecurityModuleConsts;
+import org.vmalibu.module.security.access.UserPrivilege;
+import org.vmalibu.module.security.access.struct.AccessOp;
+import org.vmalibu.module.security.authorization.controller.privilege.AccessPermission;
+import org.vmalibu.module.security.authorization.controller.privilege.PrivilegeAccess;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.module.security.database.domainobject.DBUser;
 import org.vmalibu.module.security.service.user.UserDTO;
@@ -30,5 +31,29 @@ public class UserController {
             throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DBUser.class, id);
         }
         return user;
+    }
+
+    @PatchMapping("/{id}/add-access-role/{accessRoleId}")
+    @AccessPermission(
+            values = @PrivilegeAccess(
+                    privilege = UserPrivilege.class,
+                    ops = AccessOp.WRITE
+            )
+    )
+    @ResponseStatus(HttpStatus.OK)
+    public void addAccessRole(@PathVariable("id") long id, @PathVariable("accessRoleId") long accessRoleId) throws PlatformException {
+        userService.addAccessRole(id, accessRoleId);
+    }
+
+    @PatchMapping("/{id}/remove-access-role/{accessRoleId}")
+    @AccessPermission(
+            values = @PrivilegeAccess(
+                    privilege = UserPrivilege.class,
+                    ops = AccessOp.WRITE
+            )
+    )
+    @ResponseStatus(HttpStatus.OK)
+    public void removeAccessRole(@PathVariable("id") long id, @PathVariable("accessRoleId") long accessRoleId) throws PlatformException {
+        userService.removeAccessRole(id, accessRoleId);
     }
 }

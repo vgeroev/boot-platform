@@ -10,5 +10,11 @@ public interface UserService {
 
     @Nullable UserDTO findByUsername(@NonNull String username);
 
+    @Nullable UserWithPrivilegesDTO findWithPrivileges(@NonNull String username);
+
     @NonNull UserDTO create(@NonNull String username, @NonNull String password) throws PlatformException;
+
+    void addAccessRole(long id, long accessRoleId) throws PlatformException;
+
+    void removeAccessRole(long id, long accessRoleId) throws PlatformException;
 }

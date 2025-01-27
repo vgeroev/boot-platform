@@ -1,7 +1,7 @@
 package org.vmalibu.module.security.authorization.controller.privilege;
 
-import org.vmalibu.module.security.access.AbstractPrivilege;
-import org.vmalibu.module.security.access.AccessOp;
+import org.vmalibu.module.security.access.struct.AbstractPrivilege;
+import org.vmalibu.module.security.access.struct.AccessOp;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

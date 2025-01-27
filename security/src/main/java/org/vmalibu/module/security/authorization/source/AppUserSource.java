@@ -6,7 +6,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Objects;
 
 @Getter
@@ -15,16 +14,21 @@ public class AppUserSource implements UserSource, UserDetails {
     private final long id;
     private final String username;
     private final String password;
+    private final Collection<? extends GrantedAuthority> authorities;
 
-    public AppUserSource(long id, @NonNull String username, @NonNull String password) {
+    public AppUserSource(long id,
+                         @NonNull String username,
+                         @NonNull String password,
+                         Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.authorities = authorities;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList();
+        return authorities;
     }
 
     @Override

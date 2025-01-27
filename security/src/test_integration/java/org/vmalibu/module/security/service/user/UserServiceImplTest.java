@@ -5,8 +5,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.vmalibu.module.security.BaseTestClass;
+import org.vmalibu.module.security.access.AccessRolePrivilege;
+import org.vmalibu.module.security.access.UserPrivilege;
+import org.vmalibu.module.security.access.struct.AccessOp;
+import org.vmalibu.module.security.service.accessrole.AccessRoleDTO;
+import org.vmalibu.module.security.service.accessrole.AccessRoleService;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
+import org.vmalibu.modules.utils.OptionalField;
+
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.Set;
 
 import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.*;
 
@@ -14,6 +24,9 @@ public class UserServiceImplTest extends BaseTestClass {
 
     @Autowired
     private UserServiceImpl userService;
+
+    @Autowired
+    private AccessRoleService accessRoleService;
 
     @Test
     @DisplayName("Test Case: User creation")
@@ -102,5 +115,53 @@ public class UserServiceImplTest extends BaseTestClass {
         Assertions.assertThat(found).isNotNull()
                 .returns(userDTO.id(), UserDTO::id)
                 .returns(userDTO.username(), UserDTO::username);
+    }
+
+    @Test
+    @DisplayName("Test Case: Find user with privileges")
+    void findWithPrivilegesTest() throws PlatformException {
+        String username = "username";
+
+        UserDTO userDTO = userService.create(username, randomAlphanumeric(10));
+        AccessRoleDTO accessRole1 = accessRoleService.create("ar_1");
+        accessRoleService.update(
+                accessRole1.id(),
+                OptionalField.empty(),
+                OptionalField.of(
+                        Map.of(
+                                UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.WRITE),
+                                AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ)
+                        )
+                )
+        );
+        AccessRoleDTO accessRole2 = accessRoleService.create("ar_2");
+        accessRoleService.update(
+                accessRole2.id(),
+                OptionalField.empty(),
+                OptionalField.of(
+                        Map.of(
+                                UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ, AccessOp.DELETE)
+                        )
+                )
+        );
+
+        userService.addAccessRole(userDTO.id(), accessRole1.id());
+        userService.addAccessRole(userDTO.id(), accessRole2.id());
+
+        //--------------------------------------------------------------------------------------------------------------
+
+        UserWithPrivilegesDTO user = userService.findWithPrivileges(username);
+        Assertions.assertThat(user).isNotNull();
+
+        UserDTO found = user.user();
+        Assertions.assertThat(found).isNotNull()
+                .returns(userDTO.id(), UserDTO::id)
+                .returns(userDTO.username(), UserDTO::username);
+
+        Assertions.assertThat(user.privileges()).isNotNull()
+                .containsOnly(
+                        new AbstractMap.SimpleEntry<>(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ, AccessOp.WRITE, AccessOp.DELETE)),
+                        new AbstractMap.SimpleEntry<>(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ))
+                );
     }
 }

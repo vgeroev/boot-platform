@@ -1,0 +1,101 @@
+databaseChangeLog:
+  - preConditions:
+
+  - changeSet:
+      id: 1.0.7
+      author: vmalibu
+      changes:
+        - createTable:
+            tableName: security_access_role
+            remarks: Access Roles
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_access_role
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: security_access_role
+            columnNames: name
+            constraintName: unique_name
+
+        - createTable:
+            tableName: security_privilege
+            remarks: Privileges
+            columns:
+              - column:
+                  name: fk_access_role
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: key
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: integer
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: security_privilege
+            columnNames: fk_access_role, key
+            constraintName: pk_privilege
+
+        - addForeignKeyConstraint:
+            baseTableName: security_privilege
+            baseColumnNames: fk_access_role
+            referencedTableName: security_access_role
+            referencedColumnNames: id
+            constraintName: fk_privilege_to_access_role
+
+        - createTable:
+            tableName: security_user_access_role
+            remarks: Linking tables security_users <-> security_access_role
+            columns:
+              - column:
+                  name: fk_user
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fk_access_role
+                  type: bigint
+                  constraints:
+                    nullable: false
+
+        - addPrimaryKey:
+            tableName: security_user_access_role
+            columnNames: fk_user, fk_access_role
+            constraintName: pk_user_access_role
+
+        - addForeignKeyConstraint:
+            baseTableName: security_user_access_role
+            baseColumnNames: fk_user
+            referencedTableName: security_users
+            referencedColumnNames: id
+            constraintName: fk_user_access_role_user
+
+        - addForeignKeyConstraint:
+            baseTableName: security_user_access_role
+            baseColumnNames: fk_access_role
+            referencedTableName: security_access_role
+            referencedColumnNames: id
+            constraintName: fk_user_access_role_access_role
+
+
+

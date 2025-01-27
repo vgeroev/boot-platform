@@ -1,4 +1,4 @@
-package org.vmalibu.module.security.access;
+package org.vmalibu.module.security.access.struct;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -42,6 +42,10 @@ public class AccessOpCollection implements Serializable {
         return true;
     }
 
+    public boolean contains(@NonNull Collection<@NonNull AccessOp> ops) {
+        return contains(ops.toArray(new AccessOp[0]));
+    }
+
     public void setOps(@NonNull AccessOp[] ops) {
         value = 0;
         addOps(ops);
@@ -60,14 +64,14 @@ public class AccessOpCollection implements Serializable {
     }
 
     public @NonNull Set<AccessOp> toOps() {
-        List<AccessOp> result = new ArrayList<>();
+        Set<AccessOp> result = new HashSet<>();
         for (AccessOp op : AccessOp.values()) {
             if (contains(op)) {
                 result.add(op);
             }
         }
 
-        return EnumSet.copyOf(result);
+        return Collections.unmodifiableSet(result);
     }
 
     @Override

@@ -3,12 +3,13 @@ package org.vmalibu.module.security.database.converter;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import org.vmalibu.module.security.access.AccessOp;
-import org.vmalibu.module.security.access.AccessOpCollection;
+import org.vmalibu.module.security.access.struct.AccessOp;
+import org.vmalibu.module.security.access.struct.AccessOpCollection;
 
 import java.util.Set;
 
-@Converter
+// Without autoApply does not work. ;(
+@Converter(autoApply = true)
 public class AccessOpsConverter implements AttributeConverter<Set<AccessOp>, Integer> {
 
     @Override

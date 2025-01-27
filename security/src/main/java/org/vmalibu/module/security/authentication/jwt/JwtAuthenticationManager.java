@@ -19,9 +19,9 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.vmalibu.module.security.access.AbstractPrivilege;
-import org.vmalibu.module.security.access.AccessOp;
-import org.vmalibu.module.security.access.PrivilegeAuthority;
+import org.vmalibu.module.security.access.struct.AbstractPrivilege;
+import org.vmalibu.module.security.access.struct.AccessOp;
+import org.vmalibu.module.security.access.struct.PrivilegeAuthority;
 import org.vmalibu.module.security.service.privilege.PrivilegeGetter;
 import org.vmalibu.module.security.service.user.UserDTO;
 import org.vmalibu.module.security.service.user.UserService;
@@ -55,7 +55,7 @@ public class JwtAuthenticationManager implements AuthenticationManager {
             Map<String, Set<AccessOp>> privilegePretenders = parsePrivilegePretenders(jwtAuthenticationToken);
 
             Set<PrivilegeAuthority> privilegeAuthorities = new HashSet<>();
-            for (AbstractPrivilege privilege : privilegeGetter.getAvailablePrivileges()) {
+            for (Map.Entry<String, AbstractPrivilege> privilege : privilegeGetter.getAvailablePrivileges().entrySet()) {
                 Set<AccessOp> accessOps = privilegePretenders.get(privilege.getKey());
                 if (accessOps != null) {
                     privilegeAuthorities.add(new PrivilegeAuthority(privilege.getKey(), accessOps.toArray(new AccessOp[0])));

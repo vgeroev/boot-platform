@@ -6,16 +6,24 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.vmalibu.module.security.access.struct.AccessOp;
+import org.vmalibu.module.security.access.struct.AccessOpCollection;
+import org.vmalibu.module.security.database.dao.AccessRoleDAO;
 import org.vmalibu.module.security.database.dao.UserDAO;
+import org.vmalibu.module.security.database.domainobject.DBAccessRole;
+import org.vmalibu.module.security.database.domainobject.DBPrivilege;
 import org.vmalibu.module.security.database.domainobject.DBUser;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
+
+import java.util.*;
 
 @Service
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserDAO userDAO;
+    private final AccessRoleDAO accessRoleDAO;
 
     @Override
     @Transactional(readOnly = true)
@@ -30,7 +38,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
+    public @Nullable UserWithPrivilegesDTO findWithPrivileges(@NonNull String username) {
+        Optional<DBUser> oUser = userDAO.findWithPrivileges(username);
+        if (oUser.isEmpty()) {
+            return null;
+        }
+
+        DBUser user = oUser.get();
+        Map<String, Set<AccessOp>> privileges = mergePrivileges(user.getAccessRoles());
+
+        return new UserWithPrivilegesDTO(UserDTO.from(user), privileges);
+    }
+
+    @Override
+    @Transactional(rollbackFor = PlatformException.class)
     public @NonNull UserDTO create(@NonNull String username, @NonNull String password) throws PlatformException {
         checkNotEmpty(DBUser.DB_USERNAME, username);
         checkNotEmpty(DBUser.DB_PASSWORD, password);
@@ -44,6 +66,22 @@ public class UserServiceImpl implements UserService {
         return UserDTO.from(userDAO.save(user));
     }
 
+    @Transactional(rollbackFor = PlatformException.class)
+    @Override
+    public void addAccessRole(long id, long accessRoleId) throws PlatformException {
+        DBUser user = userDAO.checkExistenceAndGet(id);
+        DBAccessRole accessRole = accessRoleDAO.checkExistenceAndGet(accessRoleId);
+        user.getAccessRoles().add(accessRole);
+    }
+
+    @Transactional(rollbackFor = PlatformException.class)
+    @Override
+    public void removeAccessRole(long id, long accessRoleId) throws PlatformException {
+        DBUser user = userDAO.checkExistenceAndGet(id);
+        DBAccessRole accessRole = accessRoleDAO.checkExistenceAndGet(accessRoleId);
+        user.getAccessRoles().removeIf(role -> Objects.equals(role.getId(), accessRole.getId()));
+    }
+
     private void checkUsernameUniqueness(String username) throws PlatformException {
         boolean exists = userDAO.isExistByUsername(username);
         if (exists) {
@@ -55,5 +93,22 @@ public class UserServiceImpl implements UserService {
         if (!StringUtils.hasText(value)) {
             throw GeneralExceptionFactory.buildEmptyValueException(DBUser.class, field);
         }
+    }
+
+    private Map<String, Set<AccessOp>> mergePrivileges(Set<DBAccessRole> accessRoles) {
+        Map<String, AccessOpCollection> mergedPrivileges = new HashMap<>();
+        for (DBAccessRole accessRole : accessRoles) {
+            for (DBPrivilege privilege : accessRole.getPrivileges()) {
+                mergedPrivileges.compute(privilege.getKey(), (key, accessOpCollection) -> {
+                    accessOpCollection = Objects.requireNonNullElseGet(accessOpCollection, AccessOpCollection::new);
+                    return accessOpCollection.addOps(privilege.getValue().toArray(new AccessOp[0]));
+                });
+            }
+        }
+
+        Map<String, Set<AccessOp>> result = new HashMap<>(mergedPrivileges.size());
+        mergedPrivileges.forEach((k, v) -> result.put(k, v.toOps()));
+
+        return result;
     }
 }

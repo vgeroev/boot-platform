@@ -10,15 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.vmalibu.module.security.SecurityModuleConsts;
-import org.vmalibu.module.security.WebMvcTestBaseClass;
+import org.vmalibu.module.security.WebMvcTestConfigurationTest;
+import org.vmalibu.module.security.configuration.AuthWebConfiguration;
 import org.vmalibu.module.security.service.user.UserDTO;
 import org.vmalibu.module.security.service.user.UserService;
+import org.vmalibu.modules.web.advice.ExceptionControllerAdvice;
+import org.vmalibu.modules.web.advice.JsonResponseBodyAdvice;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -27,19 +29,22 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(RegisterController.class)
-@ContextConfiguration(classes = RegisterController.class)
-class RegisterControllerTest extends WebMvcTestBaseClass {
+@ContextConfiguration(classes = {
+        RegisterController.class,
+        AuthWebConfiguration.class,
+        WebMvcTestConfigurationTest.class,
+        ExceptionControllerAdvice.class,
+        JsonResponseBodyAdvice.class
+})
+class RegisterControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
     @MockBean
     private UserService userService;
-    @MockBean
-    private UserDetailsService userDetailsService;
     @MockBean
     private PasswordEncoder passwordEncoder;
 
@@ -74,7 +79,8 @@ class RegisterControllerTest extends WebMvcTestBaseClass {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestJson)
         ).andExpect(status().isCreated())
-                .andExpect(content().json(objectMapper.writeValueAsString(userDTO)));
+                .andExpect(jsonPath("$.data.id").value(userDTO.id()))
+                .andExpect(jsonPath("$.data.username").value(userDTO.username()));
 
         verify(passwordEncoder, only()).encode(password);
         verify(userService, only()).create(username, password);

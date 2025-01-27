@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.vmalibu.module.security.authorization.source.AppUserSource;
 
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.mockito.Mockito.*;
@@ -27,7 +28,7 @@ class UserDetailsServiceImplTest {
     @Test
     @DisplayName("Test Case: Loading user by username when there is no such user. Awaiting UsernameNotFoundException")
     void loadUserByUsernameWhenThereIsNoSuchUserTest() {
-        when(userService.findByUsername(anyString())).thenReturn(null);
+        when(userService.findWithPrivileges(anyString())).thenReturn(null);
 
         Assertions.assertThatThrownBy(
                 () -> userDetailsService.loadUserByUsername(RandomStringUtils.randomAlphabetic(10))
@@ -45,7 +46,7 @@ class UserDetailsServiceImplTest {
         when(userDTO.id()).thenReturn(userId);
         when(userDTO.username()).thenReturn(username);
         when(userDTO.password()).thenReturn(password);
-        when(userService.findByUsername(username)).thenReturn(userDTO);
+        when(userService.findWithPrivileges(username)).thenReturn(new UserWithPrivilegesDTO(userDTO, Map.of()));
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
         Assertions.assertThat(userDetails).isNotNull()

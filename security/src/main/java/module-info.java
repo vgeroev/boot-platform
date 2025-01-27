@@ -27,10 +27,13 @@ module org.vmalibu.module.security {
     requires com.fasterxml.jackson.annotation;
     requires com.fasterxml.jackson.databind;
     requires org.checkerframework.checker.qual;
+    requires io.swagger.v3.oas.annotations;
 
     exports org.vmalibu.module.security.service.privilege;
     exports org.vmalibu.module.security;
+    exports org.vmalibu.module.security.exception;
     exports org.vmalibu.module.security.access;
+    exports org.vmalibu.module.security.access.struct;
     exports org.vmalibu.module.security.database.converter;
     exports org.vmalibu.module.security.database.domainobject;
     exports org.vmalibu.module.security.controller.authorized;
@@ -38,6 +41,7 @@ module org.vmalibu.module.security {
     exports org.vmalibu.module.security.database.dao;
     exports org.vmalibu.module.security.database.changelog to spring.beans;
     exports org.vmalibu.module.security.service.user;
+    exports org.vmalibu.module.security.service.accessrole;
     exports org.vmalibu.module.security.authentication.jwt;
     exports org.vmalibu.module.security.authorization.manager;
     exports org.vmalibu.module.security.authorization.controller;

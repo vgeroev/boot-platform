@@ -12,6 +12,8 @@ import org.vmalibu.module.security.SecurityModuleConsts;
 import org.vmalibu.modules.database.domainobject.IdentityGeneratedDomainObject;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @Table(
         name = SecurityModuleConsts.DB_PREFIX + "users"
@@ -43,4 +45,18 @@ public class DBUser extends IdentityGeneratedDomainObject {
     @LastModifiedDate
     @Column(name = DB_UPDATED_AT)
     private Date updatedAt;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = SecurityModuleConsts.DB_PREFIX + "user_access_role",
+            joinColumns = @JoinColumn(
+                    name = "fk_user",
+                    referencedColumnName = "id"
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "fk_access_role",
+                    referencedColumnName = "id"
+            )
+    )
+    private Set<DBAccessRole> accessRoles = new HashSet<>();
 }

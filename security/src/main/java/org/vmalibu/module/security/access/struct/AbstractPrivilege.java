@@ -1,4 +1,4 @@
-package org.vmalibu.module.security.access;
+package org.vmalibu.module.security.access.struct;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 
@@ -17,7 +17,7 @@ public abstract class AbstractPrivilege {
     }
 
     public @NonNull AccessOpCollection getAccessOpCollection() {
-        return accessOpCollection;
+        return new AccessOpCollection(accessOpCollection.getValue());
     }
 
 }
