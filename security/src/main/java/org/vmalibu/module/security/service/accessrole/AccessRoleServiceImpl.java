@@ -102,13 +102,19 @@ public class AccessRoleServiceImpl implements AccessRoleService {
     private void checkPrivileges(Map<String, Set<AccessOp>> privileges) throws PlatformException {
         Map<String, AbstractPrivilege> availablePrivileges = privilegeGetter.getAvailablePrivileges();
         for (Map.Entry<String, Set<AccessOp>> entry : privileges.entrySet()) {
-            AbstractPrivilege existingPrivilege = availablePrivileges.get(entry.getKey());
-            if (existingPrivilege == null) {
-                throw SecurityExceptionFactory.buildInvalidPrivilegeKeyException(entry.getKey());
+            String key = entry.getKey();
+            Set<AccessOp> accessOps = entry.getValue();
+
+            if (accessOps.isEmpty()) {
+                throw SecurityExceptionFactory.buildNoPrivilegeAccessOpsException(key);
             }
 
-            Set<AccessOp> newAccessOps = entry.getValue();
-            if (!existingPrivilege.getAccessOpCollection().contains(newAccessOps)) {
+            AbstractPrivilege existingPrivilege = availablePrivileges.get(key);
+            if (existingPrivilege == null) {
+                throw SecurityExceptionFactory.buildInvalidPrivilegeKeyException(key);
+            }
+
+            if (!existingPrivilege.getAccessOpCollection().contains(accessOps)) {
                 throw SecurityExceptionFactory.buildInvalidPrivilegeAccessOpsException();
             }
         }

@@ -159,6 +159,27 @@ public class AccessRoleServiceImplTest extends BaseTestClass {
     }
 
     @Test
+    @DisplayName("Test Case: AccessRole updating when privilege does not have access operations. Awaiting PlatformException")
+    void updateWhenPrivilegeDoesNotHaveAccessOperationsTest() throws PlatformException {
+        String name = randomAlphanumeric(10);
+        AccessRoleDTO accessRole = accessRoleService.create(name);
+
+        //--------------------------------------------------------------------------------------------------------------
+
+        Assertions.assertThatThrownBy(() -> accessRoleService.update(
+                        accessRole.id(),
+                        OptionalField.empty(),
+                        OptionalField.of(
+                                Map.of(
+                                        UserPrivilege.INSTANCE.getKey(), Set.of()
+                                )
+                        ))
+                ).isExactlyInstanceOf(PlatformException.class)
+                .hasMessageContaining(SecurityExceptionFactory.NO_PRIVILEGE_ACCESS_OPS)
+                .hasMessageContaining(UserPrivilege.INSTANCE.getKey());
+    }
+
+    @Test
     @DisplayName("Test Case: AccessRole updating when privilege key is invalid. Awaiting PlatformException")
     void updateWhenPrivilegeKeyIsInvalidTest() throws PlatformException {
         String name = randomAlphanumeric(10);
@@ -188,14 +209,13 @@ public class AccessRoleServiceImplTest extends BaseTestClass {
 
         //--------------------------------------------------------------------------------------------------------------
 
-        String invalidPrivilegeKey = "invalid_key";
         Assertions.assertThatThrownBy(() -> accessRoleService.update(
                         accessRole.id(),
                         OptionalField.empty(),
                         OptionalField.of(
                                 Map.of(
                                         UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ, AccessOp.WRITE),
-                                        // EXECUTE does not appropriate to AccessRolePrivilege
+                                        // EXECUTE does not belong to AccessRolePrivilege
                                         AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.EXECUTE))
                         )
                 )).isExactlyInstanceOf(PlatformException.class)
