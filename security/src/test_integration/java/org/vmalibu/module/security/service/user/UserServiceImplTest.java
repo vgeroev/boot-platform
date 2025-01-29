@@ -164,4 +164,22 @@ public class UserServiceImplTest extends BaseTestClass {
                         new AbstractMap.SimpleEntry<>(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ))
                 );
     }
+
+    @Test
+    @DisplayName("Test Case: Adding access role to user when there is no such user. Awaiting PlatformException")
+    void addAccessRoleWhenThereIsNoSuchUserTest() throws PlatformException {
+        AccessRoleDTO accessRole = accessRoleService.create("ar_1");
+        Assertions.assertThatThrownBy(() -> userService.addAccessRole(1234L, accessRole.id()))
+                .isExactlyInstanceOf(PlatformException.class)
+                .hasMessageContaining(GeneralExceptionFactory.NOT_FOUND_DOMAIN_OBJECT_CODE);
+    }
+
+    @Test
+    @DisplayName("Test Case: Adding access role to user when there is no such access role")
+    void addAccessRoleWhenThereIsNoSuchAccessRoleTest() throws PlatformException {
+        UserDTO userDTO = userService.create("username", randomAlphanumeric(10));
+        Assertions.assertThatThrownBy(() -> userService.addAccessRole(userDTO.id(), 1234L))
+                .isExactlyInstanceOf(PlatformException.class)
+                .hasMessageContaining(GeneralExceptionFactory.NOT_FOUND_DOMAIN_OBJECT_CODE);
+    }
 }
