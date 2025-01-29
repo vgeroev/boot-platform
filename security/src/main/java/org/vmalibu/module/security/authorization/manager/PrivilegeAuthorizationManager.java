@@ -13,7 +13,6 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.vmalibu.module.security.access.struct.AccessOp;
-import org.vmalibu.module.security.access.struct.AccessOpCollection;
 import org.vmalibu.module.security.access.struct.PrivilegeAuthority;
 import org.vmalibu.module.security.authorization.controller.ControllerAuthDetails;
 import org.vmalibu.module.security.authorization.controller.ControllerDetails;
@@ -24,6 +23,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 @Slf4j
@@ -45,8 +45,6 @@ public class PrivilegeAuthorizationManager implements CustomAuthorizationManager
             return ACCESS_DENIED;
         }
 
-        Map<String, AccessOpCollection> privileges = checkAndRetrieveSource(authentication);
-
         Method handlerMethod = getHandlerMethod(request);
         if (handlerMethod == null) {
             log.warn("Failed to resolve handler method for request: {}. Abstaining from decision...",
@@ -56,28 +54,29 @@ public class PrivilegeAuthorizationManager implements CustomAuthorizationManager
 
         ControllerDetails controllerDetails = controllerMappingInfoGetter.getControllersDetails().get(handlerMethod);
         ControllerAuthDetails controllerAuthDetails = controllerDetails.getAuthDetails();
-        Map<String, AccessOpCollection> controllerPrivileges = controllerAuthDetails.getPrivileges();
+        Map<String, Set<AccessOp>> controllerPrivileges = controllerAuthDetails.privileges();
         if (controllerPrivileges.isEmpty()) {
             return ACCESS_GRANTED;
         }
 
-        return resolveAuthorizationDecision(privileges, controllerPrivileges, controllerAuthDetails.getJoinType());
+        Map<String, Set<AccessOp>> privileges = checkAndRetrieveSource(authentication);
+        return resolveAuthorizationDecision(privileges, controllerPrivileges, controllerAuthDetails.joinType());
     }
 
-    private Map<String, AccessOpCollection> checkAndRetrieveSource(Authentication authentication) {
+    private Map<String, Set<AccessOp>> checkAndRetrieveSource(Authentication authentication) {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         if (authorities == null) {
             throw new IllegalStateException("Authorities collection is null");
         }
 
-        Map<String, AccessOpCollection> privileges = new HashMap<>();
+        Map<String, Set<AccessOp>> privileges = new HashMap<>();
         for (GrantedAuthority grantedAuthority : authorities) {
             if (!(grantedAuthority instanceof PrivilegeAuthority privilegeAuthority)) {
                 throw new IllegalStateException("Granted authority is not PrivilegeAuthority: " + grantedAuthority);
             }
             privileges.put(
                     privilegeAuthority.getKey(),
-                    new AccessOpCollection(privilegeAuthority.getAccessOps().toArray(new AccessOp[0]))
+                    privilegeAuthority.getAccessOps()
             );
         }
 
@@ -99,8 +98,8 @@ public class PrivilegeAuthorizationManager implements CustomAuthorizationManager
        return handlerMethod.getMethod();
     }
 
-    private AuthorizationDecision resolveAuthorizationDecision(Map<String, AccessOpCollection> privileges,
-                                                               Map<String, AccessOpCollection> controllerPrivileges,
+    private AuthorizationDecision resolveAuthorizationDecision(Map<String, Set<AccessOp>> privileges,
+                                                               Map<String, Set<AccessOp>> controllerPrivileges,
                                                                PrivilegeJoinType privilegeJoinType) {
         return switch (privilegeJoinType) {
             case AND -> resolveByAndJoinType(privileges, controllerPrivileges);
@@ -108,15 +107,15 @@ public class PrivilegeAuthorizationManager implements CustomAuthorizationManager
         };
     }
 
-    private AuthorizationDecision resolveByAndJoinType(Map<String, AccessOpCollection> privileges,
-                                                       Map<String, AccessOpCollection> controllerPrivileges) {
-        for (Map.Entry<String, AccessOpCollection> entry : controllerPrivileges.entrySet()) {
-            AccessOpCollection sourceOpCollection = privileges.get(entry.getKey());
+    private AuthorizationDecision resolveByAndJoinType(Map<String, Set<AccessOp>> privileges,
+                                                       Map<String, Set<AccessOp>> controllerPrivileges) {
+        for (Map.Entry<String, Set<AccessOp>> entry : controllerPrivileges.entrySet()) {
+            Set<AccessOp> sourceOpCollection = privileges.get(entry.getKey());
             if (sourceOpCollection == null) {
                 return ACCESS_DENIED;
             }
 
-            if (!sourceOpCollection.contains(entry.getValue())) {
+            if (!sourceOpCollection.containsAll(entry.getValue())) {
                 return ACCESS_DENIED;
             }
         }
@@ -124,11 +123,11 @@ public class PrivilegeAuthorizationManager implements CustomAuthorizationManager
         return ACCESS_GRANTED;
     }
 
-    private AuthorizationDecision resolveByOrJoinType(Map<String, AccessOpCollection> privileges,
-                                                      Map<String, AccessOpCollection> controllerPrivileges) {
-        for (Map.Entry<String, AccessOpCollection> entry : controllerPrivileges.entrySet()) {
-            AccessOpCollection sourceOpCollection = privileges.get(entry.getKey());
-            if (sourceOpCollection != null && sourceOpCollection.contains(entry.getValue())) {
+    private AuthorizationDecision resolveByOrJoinType(Map<String, Set<AccessOp>> privileges,
+                                                      Map<String, Set<AccessOp>> controllerPrivileges) {
+        for (Map.Entry<String, Set<AccessOp>> entry : controllerPrivileges.entrySet()) {
+            Set<AccessOp> sourceOpCollection = privileges.get(entry.getKey());
+            if (sourceOpCollection != null && sourceOpCollection.containsAll(entry.getValue())) {
                 return ACCESS_GRANTED;
             }
         }

@@ -11,7 +11,6 @@ import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.vmalibu.module.security.access.struct.AbstractPrivilege;
 import org.vmalibu.module.security.access.struct.AccessOp;
-import org.vmalibu.module.security.access.struct.AccessOpCollection;
 import org.vmalibu.module.security.authorization.controller.privilege.AccessPermission;
 import org.vmalibu.module.security.authorization.controller.privilege.PrivilegeAccess;
 import org.vmalibu.module.security.authorization.controller.privilege.PrivilegeJoinType;
@@ -21,6 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ControllerMappingInfoGetter {
@@ -61,11 +61,14 @@ public class ControllerMappingInfoGetter {
                     }
                 }
 
-                builder.authDetails(new ControllerAuthDetails(
-                        accessPermissionAnn.joinType(), getPrivileges(basicControllersAuth)
-                ));
+                builder.authDetails(
+                        new ControllerAuthDetails(
+                                accessPermissionAnn.joinType(),
+                                getPrivileges(basicControllersAuth)
+                        )
+                );
             } else {
-                builder.authDetails(new ControllerAuthDetails(PrivilegeJoinType.AND, new HashMap<>()));
+                builder.authDetails(new ControllerAuthDetails(PrivilegeJoinType.AND, Map.of()));
             }
 
             controllersDetails.put(method, builder.build());
@@ -107,15 +110,18 @@ public class ControllerMappingInfoGetter {
         }
     }
 
-    private Map<String, AccessOpCollection> getPrivileges(List<BasicControllerAuth> basicControllerAuths) {
-        Map<String, AccessOpCollection> privileges = new HashMap<>();
-
-        basicControllerAuths.forEach(cInfo -> privileges.compute(
-                cInfo.privilege.getKey(),
-                (key, value) -> value == null ? new AccessOpCollection(cInfo.accessOps) : value.addOps(cInfo.accessOps)
-        ));
-
-        return privileges;
+    private Map<String, Set<AccessOp>> getPrivileges(List<BasicControllerAuth> basicControllerAuths) {
+        return basicControllerAuths.stream()
+                .collect(Collectors.toMap(
+                        BasicControllerAuth::getKey,
+                        BasicControllerAuth::getAccessOps,
+                        (ops1 , ops2) -> {
+                            EnumSet<AccessOp> accessOps = EnumSet.noneOf(AccessOp.class);
+                            accessOps.addAll(ops1);
+                            accessOps.addAll(ops2);
+                            return accessOps;
+                        })
+                );
     }
 
     @AllArgsConstructor
@@ -124,6 +130,14 @@ public class ControllerMappingInfoGetter {
 
         private AbstractPrivilege privilege;
         private AccessOp[] accessOps;
+
+        public String getKey() {
+            return privilege.getKey();
+        }
+
+        public Set<AccessOp> getAccessOps() {
+            return Set.of(accessOps);
+        }
 
     }
 

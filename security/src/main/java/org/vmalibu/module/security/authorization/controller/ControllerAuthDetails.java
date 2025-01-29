@@ -1,17 +1,12 @@
 package org.vmalibu.module.security.authorization.controller;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import org.vmalibu.module.security.access.struct.AccessOpCollection;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.vmalibu.module.security.access.struct.AccessOp;
 import org.vmalibu.module.security.authorization.controller.privilege.PrivilegeJoinType;
 
 import java.util.Map;
+import java.util.Set;
 
-@Getter
-@AllArgsConstructor
-public class ControllerAuthDetails {
+public record ControllerAuthDetails(@NonNull PrivilegeJoinType joinType, @NonNull Map<String, Set<AccessOp>> privileges) {
 
-    private final PrivilegeJoinType joinType;
-
-    private final Map<String, AccessOpCollection> privileges;
 }
