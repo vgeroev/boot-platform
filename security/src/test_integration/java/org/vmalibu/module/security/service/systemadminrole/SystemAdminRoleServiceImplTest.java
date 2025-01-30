@@ -75,7 +75,7 @@ public class SystemAdminRoleServiceImplTest extends BaseTestClass {
                 }
 
                 Assertions.assertThat(dbPrivilege).isNotNull();
-                Assertions.assertThat(dbPrivilege.getValue()).hasSameElementsAs(entry.getValue().getAccessOpCollection().toOps());
+                Assertions.assertThat(dbPrivilege.getValue()).hasSameElementsAs(entry.getValue().getAccessOps());
             }
         };
 

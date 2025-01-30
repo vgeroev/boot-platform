@@ -124,7 +124,7 @@ public class AccessRoleServiceImpl implements AccessRoleService {
                 throw SecurityExceptionFactory.buildInvalidPrivilegeKeyException(key);
             }
 
-            if (!existingPrivilege.getAccessOpCollection().contains(accessOps)) {
+            if (!existingPrivilege.getAccessOps().containsAll(accessOps)) {
                 throw SecurityExceptionFactory.buildInvalidPrivilegeAccessOpsException();
             }
         }

@@ -97,7 +97,7 @@ public class ControllerMappingInfoGetter {
                 throw new RuntimeException(e);
             }
 
-            if (!privilege.getAccessOpCollection().contains(ops)) {
+            if (!privilege.getAccessOps().containsAll(Set.of(ops))) {
                 throw new IllegalStateException("Privilege " + privilege.getKey() + " doesn't have such access operations: "
                         + Arrays.toString(ops));
             }

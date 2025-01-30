@@ -49,7 +49,7 @@ public class SystemAdminRoleServiceImpl implements SystemAdminRoleService {
         Map<String, AbstractPrivilege> availablePrivileges = privilegeGetter.getAvailablePrivileges();
         Set<DBPrivilege> dbPrivileges = new HashSet<>(availablePrivileges.size());
         for (Map.Entry<String, AbstractPrivilege> entry : availablePrivileges.entrySet()) {
-            dbPrivileges.add(new DBPrivilege(entry.getKey(), entry.getValue().getAccessOpCollection().toOps()));
+            dbPrivileges.add(new DBPrivilege(entry.getKey(), entry.getValue().getAccessOps()));
         }
 
         admin.setPrivileges(dbPrivileges);
