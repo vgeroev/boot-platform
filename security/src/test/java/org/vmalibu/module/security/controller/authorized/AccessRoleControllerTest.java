@@ -62,8 +62,9 @@ class AccessRoleControllerTest {
     )
     void createAccessRoleTest() throws Exception {
         String name = RandomStringUtils.randomAlphabetic(10);
+        boolean admin = ThreadLocalRandom.current().nextBoolean();
 
-        AccessRoleDTO accessRole = new AccessRoleDTO(1234L, name, List.of());
+        AccessRoleDTO accessRole = new AccessRoleDTO(1234L, name, admin, List.of());
         Mockito.when(accessRoleService.create(name)).thenReturn(accessRole);
 
         AccessRoleController.CreateAccessRoleRequest request = new AccessRoleController.CreateAccessRoleRequest();
@@ -79,6 +80,7 @@ class AccessRoleControllerTest {
                         .content(requestJson)
         ).andExpect(status().isCreated())
                 .andExpect(jsonPath("$.data.id").value(accessRole.id()))
+                .andExpect(jsonPath("$.data.admin").value(accessRole.admin()))
                 .andExpect(jsonPath("$.data.name").value(accessRole.name()));
 
         Mockito.verify(accessRoleService, Mockito.only()).create(name);
@@ -129,7 +131,9 @@ class AccessRoleControllerTest {
             "Test Case: Invoking REST controller to update access role. Awaiting 200 and updating access role"
     )
     void updateAccessRoleTest() throws Exception {
-        long id = ThreadLocalRandom.current().nextLong();
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        long id = random.nextLong();
+        boolean admin = random.nextBoolean();
         String name = RandomStringUtils.randomAlphabetic(10);
         Map<String, Set<AccessOp>> privileges = new HashMap<>();
         privileges.put(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ));
@@ -138,6 +142,7 @@ class AccessRoleControllerTest {
         AccessRoleDTO accessRole = new AccessRoleDTO(
                 id,
                 name,
+                admin,
                 List.of(
                         new PrivilegeDTO(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ)),
                         new PrivilegeDTO(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.WRITE))

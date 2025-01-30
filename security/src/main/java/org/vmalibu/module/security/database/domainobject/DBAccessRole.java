@@ -23,9 +23,13 @@ import java.util.Set;
 public class DBAccessRole extends IdentityGeneratedDomainObject {
 
     public static final String DB_NAME = "name";
+    public static final String DB_ADMIN = "admin";
 
     @Column(name = DB_NAME, nullable = false)
     private String name;
+
+    @Column(name = DB_ADMIN, nullable = false)
+    private boolean admin;
 
     @ElementCollection
     @CollectionTable(

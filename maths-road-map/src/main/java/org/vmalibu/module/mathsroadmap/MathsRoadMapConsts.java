@@ -1,8 +1,14 @@
 package org.vmalibu.module.mathsroadmap;
 
+import org.vmalibu.module.security.SecurityModuleConsts;
+
+import java.util.Set;
+
 public class MathsRoadMapConsts {
 
     private MathsRoadMapConsts() { }
+
+    public static final Set<String> DEPENDENCIES = Set.of(SecurityModuleConsts.UUID);
 
     public static final String UUID = "org.vmalibu.module.mathsroadmap";
     public static final String DB_PREFIX = "maths_road_map_";

@@ -27,6 +27,11 @@ databaseChangeLog:
                   type: varchar(255)
                   constraints:
                     nullable: false
+              - column:
+                  name: admin
+                  type: boolean
+                  constraints:
+                    nullable: false
         - addUniqueConstraint:
             tableName: security_access_role
             columnNames: name

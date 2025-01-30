@@ -2,7 +2,7 @@ package org.vmalibu.module.mathsroadmap;
 
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
-import org.vmalibu.module.security.SecurityModule;
+import org.vmalibu.module.security.SecurityModuleConsts;
 import org.vmalibu.modules.module.AbstractModule;
 
 import java.util.Set;
@@ -20,7 +20,7 @@ public class MathsRoadMapModule extends AbstractModule<MathsRoadMapConfig> {
     }
 
     private static MathsRoadMapConfig buildConfig() {
-        return new MathsRoadMapConfig.Builder(MathsRoadMapConsts.UUID, Set.of(SecurityModule.class))
+        return new MathsRoadMapConfig.Builder(MathsRoadMapConsts.UUID, Set.of(SecurityModuleConsts.UUID))
                 .build();
     }
 

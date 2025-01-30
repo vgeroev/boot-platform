@@ -1,8 +1,12 @@
 package org.vmalibu.module.security;
 
+import java.util.Set;
+
 public class SecurityModuleConsts {
 
     private SecurityModuleConsts() { }
+
+    public static final Set<String> DEPENDENCIES = Set.of();
 
     public static final String UUID = "org.vmalibu.module.security";
     public static final String DB_PREFIX = "security_";

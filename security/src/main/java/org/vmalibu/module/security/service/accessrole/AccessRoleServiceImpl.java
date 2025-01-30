@@ -42,6 +42,7 @@ public class AccessRoleServiceImpl implements AccessRoleService {
 
         DBAccessRole accessRole = new DBAccessRole();
         accessRole.setName(name);
+        accessRole.setAdmin(false);
         accessRoleDAO.save(accessRole);
 
         return AccessRoleDTO.from(accessRole);
@@ -53,6 +54,7 @@ public class AccessRoleServiceImpl implements AccessRoleService {
                                          @NonNull OptionalField<String> name,
                                          @NonNull OptionalField<Map<String, Set<AccessOp>>> privileges) throws PlatformException {
         DBAccessRole accessRole = accessRoleDAO.checkExistenceAndGet(id);
+        checkNotAdmin(accessRole);
 
         if (name.isPresent()) {
             String newName = name.get();
@@ -82,8 +84,16 @@ public class AccessRoleServiceImpl implements AccessRoleService {
 
     @Override
     @Transactional(rollbackFor = PlatformException.class)
-    public void remove(long id) {
-        accessRoleDAO.deleteById(id);
+    public void remove(long id) throws PlatformException {
+        DBAccessRole accessRole = accessRoleDAO.checkExistenceAndGet(id);
+        checkNotAdmin(accessRole);
+        accessRoleDAO.delete(accessRole);
+    }
+
+    private void checkNotAdmin(DBAccessRole accessRole) throws PlatformException {
+        if (accessRole.isAdmin()) {
+            throw GeneralExceptionFactory.buildUnmodifiableDomainObjectException(DBAccessRole.class, accessRole.getId());
+        }
     }
 
     private void checkNameUniqueness(String name) throws PlatformException {

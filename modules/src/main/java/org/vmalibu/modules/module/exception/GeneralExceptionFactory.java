@@ -18,6 +18,7 @@ public class GeneralExceptionFactory {
     public static final String INVALID_ARGUMENT_CODE = "invalid_argument";
     public static final String IO_ERROR_CODE = "io_error";
     public static final String JSON_PARSING_ERROR_CODE = "json_parsing_error";
+    public static final String UNMODIFIABLE_DOMAIN_OBJECT = "unmodifiable_domain_object";
 
     private GeneralExceptionFactory() {
     }
@@ -99,6 +100,14 @@ public class GeneralExceptionFactory {
 
     public static PlatformException buildJsonParsingErrorException(Throwable e) {
         return new PlatformException(JSON_PARSING_ERROR_CODE, null, null, e);
+    }
+
+    public static PlatformException buildUnmodifiableDomainObjectException(Class<? extends DomainObject> clazz, long id) {
+        Map<String, Object> params = Map.of(
+                "id", id,
+                "class", clazz.getSimpleName()
+        );
+        return new PlatformException(UNMODIFIABLE_DOMAIN_OBJECT, params);
     }
 
 }

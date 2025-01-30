@@ -11,6 +11,7 @@ import java.util.List;
 @Schema(description = "Access role info")
 public record AccessRoleDTO(@Schema(description = "Unique identifier") long id,
                             @Schema(description = "Name of access role") String name,
+                            @Schema(description = "Is admin access role?") boolean admin,
                             @Schema(description = "Privileges of access role") List<PrivilegeDTO> privileges) {
 
     public static AccessRoleDTO from(@Nullable DBAccessRole accessRole) {
@@ -26,6 +27,7 @@ public record AccessRoleDTO(@Schema(description = "Unique identifier") long id,
         return AccessRoleDTO.builder()
                 .id(accessRole.getId())
                 .name(accessRole.getName())
+                .admin(accessRole.isAdmin())
                 .privileges(privileges)
                 .build();
     }

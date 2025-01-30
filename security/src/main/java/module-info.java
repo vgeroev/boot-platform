@@ -42,6 +42,7 @@ module org.vmalibu.module.security {
     exports org.vmalibu.module.security.database.changelog to spring.beans;
     exports org.vmalibu.module.security.service.user;
     exports org.vmalibu.module.security.service.accessrole;
+    exports org.vmalibu.module.security.service.systemadminrole;
     exports org.vmalibu.module.security.authentication.jwt;
     exports org.vmalibu.module.security.authorization.manager;
     exports org.vmalibu.module.security.authorization.controller;

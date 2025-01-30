@@ -8,7 +8,7 @@ import java.util.Set;
 public class ModuleConfig {
 
     private final String uuid;
-    private final Set<Class<? extends AbstractModule<?>>> dependencies;
+    private final Set<String> dependencies;
 
     protected ModuleConfig(Builder<?> builder) {
         this.uuid = builder.uuid;
@@ -19,16 +19,16 @@ public class ModuleConfig {
         return uuid;
     }
 
-    public @NonNull Set<Class<? extends AbstractModule<?>>> getDependencies() {
+    public @NonNull Set<String> getDependencies() {
         return dependencies;
     }
 
     public abstract static class Builder<T extends Builder<?>> {
 
         private final String uuid;
-        private final Set<Class<? extends AbstractModule<?>>> dependencies;
+        private final Set<String> dependencies;
 
-        protected Builder(@NonNull String uuid, @NonNull Set<Class<? extends AbstractModule<?>>> dependencies) {
+        protected Builder(@NonNull String uuid, @NonNull Set<String> dependencies) {
             this.uuid = Objects.requireNonNull(uuid);
             this.dependencies = Objects.requireNonNull(dependencies);
         }

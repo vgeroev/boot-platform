@@ -40,16 +40,15 @@ public class PrivilegeGetter {
     private static Map<String, AbstractPrivilege> getSortedPrivileges(List<? extends ModulePrivilegeGetter> privilegeGetters) {
         List<ModulePrivilege> modulePrivileges = new ArrayList<>();
         for (ModulePrivilegeGetter privilegeGetter : privilegeGetters) {
-            AbstractModule<?> module = privilegeGetter.getModule();
             for (AbstractPrivilege privilege : privilegeGetter.getPrivileges()) {
-                modulePrivileges.add(new ModulePrivilege(privilege, module));
+                modulePrivileges.add(new ModulePrivilege(privilege, privilegeGetter.getModuleUUID(), privilegeGetter.getModuleDependencies()));
             }
         }
 
         List<ModulePrivilege> sortedPrivileges = GraphTraverser.simpleDependencyTreeConstructor(
                 modulePrivileges, (p1, p2) -> {
-                    Set<Class<? extends AbstractModule<?>>> dependencies = p1.module().getConfig().getDependencies();
-                    return dependencies.contains(p2.module().getClass());
+                    Set<String> dependencies = p1.moduleDependencies();
+                    return dependencies.contains(p2.moduleUUID());
                 });
 
         Map<String, AbstractPrivilege> privilegeMap = new HashMap<>(sortedPrivileges.size());
@@ -61,7 +60,9 @@ public class PrivilegeGetter {
         return privilegeMap;
     }
 
-    private record ModulePrivilege(AbstractPrivilege privilege, AbstractModule<?> module) {
+    private record ModulePrivilege(AbstractPrivilege privilege,
+                                   String moduleUUID,
+                                   Set<String> moduleDependencies) {
 
     }
 

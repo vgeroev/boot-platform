@@ -8,11 +8,19 @@ import org.vmalibu.module.security.database.domainobject.DBAccessRole;
 import org.vmalibu.modules.database.repository.PaginatedDomainObjectRepository;
 import org.vmalibu.modules.module.exception.PlatformException;
 
+import java.util.Optional;
+
 @Repository
 public interface AccessRoleDAO extends PaginatedDomainObjectRepository<DBAccessRole> {
 
     @Query("select count(a.id) > 0 from DBAccessRole a where a.name = :name")
     boolean isExistByName(@Param("name") String name);
+
+    @Query("select count(a.id) > 0 from DBAccessRole a where a.admin = true")
+    boolean isAdminExist();
+
+    @Query("from DBAccessRole a where a.admin = true")
+    Optional<DBAccessRole> findAdmin();
 
     @NonNull
     default DBAccessRole checkExistenceAndGet(long id) throws PlatformException {

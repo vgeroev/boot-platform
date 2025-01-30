@@ -1,7 +1,6 @@
 package org.vmalibu.module.mathsroadmap;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.vmalibu.modules.module.AbstractModule;
 import org.vmalibu.modules.module.ModuleConfig;
 
 import java.util.Set;
@@ -14,7 +13,7 @@ public class MathsRoadMapConfig extends ModuleConfig {
 
     public static class Builder extends ModuleConfig.Builder<MathsRoadMapConfig.Builder> {
 
-        public Builder(@NonNull String uuid, @NonNull Set<Class<? extends AbstractModule<?>>> dependencies) {
+        public Builder(@NonNull String uuid, @NonNull Set<String> dependencies) {
             super(uuid, dependencies);
         }
 
