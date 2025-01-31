@@ -1,6 +1,7 @@
 package org.vmalibu.module.security.service.user;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,10 @@ import org.vmalibu.module.security.BaseTestClass;
 import org.vmalibu.module.security.access.AccessRolePrivilege;
 import org.vmalibu.module.security.access.UserPrivilege;
 import org.vmalibu.module.security.access.struct.AccessOp;
+import org.vmalibu.module.security.database.dao.AccessRoleDAO;
+import org.vmalibu.module.security.database.dao.UserDAO;
+import org.vmalibu.module.security.database.domainobject.DBAccessRole;
+import org.vmalibu.module.security.database.domainobject.DBUser;
 import org.vmalibu.module.security.service.accessrole.AccessRoleDTO;
 import org.vmalibu.module.security.service.accessrole.AccessRoleService;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
@@ -27,6 +32,10 @@ public class UserServiceImplTest extends BaseTestClass {
 
     @Autowired
     private AccessRoleService accessRoleService;
+    @Autowired
+    private UserDAO userDAO;
+    @Autowired
+    private AccessRoleDAO accessRoleDAO;
 
     @Test
     @DisplayName("Test Case: User creation")
@@ -175,11 +184,29 @@ public class UserServiceImplTest extends BaseTestClass {
     }
 
     @Test
-    @DisplayName("Test Case: Adding access role to user when there is no such access role")
+    @DisplayName("Test Case: Adding access role to user when there is no such access role. Awaiting PlatformException")
     void addAccessRoleWhenThereIsNoSuchAccessRoleTest() throws PlatformException {
         UserDTO userDTO = userService.create("username", randomAlphanumeric(10));
         Assertions.assertThatThrownBy(() -> userService.addAccessRole(userDTO.id(), 1234L))
                 .isExactlyInstanceOf(PlatformException.class)
                 .hasMessageContaining(GeneralExceptionFactory.NOT_FOUND_DOMAIN_OBJECT_CODE);
     }
+
+    @Test
+    @DisplayName("Test Case: Adding access role to user")
+    void addAccessRoleToUserTest() throws PlatformException {
+        UserDTO userDTO = userService.create("username", randomAlphanumeric(10));
+        AccessRoleDTO accessRole = accessRoleService.create("ar_1");
+
+        userService.addAccessRole(userDTO.id(), accessRole.id());
+        DBUser savedUser = userDAO.findWithAccessRoles(userDTO.id()).orElse(null);
+        Assertions.assertThat(savedUser).isNotNull()
+                .extracting(DBUser::getAccessRoles)
+                .asInstanceOf(InstanceOfAssertFactories.COLLECTION)
+                .anySatisfy(
+                        ar -> Assertions.assertThat((DBAccessRole) ar)
+                                .returns(accessRole.id(), DBAccessRole::getId)
+                );
+    }
+
 }

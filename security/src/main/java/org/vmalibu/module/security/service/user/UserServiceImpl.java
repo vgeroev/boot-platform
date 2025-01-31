@@ -69,7 +69,8 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = PlatformException.class)
     @Override
     public void addAccessRole(long id, long accessRoleId) throws PlatformException {
-        DBUser user = userDAO.checkExistenceAndGet(id);
+        DBUser user = userDAO.findWithAccessRoles(id)
+                .orElseThrow(() -> GeneralExceptionFactory.buildNotFoundDomainObjectException(DBUser.class, id));
         DBAccessRole accessRole = accessRoleDAO.checkExistenceAndGet(accessRoleId);
         user.getAccessRoles().add(accessRole);
     }
@@ -77,9 +78,9 @@ public class UserServiceImpl implements UserService {
     @Transactional(rollbackFor = PlatformException.class)
     @Override
     public void removeAccessRole(long id, long accessRoleId) throws PlatformException {
-        DBUser user = userDAO.checkExistenceAndGet(id);
-        DBAccessRole accessRole = accessRoleDAO.checkExistenceAndGet(accessRoleId);
-        user.getAccessRoles().removeIf(role -> Objects.equals(role.getId(), accessRole.getId()));
+        DBUser user = userDAO.findWithAccessRoles(id)
+                .orElseThrow(() -> GeneralExceptionFactory.buildNotFoundDomainObjectException(DBUser.class, id));
+        user.getAccessRoles().removeIf(role -> Objects.equals(role.getId(), accessRoleId));
     }
 
     private void checkUsernameUniqueness(String username) throws PlatformException {
