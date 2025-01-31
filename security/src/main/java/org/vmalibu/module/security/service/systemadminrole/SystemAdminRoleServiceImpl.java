@@ -27,7 +27,7 @@ public class SystemAdminRoleServiceImpl implements SystemAdminRoleService {
     private final PrivilegeGetter privilegeGetter;
 
     @Override
-    @Transactional(rollbackFor = PlatformException.class)
+    @Transactional(rollbackFor = PlatformException.class, readOnly = true)
     public @NonNull AccessRoleDTO findRole() throws PlatformException {
         return accessRoleDAO.findAdmin()
                 .map(AccessRoleDTO::from)
@@ -37,7 +37,7 @@ public class SystemAdminRoleServiceImpl implements SystemAdminRoleService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = PlatformException.class)
     public void createOrUpdateAdminRole() {
         DBAccessRole admin = accessRoleDAO.findAdmin().orElse(null);
         if (admin == null) {
