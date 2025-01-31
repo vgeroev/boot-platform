@@ -50,6 +50,7 @@ public class AccessRoleServiceImpl implements AccessRoleService {
 
     @Override
     @Transactional(rollbackFor = PlatformException.class)
+    // Need batching insert
     public @NonNull AccessRoleDTO update(long id,
                                          @NonNull OptionalField<String> name,
                                          @NonNull OptionalField<Map<String, Set<AccessOp>>> privileges) throws PlatformException {
