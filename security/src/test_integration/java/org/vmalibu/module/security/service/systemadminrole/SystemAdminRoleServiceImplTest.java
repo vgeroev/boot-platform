@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.vmalibu.module.security.BaseTestClass;
 import org.vmalibu.module.security.access.struct.AbstractPrivilege;
+import org.vmalibu.module.security.access.struct.AccessOp;
 import org.vmalibu.module.security.database.dao.AccessRoleDAO;
 import org.vmalibu.module.security.database.domainobject.DBAccessRole;
-import org.vmalibu.module.security.database.domainobject.DBPrivilege;
 import org.vmalibu.module.security.service.accessrole.AccessRoleDTO;
 import org.vmalibu.module.security.service.privilege.PrivilegeGetter;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
@@ -63,19 +63,12 @@ public class SystemAdminRoleServiceImplTest extends BaseTestClass {
                     .returns(SystemAdminRoleServiceImpl.SYSTEM_ADMIN_NAME, DBAccessRole::getName);
 
             Set<Map.Entry<String, AbstractPrivilege>> privilegeEntries = privilegeGetter.getAvailablePrivileges().entrySet();
-            Assertions.assertThat(admin.getPrivileges()).hasSameSizeAs(privilegeEntries);
+            Map<String, Set<AccessOp>> privileges = admin.getPrivileges();
+            Assertions.assertThat(privileges).hasSameSizeAs(privilegeEntries);
             for (Map.Entry<String, AbstractPrivilege> entry : privilegeEntries) {
                 String privilegeKey = entry.getKey();
-                DBPrivilege dbPrivilege = null;
-                for (DBPrivilege privilege : admin.getPrivileges()) {
-                    if (privilegeKey.equals(privilege.getKey())) {
-                        dbPrivilege = privilege;
-                        break;
-                    }
-                }
-
-                Assertions.assertThat(dbPrivilege).isNotNull();
-                Assertions.assertThat(dbPrivilege.getValue()).hasSameElementsAs(entry.getValue().getAccessOps());
+                Set<AccessOp> accessOps = privileges.get(privilegeKey);
+                Assertions.assertThat(accessOps).isNotNull().hasSameElementsAs(entry.getValue().getAccessOps());
             }
         };
 

@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.vmalibu.module.security.access.struct.AbstractPrivilege;
 import org.vmalibu.modules.graph.GraphTraverser;
-import org.vmalibu.modules.module.AbstractModule;
 
 import java.util.*;
 

@@ -5,15 +5,15 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.vmalibu.module.security.access.struct.AbstractPrivilege;
+import org.vmalibu.module.security.access.struct.AccessOp;
 import org.vmalibu.module.security.database.dao.AccessRoleDAO;
 import org.vmalibu.module.security.database.domainobject.DBAccessRole;
-import org.vmalibu.module.security.database.domainobject.DBPrivilege;
 import org.vmalibu.module.security.service.accessrole.AccessRoleDTO;
 import org.vmalibu.module.security.service.privilege.PrivilegeGetter;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,9 +47,9 @@ public class SystemAdminRoleServiceImpl implements SystemAdminRoleService {
         }
 
         Map<String, AbstractPrivilege> availablePrivileges = privilegeGetter.getAvailablePrivileges();
-        Set<DBPrivilege> dbPrivileges = new HashSet<>(availablePrivileges.size());
+        Map<String, Set<AccessOp>> dbPrivileges = new HashMap<>(availablePrivileges.size());
         for (Map.Entry<String, AbstractPrivilege> entry : availablePrivileges.entrySet()) {
-            dbPrivileges.add(new DBPrivilege(entry.getKey(), entry.getValue().getAccessOps()));
+            dbPrivileges.put(entry.getKey(), entry.getValue().getAccessOps());
         }
 
         admin.setPrivileges(dbPrivileges);

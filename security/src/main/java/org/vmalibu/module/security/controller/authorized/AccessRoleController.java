@@ -20,6 +20,7 @@ import org.vmalibu.module.security.authorization.controller.privilege.PrivilegeA
 import org.vmalibu.module.security.database.domainobject.DBAccessRole;
 import org.vmalibu.module.security.service.accessrole.AccessRoleDTO;
 import org.vmalibu.module.security.service.accessrole.AccessRoleService;
+import org.vmalibu.module.security.service.accessrole.AccessRoleWithPrivilegesDTO;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
@@ -62,8 +63,8 @@ public class AccessRoleController {
                     )
             }
     )
-    public AccessRoleDTO getAccessRole(@Parameter(description = "ID of the access role") @PathVariable("id") long id) {
-        return accessRoleService.findById(id);
+    public AccessRoleWithPrivilegesDTO getAccessRole(@Parameter(description = "ID of the access role") @PathVariable("id") long id) {
+        return accessRoleService.findWithPrivileges(id);
     }
 
     @PostMapping("/create")

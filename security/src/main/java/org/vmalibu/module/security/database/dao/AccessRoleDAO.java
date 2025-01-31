@@ -1,6 +1,7 @@
 package org.vmalibu.module.security.database.dao;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -21,6 +22,10 @@ public interface AccessRoleDAO extends PaginatedDomainObjectRepository<DBAccessR
 
     @Query("from DBAccessRole a where a.admin = true")
     Optional<DBAccessRole> findAdmin();
+
+    @EntityGraph(attributePaths = { DBAccessRole.Fields.privileges })
+    @Query("from DBAccessRole a where a.id = :id")
+    Optional<DBAccessRole> findWithPrivileges(@Param("id") long id);
 
     @NonNull
     default DBAccessRole checkExistenceAndGet(long id) throws PlatformException {

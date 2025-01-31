@@ -24,13 +24,11 @@ import org.vmalibu.module.security.access.struct.AccessOp;
 import org.vmalibu.module.security.configuration.AuthWebConfiguration;
 import org.vmalibu.module.security.service.accessrole.AccessRoleDTO;
 import org.vmalibu.module.security.service.accessrole.AccessRoleService;
-import org.vmalibu.module.security.service.accessrole.PrivilegeDTO;
 import org.vmalibu.modules.utils.OptionalField;
 import org.vmalibu.modules.web.advice.ExceptionControllerAdvice;
 import org.vmalibu.modules.web.advice.JsonResponseBodyAdvice;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
@@ -64,7 +62,7 @@ class AccessRoleControllerTest {
         String name = RandomStringUtils.randomAlphabetic(10);
         boolean admin = ThreadLocalRandom.current().nextBoolean();
 
-        AccessRoleDTO accessRole = new AccessRoleDTO(1234L, name, admin, List.of());
+        AccessRoleDTO accessRole = new AccessRoleDTO(1234L, name, admin);
         Mockito.when(accessRoleService.create(name)).thenReturn(accessRole);
 
         AccessRoleController.CreateAccessRoleRequest request = new AccessRoleController.CreateAccessRoleRequest();
@@ -142,11 +140,7 @@ class AccessRoleControllerTest {
         AccessRoleDTO accessRole = new AccessRoleDTO(
                 id,
                 name,
-                admin,
-                List.of(
-                        new PrivilegeDTO(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ)),
-                        new PrivilegeDTO(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.WRITE))
-                )
+                admin
         );
         Mockito.when(accessRoleService.update(ArgumentMatchers.eq(id), ArgumentMatchers.any(), ArgumentMatchers.any())).thenReturn(accessRole);
 

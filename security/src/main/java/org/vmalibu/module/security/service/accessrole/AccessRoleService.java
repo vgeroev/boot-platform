@@ -13,6 +13,8 @@ public interface AccessRoleService {
 
     @Nullable AccessRoleDTO findById(long id);
 
+    @Nullable AccessRoleWithPrivilegesDTO findWithPrivileges(long id);
+
     @NonNull AccessRoleDTO create(@NonNull String name) throws PlatformException;
 
     @NonNull AccessRoleDTO update(long id,
