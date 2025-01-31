@@ -6,9 +6,11 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 import org.vmalibu.module.security.SecurityModuleConsts;
+import org.vmalibu.module.security.access.struct.AccessOp;
 import org.vmalibu.modules.database.domainobject.IdentityGeneratedDomainObject;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Table(
@@ -36,6 +38,8 @@ public class DBAccessRole extends IdentityGeneratedDomainObject {
             name = SecurityModuleConsts.DB_PREFIX + "privilege",
             joinColumns = @JoinColumn(name = "fk_access_role")
     )
-    private Set<DBPrivilege> privileges = new HashSet<>();
+    @MapKeyColumn(name = DBPrivilege.DB_KEY)
+    @Column(name = DBPrivilege.DB_VALUE)
+    private Map<String, Set<AccessOp>> privileges = new HashMap<>();
 
 }

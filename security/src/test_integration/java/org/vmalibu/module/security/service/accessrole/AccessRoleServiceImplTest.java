@@ -1,6 +1,7 @@
 package org.vmalibu.module.security.service.accessrole;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,12 +9,16 @@ import org.vmalibu.module.security.BaseTestClass;
 import org.vmalibu.module.security.access.AccessRolePrivilege;
 import org.vmalibu.module.security.access.UserPrivilege;
 import org.vmalibu.module.security.access.struct.AccessOp;
+import org.vmalibu.module.security.database.dao.AccessRoleDAO;
+import org.vmalibu.module.security.database.domainobject.DBAccessRole;
 import org.vmalibu.module.security.exception.SecurityExceptionFactory;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
 
+import java.util.AbstractMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
@@ -22,6 +27,8 @@ public class AccessRoleServiceImplTest extends BaseTestClass {
 
     @Autowired
     private AccessRoleServiceImpl accessRoleService;
+    @Autowired
+    private AccessRoleDAO accessRoleDAO;
 
     @Test
     @DisplayName("Test Case: AccessRole creation")
@@ -36,7 +43,6 @@ public class AccessRoleServiceImplTest extends BaseTestClass {
 
         Assertions.assertThat(accessRoleDTO).isNotNull()
                 .returns(name, AccessRoleDTO::name);
-        Assertions.assertThat(accessRoleDTO.privileges()).isEmpty();
     }
 
     @Test
@@ -111,10 +117,16 @@ public class AccessRoleServiceImplTest extends BaseTestClass {
 
         Assertions.assertThat(updated).isNotNull()
                 .returns(name, AccessRoleDTO::name);
-        Assertions.assertThat(updated.privileges()).isNotNull()
+
+        Optional<DBAccessRole> privileges = accessRoleDAO.findWithPrivileges(accessRole.id());
+        Assertions.assertThat(privileges)
+                .isPresent()
+                .map(DBAccessRole::getPrivileges)
+                .get()
+                .asInstanceOf(InstanceOfAssertFactories.MAP)
                 .containsOnly(
-                        new PrivilegeDTO(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ, AccessOp.WRITE)),
-                        new PrivilegeDTO(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ))
+                        new AbstractMap.SimpleEntry<>(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ, AccessOp.WRITE)),
+                        new AbstractMap.SimpleEntry<>(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ))
                 );
 
         AccessRoleDTO persisted = accessRoleService.findById(accessRole.id());
@@ -122,10 +134,15 @@ public class AccessRoleServiceImplTest extends BaseTestClass {
         Assertions.assertThat(persisted).isNotNull();
         Assertions.assertThat(persisted).isNotNull()
                 .returns(name, AccessRoleDTO::name);
-        Assertions.assertThat(persisted.privileges()).isNotNull()
+        privileges = accessRoleDAO.findWithPrivileges(persisted.id());
+        Assertions.assertThat(privileges)
+                .isPresent()
+                .map(DBAccessRole::getPrivileges)
+                .get()
+                .asInstanceOf(InstanceOfAssertFactories.MAP)
                 .containsOnly(
-                        new PrivilegeDTO(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ, AccessOp.WRITE)),
-                        new PrivilegeDTO(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ))
+                        new AbstractMap.SimpleEntry<>(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ, AccessOp.WRITE)),
+                        new AbstractMap.SimpleEntry<>(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ))
                 );
 
         //--------------------------------------------------------------------------------------------------------------
@@ -140,21 +157,30 @@ public class AccessRoleServiceImplTest extends BaseTestClass {
 
         Assertions.assertThat(updated).isNotNull()
                 .returns(newName, AccessRoleDTO::name);
-        Assertions.assertThat(updated.privileges()).isNotNull()
+        privileges = accessRoleDAO.findWithPrivileges(updated.id());
+        Assertions.assertThat(privileges)
+                .isPresent()
+                .map(DBAccessRole::getPrivileges)
+                .get()
+                .asInstanceOf(InstanceOfAssertFactories.MAP)
                 .containsOnly(
-                        new PrivilegeDTO(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ, AccessOp.WRITE)),
-                        new PrivilegeDTO(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ))
+                        new AbstractMap.SimpleEntry<>(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ, AccessOp.WRITE)),
+                        new AbstractMap.SimpleEntry<>(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ))
                 );
 
         persisted = accessRoleService.findById(accessRole.id());
 
-        Assertions.assertThat(persisted).isNotNull();
         Assertions.assertThat(persisted).isNotNull()
                 .returns(newName, AccessRoleDTO::name);
-        Assertions.assertThat(persisted.privileges()).isNotNull()
+        privileges = accessRoleDAO.findWithPrivileges(persisted.id());
+        Assertions.assertThat(privileges)
+                .isPresent()
+                .map(DBAccessRole::getPrivileges)
+                .get()
+                .asInstanceOf(InstanceOfAssertFactories.MAP)
                 .containsOnly(
-                        new PrivilegeDTO(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ, AccessOp.WRITE)),
-                        new PrivilegeDTO(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ))
+                        new AbstractMap.SimpleEntry<>(UserPrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ, AccessOp.WRITE)),
+                        new AbstractMap.SimpleEntry<>(AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ))
                 );
     }
 

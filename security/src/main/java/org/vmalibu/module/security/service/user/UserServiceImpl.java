@@ -11,7 +11,6 @@ import org.vmalibu.module.security.access.struct.AccessOpCollection;
 import org.vmalibu.module.security.database.dao.AccessRoleDAO;
 import org.vmalibu.module.security.database.dao.UserDAO;
 import org.vmalibu.module.security.database.domainobject.DBAccessRole;
-import org.vmalibu.module.security.database.domainobject.DBPrivilege;
 import org.vmalibu.module.security.database.domainobject.DBUser;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
@@ -99,7 +98,7 @@ public class UserServiceImpl implements UserService {
     private Map<String, Set<AccessOp>> mergePrivileges(Set<DBAccessRole> accessRoles) {
         Map<String, AccessOpCollection> mergedPrivileges = new HashMap<>();
         for (DBAccessRole accessRole : accessRoles) {
-            for (DBPrivilege privilege : accessRole.getPrivileges()) {
+            for (Map.Entry<String, Set<AccessOp>> privilege : accessRole.getPrivileges().entrySet()) {
                 mergedPrivileges.compute(privilege.getKey(), (key, accessOpCollection) -> {
                     accessOpCollection = Objects.requireNonNullElseGet(accessOpCollection, AccessOpCollection::new);
                     return accessOpCollection.addOps(privilege.getValue().toArray(new AccessOp[0]));

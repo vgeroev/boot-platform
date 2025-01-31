@@ -10,14 +10,12 @@ import org.vmalibu.module.security.access.struct.AbstractPrivilege;
 import org.vmalibu.module.security.access.struct.AccessOp;
 import org.vmalibu.module.security.database.dao.AccessRoleDAO;
 import org.vmalibu.module.security.database.domainobject.DBAccessRole;
-import org.vmalibu.module.security.database.domainobject.DBPrivilege;
 import org.vmalibu.module.security.exception.SecurityExceptionFactory;
 import org.vmalibu.module.security.service.privilege.PrivilegeGetter;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,6 +30,12 @@ public class AccessRoleServiceImpl implements AccessRoleService {
     @Transactional(readOnly = true)
     public @Nullable AccessRoleDTO findById(long id) {
         return accessRoleDAO.findById(id).map(AccessRoleDTO::from).orElse(null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public @Nullable AccessRoleWithPrivilegesDTO findWithPrivileges(long id) {
+        return accessRoleDAO.findWithPrivileges(id).map(AccessRoleWithPrivilegesDTO::from).orElse(null);
     }
 
     @Override
@@ -72,12 +76,7 @@ public class AccessRoleServiceImpl implements AccessRoleService {
             }
             checkPrivileges(newPrivileges);
 
-            Set<DBPrivilege> dbPrivileges = new HashSet<>(newPrivileges.size());
-            for (Map.Entry<String, Set<AccessOp>> entry : newPrivileges.entrySet()) {
-                dbPrivileges.add(new DBPrivilege(entry.getKey(), entry.getValue()));
-            }
-
-            accessRole.setPrivileges(dbPrivileges);
+            accessRole.setPrivileges(newPrivileges);
         }
 
         return AccessRoleDTO.from(accessRole);
