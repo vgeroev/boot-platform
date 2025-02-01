@@ -76,13 +76,10 @@ public class AccessRoleServiceImplTest extends BaseTestClass {
     @Test
     @DisplayName("Test Case: AccessRole removing")
     void removeAccessRoleTest() throws PlatformException {
-        String name = randomAlphanumeric(10);
-
-        //--------------------------------------------------------------------------------------------------------------
-
-        AccessRoleDTO accessRoleDTO = accessRoleService.create(name);
+        AccessRoleDTO accessRoleDTO1 = accessRoleService.create(randomAlphanumeric(10));
+        AccessRoleDTO accessRoleDTO2 = accessRoleService.create(randomAlphanumeric(10));
         accessRoleService.update(
-                accessRoleDTO.id(),
+                accessRoleDTO2.id(),
                 OptionalField.empty(),
                 OptionalField.of(
                         Map.of(
@@ -90,11 +87,12 @@ public class AccessRoleServiceImplTest extends BaseTestClass {
                                 AccessRolePrivilege.INSTANCE.getKey(), Set.of(AccessOp.READ))
                 )
         );
-        accessRoleService.remove(accessRoleDTO.id());
+        accessRoleService.remove(Set.of(accessRoleDTO1.id(), accessRoleDTO2.id(), 1234L));
 
         //--------------------------------------------------------------------------------------------------------------
 
-        Assertions.assertThat(accessRoleService.findById(accessRoleDTO.id())).isNull();
+        Assertions.assertThat(accessRoleService.findById(accessRoleDTO1.id())).isNull();
+        Assertions.assertThat(accessRoleService.findById(accessRoleDTO2.id())).isNull();
     }
 
     @Test

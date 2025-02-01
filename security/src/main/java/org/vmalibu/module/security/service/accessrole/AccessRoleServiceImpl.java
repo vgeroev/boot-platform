@@ -16,8 +16,7 @@ import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -54,7 +53,6 @@ public class AccessRoleServiceImpl implements AccessRoleService {
 
     @Override
     @Transactional(rollbackFor = PlatformException.class)
-    // Need batching insert
     public @NonNull AccessRoleDTO update(long id,
                                          @NonNull OptionalField<String> name,
                                          @NonNull OptionalField<Map<String, Set<AccessOp>>> privileges) throws PlatformException {
@@ -84,15 +82,23 @@ public class AccessRoleServiceImpl implements AccessRoleService {
 
     @Override
     @Transactional(rollbackFor = PlatformException.class)
-    public void remove(long id) throws PlatformException {
-        DBAccessRole accessRole = accessRoleDAO.checkExistenceAndGet(id);
-        checkNotAdmin(accessRole);
-        accessRoleDAO.delete(accessRole);
+    public void remove(@NonNull Set<@NonNull Long> ids) throws PlatformException {
+        Set<Long> validatedIds = new HashSet<>(ids.size());
+        for (Long id : ids) {
+            boolean admin = accessRoleDAO.isAdmin(id);
+            throwIfAdminAccessRole(id, admin);
+            validatedIds.add(id);
+        }
+        accessRoleDAO.deleteAllById(validatedIds);
     }
 
     private void checkNotAdmin(DBAccessRole accessRole) throws PlatformException {
-        if (accessRole.isAdmin()) {
-            throw GeneralExceptionFactory.buildUnmodifiableDomainObjectException(DBAccessRole.class, accessRole.getId());
+        throwIfAdminAccessRole(accessRole.getId(), accessRole.isAdmin());
+    }
+
+    private void throwIfAdminAccessRole(long id, boolean admin) throws PlatformException {
+        if (admin) {
+            throw GeneralExceptionFactory.buildUnmodifiableDomainObjectException(DBAccessRole.class, id);
         }
     }
 

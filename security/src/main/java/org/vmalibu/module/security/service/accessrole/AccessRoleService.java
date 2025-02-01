@@ -21,6 +21,6 @@ public interface AccessRoleService {
                                   @NonNull OptionalField<String> name,
                                   @NonNull OptionalField<Map<String, Set<AccessOp>>> privileges) throws PlatformException;
 
-    void remove(long id) throws PlatformException;
+    void remove(@NonNull Set<@NonNull Long> ids) throws PlatformException;
 
 }

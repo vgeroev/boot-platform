@@ -145,7 +145,7 @@ public class AccessRoleController {
         return accessRoleService.update(id, request.name, request.privileges);
     }
 
-    @DeleteMapping("/remove/{id}")
+    @DeleteMapping("/remove")
     @AccessPermission(
             values = @PrivilegeAccess(
                     privilege = AccessRolePrivilege.class,
@@ -154,12 +154,12 @@ public class AccessRoleController {
     )
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(
-            summary = "Delete an access role",
-            description = "(AccessRolePrivilege: DELETE) Removes an access role from the admin by its ID.",
+            summary = "Delete access roles",
+            description = "(AccessRolePrivilege: DELETE) Removes access roles",
             responses = {
                     @ApiResponse(
                             responseCode = "204",
-                            description = "Access role removed successfully"
+                            description = "Access roles removed successfully"
                     ),
                     @ApiResponse(
                             responseCode = "403",
@@ -167,8 +167,8 @@ public class AccessRoleController {
                     )
             }
     )
-    public void remove(@Parameter(description = "ID of the access role") @PathVariable("id") long id) throws PlatformException {
-        accessRoleService.remove(id);
+    public void remove(@Parameter(description = "IDs of the access roles") @RequestBody Set<Long> ids) throws PlatformException {
+        accessRoleService.remove(ids);
     }
 
     @Data

@@ -4,6 +4,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.vmalibu.modules.module.exception.PlatformException;
 
+import java.util.Set;
+
 public interface UserService {
 
     @Nullable UserDTO findById(long id);
@@ -14,7 +16,7 @@ public interface UserService {
 
     @NonNull UserDTO create(@NonNull String username, @NonNull String password) throws PlatformException;
 
-    void addAccessRole(long id, long accessRoleId) throws PlatformException;
+    void addAccessRoles(long id, @NonNull Set<@NonNull Long> accessRoleIds) throws PlatformException;
 
-    void removeAccessRole(long id, long accessRoleId) throws PlatformException;
+    void removeAccessRoles(long id, @NonNull Set<@NonNull Long> accessRoleIds) throws PlatformException;
 }

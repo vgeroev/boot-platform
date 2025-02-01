@@ -154,8 +154,7 @@ public class UserServiceImplTest extends BaseTestClass {
                 )
         );
 
-        userService.addAccessRole(userDTO.id(), accessRole1.id());
-        userService.addAccessRole(userDTO.id(), accessRole2.id());
+        userService.addAccessRoles(userDTO.id(), Set.of(accessRole1.id(), accessRole2.id()));
 
         //--------------------------------------------------------------------------------------------------------------
 
@@ -178,7 +177,7 @@ public class UserServiceImplTest extends BaseTestClass {
     @DisplayName("Test Case: Adding access role to user when there is no such user. Awaiting PlatformException")
     void addAccessRoleWhenThereIsNoSuchUserTest() throws PlatformException {
         AccessRoleDTO accessRole = accessRoleService.create("ar_1");
-        Assertions.assertThatThrownBy(() -> userService.addAccessRole(1234L, accessRole.id()))
+        Assertions.assertThatThrownBy(() -> userService.addAccessRoles(1234L, Set.of(accessRole.id())))
                 .isExactlyInstanceOf(PlatformException.class)
                 .hasMessageContaining(GeneralExceptionFactory.NOT_FOUND_DOMAIN_OBJECT_CODE);
     }
@@ -187,7 +186,7 @@ public class UserServiceImplTest extends BaseTestClass {
     @DisplayName("Test Case: Adding access role to user when there is no such access role. Awaiting PlatformException")
     void addAccessRoleWhenThereIsNoSuchAccessRoleTest() throws PlatformException {
         UserDTO userDTO = userService.create("username", randomAlphanumeric(10));
-        Assertions.assertThatThrownBy(() -> userService.addAccessRole(userDTO.id(), 1234L))
+        Assertions.assertThatThrownBy(() -> userService.addAccessRoles(userDTO.id(), Set.of(1234L)))
                 .isExactlyInstanceOf(PlatformException.class)
                 .hasMessageContaining(GeneralExceptionFactory.NOT_FOUND_DOMAIN_OBJECT_CODE);
     }
@@ -196,16 +195,20 @@ public class UserServiceImplTest extends BaseTestClass {
     @DisplayName("Test Case: Adding access role to user")
     void addAccessRoleToUserTest() throws PlatformException {
         UserDTO userDTO = userService.create("username", randomAlphanumeric(10));
-        AccessRoleDTO accessRole = accessRoleService.create("ar_1");
+        AccessRoleDTO accessRole1 = accessRoleService.create("ar_1");
+        AccessRoleDTO accessRole2 = accessRoleService.create("ar_2");
 
-        userService.addAccessRole(userDTO.id(), accessRole.id());
+        userService.addAccessRoles(userDTO.id(), Set.of(accessRole1.id(), accessRole2.id()));
         DBUser savedUser = userDAO.findWithAccessRoles(userDTO.id()).orElse(null);
         Assertions.assertThat(savedUser).isNotNull()
                 .extracting(DBUser::getAccessRoles)
                 .asInstanceOf(InstanceOfAssertFactories.COLLECTION)
+                .hasSize(2)
                 .anySatisfy(
-                        ar -> Assertions.assertThat((DBAccessRole) ar)
-                                .returns(accessRole.id(), DBAccessRole::getId)
+                        ar -> Assertions.assertThat((DBAccessRole) ar).returns(accessRole1.id(), DBAccessRole::getId)
+                )
+                .anySatisfy(
+                        ar -> Assertions.assertThat((DBAccessRole) ar).returns(accessRole2.id(), DBAccessRole::getId)
                 );
     }
 

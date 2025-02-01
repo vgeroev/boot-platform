@@ -20,6 +20,9 @@ public interface AccessRoleDAO extends PaginatedDomainObjectRepository<DBAccessR
     @Query("select count(a.id) > 0 from DBAccessRole a where a.admin = true")
     boolean isAdminExist();
 
+    @Query("select count(a.id) > 0 from DBAccessRole a where a.id = :id and a.admin = true")
+    boolean isAdmin(@Param("id") long id);
+
     @Query("from DBAccessRole a where a.admin = true")
     Optional<DBAccessRole> findAdmin();
 

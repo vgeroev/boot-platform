@@ -20,6 +20,8 @@ import org.vmalibu.module.security.service.user.UserService;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
+import java.util.Set;
+
 @RestController
 @RequestMapping(SecurityModuleConsts.REST_AUTHORIZED_PREFIX + "/user")
 @Tag(name = "User Management", description = "Endpoints for managing users")
@@ -50,7 +52,7 @@ public class UserController {
         return user;
     }
 
-    @PatchMapping("/{id}/add-access-role/{accessRoleId}")
+    @PatchMapping("/{id}/add-access-role")
     @AccessPermission(
             values = @PrivilegeAccess(
                     privilege = UserPrivilege.class,
@@ -76,12 +78,13 @@ public class UserController {
                     )
             }
     )
-    public void addAccessRole(@Parameter(description = "ID of the user") @PathVariable("id") long id,
-                              @Parameter(description = "ID of the access role") @PathVariable("accessRoleId") long accessRoleId) throws PlatformException {
-        userService.addAccessRole(id, accessRoleId);
+    public void addAccessRoles(@Parameter(description = "ID of the user") @PathVariable("id") long id,
+                               @Parameter(description = "IDs of the access roles")
+                               @RequestBody Set<Long> accessRoleIds) throws PlatformException {
+        userService.addAccessRoles(id, accessRoleIds);
     }
 
-    @PatchMapping("/{id}/remove-access-role/{accessRoleId}")
+    @PatchMapping("/{id}/remove-access-role")
     @AccessPermission(
             values = @PrivilegeAccess(
                     privilege = UserPrivilege.class,
@@ -107,8 +110,9 @@ public class UserController {
                     )
             }
     )
-    public void removeAccessRole(@Parameter(description = "ID of the user") @PathVariable("id") long id,
-                                 @Parameter(description = "ID of the access role") @PathVariable("accessRoleId") long accessRoleId) throws PlatformException {
-        userService.removeAccessRole(id, accessRoleId);
+    public void removeAccessRoles(@Parameter(description = "ID of the user") @PathVariable("id") long id,
+                                  @Parameter(description = "IDs of the access roles")
+                                  @RequestBody Set<Long> accessRoleIds) throws PlatformException {
+        userService.removeAccessRoles(id, accessRoleIds);
     }
 }
