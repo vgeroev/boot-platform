@@ -13,7 +13,7 @@ import org.vmalibu.modules.module.exception.PlatformException;
 import java.util.Optional;
 
 @Repository
-public interface UserDAO extends PaginatedDomainObjectRepository<DBUser> {
+public interface UserDAO extends PaginatedDomainObjectRepository<Long, DBUser> {
 
     @Query("from DBUser where username = :username")
     Optional<DBUser> findByUsername(@Param("username") String username);

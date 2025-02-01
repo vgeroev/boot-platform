@@ -7,7 +7,7 @@ import org.hibernate.id.OptimizableGenerator;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 
 @MappedSuperclass
-public abstract class SequenceGeneratedDomainObject extends VersionedDomainObject {
+public abstract class SequenceGeneratedDomainObject extends VersionedDomainObject<Long> {
 
     @Override
     @Id

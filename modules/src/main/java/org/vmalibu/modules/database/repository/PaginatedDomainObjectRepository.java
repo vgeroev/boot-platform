@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
-public interface PaginatedDomainObjectRepository<T extends DomainObject> extends DomainObjectRepository<T>,
+public interface PaginatedDomainObjectRepository<I, T extends DomainObject<I>> extends DomainObjectRepository<I, T>,
         JpaSpecificationExecutor<T> {
 }

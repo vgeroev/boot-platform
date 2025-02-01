@@ -17,7 +17,7 @@ import org.vmalibu.modules.database.domainobject.VersionedDomainObject;
 @Access(value = AccessType.FIELD)
 @NoArgsConstructor
 @FieldNameConstants
-public class DBArticleLatex extends VersionedDomainObject {
+public class DBArticleLatex extends VersionedDomainObject<Long> {
 
     public static final String DB_ARTICLE_ID = "id";
     public static final String DB_LATEX = "latex";

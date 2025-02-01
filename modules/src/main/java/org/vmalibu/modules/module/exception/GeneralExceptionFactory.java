@@ -37,14 +37,14 @@ public class GeneralExceptionFactory {
         return new PlatformException(INTERNAL_SERVER_ERROR_CODE, message);
     }
 
-    public static PlatformException buildNotFoundDomainObjectException(Class<? extends DomainObject> clazz, long id) {
+    public static PlatformException buildNotFoundDomainObjectException(Class<? extends DomainObject<?>> clazz, Object id) {
         Map<String, Object> params = new HashMap<>();
         params.put("id", id);
         params.put("class", clazz.getSimpleName());
         return new PlatformException(NOT_FOUND_DOMAIN_OBJECT_CODE, params);
     }
 
-    public static PlatformException buildNotFoundDomainObjectException(Class<? extends DomainObject> clazz,
+    public static PlatformException buildNotFoundDomainObjectException(Class<? extends DomainObject<?>> clazz,
                                                                        String fieldName,
                                                                        Serializable value) {
         Map<String, Object> params = new HashMap<>();
@@ -54,7 +54,7 @@ public class GeneralExceptionFactory {
         return new PlatformException(NOT_FOUND_DOMAIN_OBJECT_CODE, params);
     }
 
-    public static PlatformException buildNotUniqueDomainObjectException(Class<? extends DomainObject> clazz,
+    public static PlatformException buildNotUniqueDomainObjectException(Class<? extends DomainObject<?>> clazz,
                                                                         Map<String, Serializable> fields) {
         Map<String, Object> params = new HashMap<>();
         params.put("class", clazz.getSimpleName());
@@ -62,13 +62,13 @@ public class GeneralExceptionFactory {
         return new PlatformException(NOT_UNIQUE_DOMAIN_OBJECT_CODE, params);
     }
 
-    public static PlatformException buildNotUniqueDomainObjectException(Class<? extends DomainObject> clazz,
+    public static PlatformException buildNotUniqueDomainObjectException(Class<? extends DomainObject<?>> clazz,
                                                                         String fieldName,
                                                                         Serializable value) {
         return buildNotUniqueDomainObjectException(clazz, Map.of(fieldName, value));
     }
 
-    public static PlatformException buildEmptyValueException(Class<? extends DomainObject> clazz,
+    public static PlatformException buildEmptyValueException(Class<? extends DomainObject<?>> clazz,
                                                              String fieldName) {
         Map<String, Object> params = new HashMap<>();
         params.put("class", clazz.getSimpleName());
@@ -102,7 +102,7 @@ public class GeneralExceptionFactory {
         return new PlatformException(JSON_PARSING_ERROR_CODE, null, null, e);
     }
 
-    public static PlatformException buildUnmodifiableDomainObjectException(Class<? extends DomainObject> clazz, long id) {
+    public static PlatformException buildUnmodifiableDomainObjectException(Class<? extends DomainObject<?>> clazz, Object id) {
         Map<String, Object> params = Map.of(
                 "id", id,
                 "class", clazz.getSimpleName()

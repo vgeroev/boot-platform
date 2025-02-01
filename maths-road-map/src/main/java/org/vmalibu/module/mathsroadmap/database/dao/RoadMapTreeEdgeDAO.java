@@ -8,7 +8,7 @@ import org.vmalibu.modules.database.repository.DomainObjectRepository;
 
 import java.util.List;
 
-public interface RoadMapTreeEdgeDAO extends DomainObjectRepository<DBRoadMapTreeEdge> {
+public interface RoadMapTreeEdgeDAO extends DomainObjectRepository<Long, DBRoadMapTreeEdge> {
 
     @Query("""
         select n from DBRoadMapTreeEdge n

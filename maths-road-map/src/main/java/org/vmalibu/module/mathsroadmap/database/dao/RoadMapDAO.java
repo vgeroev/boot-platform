@@ -11,7 +11,7 @@ import org.vmalibu.modules.module.exception.PlatformException;
 import java.util.Optional;
 
 @Repository
-public interface RoadMapDAO extends PaginatedDomainObjectRepository<DBRoadMap> {
+public interface RoadMapDAO extends PaginatedDomainObjectRepository<Long, DBRoadMap> {
 
     @Query("from DBRoadMap r join fetch r.creator where r.id = :id")
     Optional<DBRoadMap> findWithCreator(@Param("id") long id);

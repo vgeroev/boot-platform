@@ -8,7 +8,7 @@ import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleLatex;
 import org.vmalibu.modules.database.repository.DomainObjectRepository;
 
 @Repository
-public interface ArticleLatexDAO extends DomainObjectRepository<DBArticleLatex> {
+public interface ArticleLatexDAO extends DomainObjectRepository<Long, DBArticleLatex> {
 
     @Query("update DBArticleLatex al set configuration = :configuration where al.id = :id")
     @Modifying

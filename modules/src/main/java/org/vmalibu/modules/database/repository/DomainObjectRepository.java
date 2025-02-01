@@ -12,10 +12,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 @NoRepositoryBean
-public interface DomainObjectRepository<T extends DomainObject> extends JpaRepository<T, Long> {
+public interface DomainObjectRepository<I, D extends DomainObject<I>> extends JpaRepository<D, I> {
 
-    default @NonNull T checkExistenceAndGet(long id, @NonNull Class<T> entityClass) throws PlatformException {
-        Optional<T> oDomainObject = findById(id);
+    default @NonNull D checkExistenceAndGet(@NonNull I id, @NonNull Class<D> entityClass) throws PlatformException {
+        Optional<D> oDomainObject = findById(id);
         if (oDomainObject.isEmpty()) {
             throw GeneralExceptionFactory.buildNotFoundDomainObjectException(entityClass, id);
         }
@@ -23,10 +23,10 @@ public interface DomainObjectRepository<T extends DomainObject> extends JpaRepos
         return oDomainObject.get();
     }
 
-    default void checkUniqueness(@NonNull T domainObject,
-                                 @NonNull Supplier<T> domainObjectSupplier,
+    default void checkUniqueness(@NonNull D domainObject,
+                                 @NonNull Supplier<D> domainObjectSupplier,
                                  @NonNull Supplier<? extends PlatformException> exceptionSupplier) throws PlatformException {
-        T anotherDomainObject = domainObjectSupplier.get();
+        D anotherDomainObject = domainObjectSupplier.get();
         if (anotherDomainObject != null && !Objects.equals(domainObject.getId(), anotherDomainObject.getId())) {
             throw exceptionSupplier.get();
         }

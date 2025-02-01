@@ -12,7 +12,7 @@ import org.vmalibu.modules.module.exception.PlatformException;
 import java.util.Optional;
 
 @Repository
-public interface AccessRoleDAO extends PaginatedDomainObjectRepository<DBAccessRole> {
+public interface AccessRoleDAO extends PaginatedDomainObjectRepository<Long, DBAccessRole> {
 
     @Query("select count(a.id) > 0 from DBAccessRole a where a.name = :name")
     boolean isExistByName(@Param("name") String name);

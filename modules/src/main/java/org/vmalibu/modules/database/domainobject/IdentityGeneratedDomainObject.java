@@ -3,7 +3,7 @@ package org.vmalibu.modules.database.domainobject;
 import jakarta.persistence.*;
 
 @MappedSuperclass
-public abstract class IdentityGeneratedDomainObject extends VersionedDomainObject {
+public abstract class IdentityGeneratedDomainObject extends VersionedDomainObject<Long> {
 
     @Override
     @Id

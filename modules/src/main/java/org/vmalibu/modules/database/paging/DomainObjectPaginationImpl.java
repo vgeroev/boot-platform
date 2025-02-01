@@ -10,15 +10,15 @@ import org.vmalibu.modules.database.repository.PaginatedDomainObjectRepository;
 
 import java.util.function.Function;
 
-public class DomainObjectPaginationImpl<T extends DomainObject, V> extends AbstractDomainObjectPagination<T, T, V> {
+public class DomainObjectPaginationImpl<D extends DomainObject<?>, V> extends AbstractDomainObjectPagination<D, D, V> {
 
-    public DomainObjectPaginationImpl(@NonNull PaginatedDomainObjectRepository<T> dao,
-                                      @NonNull Function<T, V> mapper) {
+    public DomainObjectPaginationImpl(@NonNull PaginatedDomainObjectRepository<?, D> dao,
+                                      @NonNull Function<D, V> mapper) {
         super(dao, mapper);
     }
 
     @Override
-    protected @NonNull Page<T> getResult(@Nullable Specification<T> specification, @NonNull PageRequest pageRequest) {
+    protected @NonNull Page<D> getResult(@Nullable Specification<D> specification, @NonNull PageRequest pageRequest) {
         if (specification != null) {
             return dao.findAll(specification, pageRequest);
         } else {

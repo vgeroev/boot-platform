@@ -11,8 +11,8 @@ import lombok.experimental.FieldNameConstants;
 @Setter
 @AllArgsConstructor
 @FieldNameConstants
-public abstract class DomainObject {
+public abstract class DomainObject<T> {
 
-    private Long id;
+    private T id;
 
 }

@@ -11,12 +11,12 @@ import org.vmalibu.modules.database.repository.PaginatedDomainObjectRepository;
 
 import java.util.function.Function;
 
-public abstract class AbstractDomainObjectPagination<T extends DomainObject, U, V> implements DomainObjectPagination<T, V> {
+public abstract class AbstractDomainObjectPagination<T extends DomainObject<?>, U, V> implements DomainObjectPagination<T, V> {
 
-    protected final PaginatedDomainObjectRepository<T> dao;
+    protected final PaginatedDomainObjectRepository<?, T> dao;
     protected final Function<U, V> mapper;
 
-    protected AbstractDomainObjectPagination(@NonNull PaginatedDomainObjectRepository<T> dao,
+    protected AbstractDomainObjectPagination(@NonNull PaginatedDomainObjectRepository<?, T> dao,
                                              @NonNull Function<U, V> mapper) {
         this.dao = dao;
         this.mapper = mapper;

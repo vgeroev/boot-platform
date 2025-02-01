@@ -13,7 +13,7 @@ import lombok.experimental.FieldNameConstants;
 @Setter
 @AllArgsConstructor
 @FieldNameConstants
-public class VersionedDomainObject extends DomainObject {
+public class VersionedDomainObject<T> extends DomainObject<T> {
 
     @Version
     @Column(name = "version")

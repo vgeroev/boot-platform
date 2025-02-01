@@ -11,7 +11,7 @@ import org.vmalibu.modules.module.exception.PlatformException;
 import java.util.Optional;
 
 @Repository
-public interface ArticleDAO extends PaginatedDomainObjectRepository<DBArticle> {
+public interface ArticleDAO extends PaginatedDomainObjectRepository<Long, DBArticle> {
 
     @Query("from DBArticle a join fetch a.creator where a.id = :id")
     Optional<DBArticle> findArticleWithCreator(@Param("id") long id);
