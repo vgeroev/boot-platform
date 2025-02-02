@@ -12,7 +12,7 @@ WORKDIR /opt/src
 ENV JAVA_HOME=/opt/src/docker/jdk
 
 COPY ./ $pwd
-RUN ./gradlew clean && ./gradlew bootJar
+RUN  ./gradlew clean bootJar --no-daemon
 
 # Application
 FROM debian:10 AS default
