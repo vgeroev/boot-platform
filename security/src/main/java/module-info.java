@@ -28,6 +28,7 @@ module org.vmalibu.module.security {
     requires com.fasterxml.jackson.databind;
     requires org.checkerframework.checker.qual;
     requires io.swagger.v3.oas.annotations;
+    requires spring.boot.actuator;
 
     exports org.vmalibu.module.security.service.privilege;
     exports org.vmalibu.module.security;
@@ -58,6 +59,7 @@ module org.vmalibu.module.security {
     opens org.vmalibu.module.security.database.dao to spring.data.commons;
     opens org.vmalibu.module.security.service.user to spring.core;
     opens org.vmalibu.module.security.service.accessrole to spring.core;
+    opens org.vmalibu.module.security.service.systemadminrole to spring.core;
     opens org.vmalibu.module.security.controller.authorized to spring.beans;
     opens org.vmalibu.module.security.controller.anon to spring.beans;
     opens org.vmalibu.module.security.configuration.authorized to spring.core;

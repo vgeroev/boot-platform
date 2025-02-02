@@ -140,7 +140,7 @@ public class AuthorizedSecurityConfiguration {
                             .map(m -> m.getClass().getName())
                             .collect(Collectors.joining(", "));
             log.info("Authorization managers for protectedFilterChains: [{}]", authManagerClassNames);
-            return AuthorizationManagers.allOf(authorizationManagers.toArray(new CustomAuthorizationManager[0]));
+            return AuthorizationManagers.anyOf(authorizationManagers.toArray(new CustomAuthorizationManager[0]));
         }
     }
 

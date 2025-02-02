@@ -1,17 +1,14 @@
 package org.vmalibu.module.security.authorization.manager;
 
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerExecutionChain;
-import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 import org.vmalibu.module.security.access.struct.AccessOp;
 import org.vmalibu.module.security.access.struct.PrivilegeAuthority;
 import org.vmalibu.module.security.authorization.controller.ControllerAuthDetails;
@@ -19,23 +16,22 @@ import org.vmalibu.module.security.authorization.controller.ControllerDetails;
 import org.vmalibu.module.security.authorization.controller.ControllerMappingInfoGetter;
 import org.vmalibu.module.security.authorization.controller.privilege.PrivilegeJoinType;
 
-import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 @Slf4j
 @Component
-@AllArgsConstructor
 public class PrivilegeAuthorizationManager implements CustomAuthorizationManager {
 
-    protected static final AuthorizationDecision ACCESS_GRANTED = new AuthorizationDecision(true);
-    protected static final AuthorizationDecision ACCESS_DENIED = new AuthorizationDecision(false);
+    private static final AuthorizationDecision ACCESS_GRANTED = new AuthorizationDecision(true);
+    private static final AuthorizationDecision ACCESS_DENIED = new AuthorizationDecision(false);
 
     private final ControllerMappingInfoGetter controllerMappingInfoGetter;
-    private final RequestMappingHandlerMapping handlerMapping;
+
+    @Autowired
+    public PrivilegeAuthorizationManager(ControllerMappingInfoGetter controllerMappingInfoGetter) {
+        this.controllerMappingInfoGetter = controllerMappingInfoGetter;
+    }
 
     @Override
     public @Nullable AuthorizationDecision check(@NonNull Supplier<Authentication> authenticationSupplier,
@@ -45,14 +41,12 @@ public class PrivilegeAuthorizationManager implements CustomAuthorizationManager
             return ACCESS_DENIED;
         }
 
-        Method handlerMethod = getHandlerMethod(request);
-        if (handlerMethod == null) {
-            log.warn("Failed to resolve handler method for request: {}. Abstaining from decision...",
-                    request.getRequestURI());
+        ControllerDetails controllerDetails = controllerMappingInfoGetter.getControllersDetails(request);
+        if (controllerDetails == null) {
+            log.warn("Failed to resolve controller for request: {}. Abstaining from decision...", request.getRequestURI());
             return null;
         }
 
-        ControllerDetails controllerDetails = controllerMappingInfoGetter.getControllersDetails().get(handlerMethod);
         ControllerAuthDetails controllerAuthDetails = controllerDetails.getAuthDetails();
         Map<String, Set<AccessOp>> controllerPrivileges = controllerAuthDetails.privileges();
         if (controllerPrivileges.isEmpty()) {
@@ -81,21 +75,6 @@ public class PrivilegeAuthorizationManager implements CustomAuthorizationManager
         }
 
         return privileges;
-    }
-
-    private Method getHandlerMethod(HttpServletRequest request) {
-        HandlerExecutionChain handler;
-        try {
-            handler = handlerMapping.getHandler(request);
-        } catch (Exception e) {
-            throw new IllegalStateException(e);
-        }
-
-        if (handler == null || !(handler.getHandler() instanceof HandlerMethod handlerMethod)) {
-            return null;
-        }
-
-       return handlerMethod.getMethod();
     }
 
     private AuthorizationDecision resolveAuthorizationDecision(Map<String, Set<AccessOp>> privileges,
