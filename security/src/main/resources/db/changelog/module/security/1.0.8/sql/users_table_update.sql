@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX unique_admin ON security_access_role (admin) WHERE admin = TRUE;

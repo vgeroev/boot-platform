@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.0.8
+      author: vmalibu
+      changes:
+        - sqlFile:
+            path: sql/users_table_update.sql
+            relativeToChangelogFile: true

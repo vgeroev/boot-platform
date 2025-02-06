@@ -1,6 +1,6 @@
 package org.vmalibu.module.security;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -17,7 +17,7 @@ public class BaseTestClass {
     @Autowired
     private DatabaseCleanup databaseCleanup;
 
-    @BeforeEach
+    @AfterEach
     public void cleanupDatabase() {
         databaseCleanup.execute();
     }

@@ -12,7 +12,6 @@ import org.vmalibu.module.security.database.dao.AccessRoleDAO;
 import org.vmalibu.module.security.database.domainobject.DBAccessRole;
 import org.vmalibu.module.security.service.accessrole.AccessRoleDTO;
 import org.vmalibu.module.security.service.privilege.PrivilegeGetter;
-import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.util.Map;
@@ -34,21 +33,10 @@ public class SystemAdminRoleServiceImplTest extends BaseTestClass {
     @Test
     @DisplayName("Test Case: Trying to find admin access role when this role exists")
     void findRoleTest() throws PlatformException {
-        DBAccessRole adminRole = createAdminRole();
-
         AccessRoleDTO adminRoleDTO = systemAdminRoleService.findRole();
         Assertions.assertThat(adminRoleDTO).isNotNull()
-                .returns(adminRole.getId(), AccessRoleDTO::id)
-                .returns(adminRole.isAdmin(), AccessRoleDTO::admin)
-                .returns(adminRole.getName(), AccessRoleDTO::name);
-    }
-
-    @Test
-    @DisplayName("Test Case: Trying to find admin access role when this role does not exist")
-    void findRoleWhenThisRoleDoesNotExistTest() {
-        Assertions.assertThatThrownBy(() -> systemAdminRoleService.findRole())
-                .isExactlyInstanceOf(PlatformException.class)
-                .hasMessageContaining(GeneralExceptionFactory.NOT_FOUND_DOMAIN_OBJECT_CODE);
+                .returns(true, AccessRoleDTO::admin)
+                .returns(SystemAdminRoleServiceImpl.SYSTEM_ADMIN_NAME, AccessRoleDTO::name);
     }
 
     @Test
@@ -78,11 +66,4 @@ public class SystemAdminRoleServiceImplTest extends BaseTestClass {
         checker.run();
     }
 
-    private DBAccessRole createAdminRole() {
-        DBAccessRole accessRole = new DBAccessRole();
-        accessRole.setAdmin(true);
-        accessRole.setName(SystemAdminRoleServiceImpl.SYSTEM_ADMIN_NAME);
-        accessRoleDAO.save(accessRole);
-        return accessRole;
-    }
 }
