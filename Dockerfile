@@ -37,6 +37,8 @@ RUN apt-get -y update  \
 #    && rm install-tl-20240702 \
     && tlmgr install tikz-cd \
     && tlmgr install enumitem \
+    && tlmgr install collection-langcyrillic \
+    && tlmgr install titlesec \
     && apt-get -y install ghostscript \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
