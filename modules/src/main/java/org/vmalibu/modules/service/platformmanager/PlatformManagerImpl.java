@@ -88,7 +88,8 @@ public class PlatformManagerImpl implements PlatformManager {
         modules = Collections.unmodifiableList(
                 GraphTraverser.simpleDependencyTreeConstructor(
                         modules,
-                        (n1, n2) -> n1.getConfig().getDependencies().contains(n2.getClass()),
+                        (n1, n2) ->
+                                n1.getConfig().getDependencies().contains(n2.getConfig().getUuid()),
                         () -> new IllegalStateException("Modules have circular dependencies")
                 )
         );
