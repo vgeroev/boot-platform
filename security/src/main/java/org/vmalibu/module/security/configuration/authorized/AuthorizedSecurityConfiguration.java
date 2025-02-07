@@ -3,6 +3,7 @@ package org.vmalibu.module.security.configuration.authorized;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -43,6 +44,7 @@ public class AuthorizedSecurityConfiguration {
     public static final String PATH_LOGIN = SecurityModuleConsts.REST_AUTHORIZED_PREFIX + "/login";
     public static final String PATH_LOGOUT = SecurityModuleConsts.REST_AUTHORIZED_PREFIX + "/logout";
 
+    private final String cookiesSessionName;
     private final JwtAuthenticationManager jwtAuthenticationManager;
     private final AuthorizationManager<HttpServletRequest> authorizationManager;
     private final ExtraAuthSessionFilters extraAuthSessionFilters;
@@ -50,13 +52,15 @@ public class AuthorizedSecurityConfiguration {
 
     @Autowired
     public AuthorizedSecurityConfiguration(
+            @Value("${server.servlet.session.cookie.name}") String cookiesSessionName,
             JwtAuthenticationManager jwtAuthenticationManager,
             @Autowired(required = false) List<? extends CustomAuthorizationManager> authorizationManagers,
             ExtraAuthSessionFilters extraAuthSessionFilters) {
+        this.cookiesSessionName = cookiesSessionName;
         this.jwtAuthenticationManager = jwtAuthenticationManager;
         this.authorizationManager = getAuthorizationManager(authorizationManagers == null ? List.of() : authorizationManagers);
         this.extraAuthSessionFilters = extraAuthSessionFilters;
-        this.authFlows = List.of(new SessionBasedAuthFlow(), new JwtAuthFlow());
+        this.authFlows = List.of(new SessionBasedAuthFlow(cookiesSessionName), new JwtAuthFlow());
     }
 
     @Bean
@@ -85,7 +89,7 @@ public class AuthorizedSecurityConfiguration {
                         .logoutRequestMatcher(new AntPathRequestMatcher(PATH_LOGOUT, "POST"))
                         .invalidateHttpSession(true)
                         .logoutSuccessHandler(new HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK))
-                        .deleteCookies(SessionBasedAuthFlow.SESSION_ID)
+                        .deleteCookies(cookiesSessionName)
                 )
                 .anonymous(AbstractHttpConfigurer::disable);
 

@@ -20,10 +20,10 @@ class SessionBasedAuthFlowTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
 
         when(request.getCookies()).thenReturn(null);
-        Assertions.assertThat(new SessionBasedAuthFlow().supports(request)).isFalse();
+        Assertions.assertThat(new SessionBasedAuthFlow("SESSION").supports(request)).isFalse();
 
         when(request.getCookies()).thenReturn(new Cookie[0]);
-        Assertions.assertThat(new SessionBasedAuthFlow().supports(request)).isFalse();
+        Assertions.assertThat(new SessionBasedAuthFlow("SESSION").supports(request)).isFalse();
 
     }
 
@@ -33,10 +33,10 @@ class SessionBasedAuthFlowTest {
         HttpServletRequest request = mock(HttpServletRequest.class);
         Cookie[] cookies = new Cookie[2];
         cookies[0] = new Cookie(RandomStringUtils.randomAlphabetic(10), RandomStringUtils.randomAlphabetic(25));
-        cookies[1] = new Cookie(SessionBasedAuthFlow.SESSION_ID, RandomStringUtils.randomAlphabetic(25));
+        cookies[1] = new Cookie("SESSION", RandomStringUtils.randomAlphabetic(25));
         when(request.getCookies()).thenReturn(cookies);
 
-        Assertions.assertThat(new SessionBasedAuthFlow().supports(request)).isTrue();
+        Assertions.assertThat(new SessionBasedAuthFlow("SESSION").supports(request)).isTrue();
     }
 
     @Test
@@ -48,6 +48,6 @@ class SessionBasedAuthFlowTest {
         cookies[1] = new Cookie("cookie2", RandomStringUtils.randomAlphabetic(25));
         when(request.getCookies()).thenReturn(cookies);
 
-        Assertions.assertThat(new SessionBasedAuthFlow().supports(request)).isFalse();
+        Assertions.assertThat(new SessionBasedAuthFlow("SESSION").supports(request)).isFalse();
     }
 }

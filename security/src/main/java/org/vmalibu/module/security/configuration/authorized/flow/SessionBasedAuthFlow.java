@@ -1,13 +1,16 @@
 package org.vmalibu.module.security.configuration.authorized.flow;
 
-import
-        jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class SessionBasedAuthFlow implements AuthFlow {
 
-    public static final String SESSION_ID = "JSESSIONID";
+    private final String sessionName;
+
+    public SessionBasedAuthFlow(@NonNull String sessionName) {
+        this.sessionName = sessionName;
+    }
 
     @Override
     public boolean supports(@NonNull HttpServletRequest request) {
@@ -17,7 +20,7 @@ public class SessionBasedAuthFlow implements AuthFlow {
         }
 
         for (Cookie cookie : cookies) {
-            if (SESSION_ID.equals(cookie.getName())) {
+            if (sessionName.equals(cookie.getName())) {
                 return true;
             }
         }
