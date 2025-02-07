@@ -100,9 +100,7 @@ public class ExtraAuthSessionFilters {
             try {
                 credentials = objectMapper.readValue(payload, UsernamePassword.class);
             } catch (JsonProcessingException e) {
-                UsernamePassword empty = UsernamePassword.empty();
-                credentialsStorage.set(empty);
-                return empty;
+                credentials = UsernamePassword.empty();
             }
 
             credentialsStorage.set(credentials);
