@@ -23,7 +23,7 @@ public class MathsRoadMapDatabaseChangelog100 implements DatabaseChangelog {
 
     @Override
     public @NonNull Set<String> getDependencies() {
-        return Set.of(SecurityModuleConsts.UUID);
+        return MathsRoadMapConsts.DEPENDENCIES;
     }
 
     @Override
