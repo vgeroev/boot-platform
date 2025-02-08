@@ -32,14 +32,13 @@ RUN apt-get -y update  \
     && zcat < install-tl-unx.tar.gz | tar xf - \
     && cd install-tl-20240702 \
     && perl ./install-tl --scheme=scheme-medium --no-doc-install --no-interaction \
-    # Need to remove this
-#    && rm install-tl-unx.tar.gz \
-#    && rm install-tl-20240702 \
     && tlmgr install tikz-cd \
     && tlmgr install enumitem \
     && tlmgr install collection-langcyrillic \
     && tlmgr install titlesec \
     && apt-get -y install ghostscript \
+    && rm install-tl-unx.tar.gz \
+    && rm install-tl-20240702 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
