@@ -135,15 +135,19 @@ public class ArticleServiceImpl implements ArticleService {
         DBArticle article = articleDAO.checkExistenceAndGet(id);
         validateArticleBelongsToUser(article, userSource);
 
+        // Updating version of DBArticle when DBArticleLatex is updated
         if (latex.isPresent() && configuration.isPresent()) {
+            article.setVersion((short) (article.getVersion() + 1));
             String newLatex = latex.get();
             checkLatex(newLatex);
             articleLatexDAO.updateLatex(id, newLatex, configuration.get());
         } else if (latex.isPresent()) {
+            article.setVersion((short) (article.getVersion() + 1));
             String newLatex = latex.get();
             checkLatex(newLatex);
             articleLatexDAO.updateLatex(id, newLatex);
         } else if (configuration.isPresent()) {
+            article.setVersion((short) (article.getVersion() + 1));
             articleLatexDAO.updateConfiguration(id, configuration.get());
         }
 

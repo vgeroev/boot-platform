@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.0.9
+      author: vmalibu
+      changes:
+        - dropColumn:
+            tableName: maths_road_map_article_latex
+            columnName: version

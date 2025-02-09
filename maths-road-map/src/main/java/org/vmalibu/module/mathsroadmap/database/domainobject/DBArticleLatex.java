@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
-import org.vmalibu.modules.database.domainobject.VersionedDomainObject;
+import org.vmalibu.modules.database.domainobject.DomainObject;
 
 @Table(
         name = MathsRoadMapConsts.DB_PREFIX + "article_latex"
@@ -17,7 +17,7 @@ import org.vmalibu.modules.database.domainobject.VersionedDomainObject;
 @Access(value = AccessType.FIELD)
 @NoArgsConstructor
 @FieldNameConstants
-public class DBArticleLatex extends VersionedDomainObject<Long> {
+public class DBArticleLatex extends DomainObject<Long> {
 
     public static final String DB_ARTICLE_ID = "id";
     public static final String DB_LATEX = "latex";

@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -25,6 +26,7 @@ import java.util.Date;
 @EntityListeners(AuditingEntityListener.class)
 @NoArgsConstructor
 @FieldNameConstants
+@DynamicUpdate
 public class DBArticle extends IdentityGeneratedDomainObject {
 
     public static final String DB_CREATED_AT = "created_at";
