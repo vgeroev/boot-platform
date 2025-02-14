@@ -47,6 +47,8 @@ RUN chmod 600 jmxremote.password
 COPY --from=build_stage /opt/src/docker/jdk /var/lib/jdk
 COPY --from=build_stage /opt/src/build/libs/boot-platform.jar /var/lib/boot-platform/jar/boot-platform.jar
 
+# JMX port forwarding
+EXPOSE 1099 1099
 EXPOSE 8078 8078
 CMD [ \
     "/var/lib/jdk/bin/java","-XX:+UseG1GC", "-Xmx512m","-server","-jar", "/var/lib/boot-platform/jar/boot-platform.jar", \
