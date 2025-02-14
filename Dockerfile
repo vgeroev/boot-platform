@@ -17,10 +17,6 @@ RUN  ./gradlew clean bootJar --no-daemon
 # Application
 FROM debian:10 AS default
 
-WORKDIR /var/lib/boot-platform
-
-COPY --from=build_stage /opt/src/docker/jdk /var/lib/jdk
-COPY --from=build_stage /opt/src/build/libs/boot-platform.jar /var/lib/boot-platform/jar/boot-platform.jar
 COPY ./docker/install-tl-unx.tar.gz /tmp
 
 ENV PATH=/usr/local/texlive/2024/bin/x86_64-linux:$PATH
@@ -41,6 +37,15 @@ RUN apt-get -y update  \
     && rm -rf /tmp/install-tl-20240702 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
+
+WORKDIR /var/lib/boot-platform
+
+COPY jmxremote.access jmxremote.access
+COPY jmxremote.password jmxremote.password
+RUN chmod 600 jmxremote.password
+
+COPY --from=build_stage /opt/src/docker/jdk /var/lib/jdk
+COPY --from=build_stage /opt/src/build/libs/boot-platform.jar /var/lib/boot-platform/jar/boot-platform.jar
 
 EXPOSE 8078 8078
 CMD [ \

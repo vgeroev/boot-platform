@@ -37,3 +37,6 @@ gradlew*
 
 docker*
 data*
+
+jmxremote.password
+jmxremote.access

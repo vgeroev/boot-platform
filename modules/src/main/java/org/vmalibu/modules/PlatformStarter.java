@@ -14,7 +14,8 @@ import org.vmalibu.modules.module.exception.PlatformException;
         value = {
                 "classpath:boot-properties/database.application.properties",
                 "classpath:boot-properties/web.application.properties",
-                "classpath:boot-properties/actuator.application.properties"
+                "classpath:boot-properties/actuator.application.properties",
+                "classpath:boot-properties/jmx.application.properties"
         }
 )
 @Slf4j
