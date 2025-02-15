@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.vmalibu.modules.database.changelog.DatabaseChangelog;
 import org.vmalibu.modules.graph.GraphTraverser;
+import org.vmalibu.modules.utils.Version;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -29,7 +30,7 @@ public class LiquibaseConfiguration {
         SpringLiquibase liquibase = new SpringLiquibase();
         liquibase.setDataSource(dataSource);
 
-        Map<String, List<DatabaseChangelog>> changelogsVersionTree = getChangelogsVersionTree();
+        Map<Version, List<DatabaseChangelog>> changelogsVersionTree = getChangelogsVersionTree();
         Path changelogFilePath = getChangelogFilePath();
         createMasterChangelogFile(changelogsVersionTree, changelogFilePath);
         liquibase.setChangeLog("file:" + changelogFilePath);
@@ -37,12 +38,12 @@ public class LiquibaseConfiguration {
         return liquibase;
     }
 
-    private Map<String, List<DatabaseChangelog>> getChangelogsVersionTree() {
-        Map<String, List<DatabaseChangelog>> versionLayer = changelogs.stream()
+    private Map<Version, List<DatabaseChangelog>> getChangelogsVersionTree() {
+        Map<Version, List<DatabaseChangelog>> versionLayer = changelogs.stream()
                 .collect(Collectors.groupingBy(DatabaseChangelog::getVersion));
 
-        Map<String, List<DatabaseChangelog>> result = new TreeMap<>(Comparator.naturalOrder());
-        for (Map.Entry<String, List<DatabaseChangelog>> entry : versionLayer.entrySet()) {
+        Map<Version, List<DatabaseChangelog>> result = new TreeMap<>();
+        for (Map.Entry<Version, List<DatabaseChangelog>> entry : versionLayer.entrySet()) {
             result.put(entry.getKey(), getTreeFromFixedVersion(entry.getValue()));
         }
 
@@ -56,9 +57,9 @@ public class LiquibaseConfiguration {
         );
     }
 
-    private void createMasterChangelogFile(Map<String, List<DatabaseChangelog>> changelogs, Path changelogFilePath) {
+    private void createMasterChangelogFile(Map<Version, List<DatabaseChangelog>> changelogs, Path changelogFilePath) {
         List<String> changelogPaths = new ArrayList<>(changelogs.size());
-        for (Map.Entry<String, List<DatabaseChangelog>> entry : changelogs.entrySet()) {
+        for (Map.Entry<Version, List<DatabaseChangelog>> entry : changelogs.entrySet()) {
             for (DatabaseChangelog changelog : entry.getValue()) {
                 changelogPaths.add(changelog.getPath());
             }

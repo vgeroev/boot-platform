@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
 import org.vmalibu.module.security.SecurityModuleConsts;
 import org.vmalibu.modules.database.changelog.DatabaseChangelog;
+import org.vmalibu.modules.utils.Version;
 
 import java.util.Set;
 
@@ -22,8 +23,8 @@ public class MathsRoadMapDatabaseChangelog105 implements DatabaseChangelog {
     }
 
     @Override
-    public @NonNull String getVersion() {
-        return "1.0.5";
+    public @NonNull Version getVersion() {
+        return new Version(1, 0, 5);
     }
 
     @Override
