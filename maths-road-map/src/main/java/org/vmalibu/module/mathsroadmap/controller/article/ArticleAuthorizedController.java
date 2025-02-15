@@ -11,6 +11,7 @@ import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleLatex;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleLatexDTO;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleService;
+import org.vmalibu.module.mathsroadmap.service.article.ArticleUserLikeAction;
 import org.vmalibu.module.mathsroadmap.service.article.pagemanager.ArticlePageManager;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
@@ -177,6 +178,30 @@ public class ArticleAuthorizedController {
         return new ArticleResponse(articleDTO, articleURI.toString());
     }
 
+    @GetMapping("/article/{id}/like-action")
+    @ResponseStatus(HttpStatus.OK)
+    public ArticleUserLikeActionResponse getArticleLikeAction(@PathVariable("id") long id,
+                                                              final UserSource userSource) {
+        ArticleUserLikeAction action = articleService.findArticleLikeAction(id, userSource.getId());
+        return new ArticleUserLikeActionResponse(action);
+    }
+
+    @PatchMapping("/article/{id}/like")
+    @ResponseStatus(HttpStatus.OK)
+    public ArticleUserLikeActionResponse likeArticle(@PathVariable("id") long id,
+                                                     final UserSource userSource) throws PlatformException {
+        ArticleUserLikeAction action = articleService.like(id, userSource.getId());
+        return new ArticleUserLikeActionResponse(action);
+    }
+
+    @PatchMapping("/article/{id}/dislike")
+    @ResponseStatus(HttpStatus.OK)
+    public ArticleUserLikeActionResponse dislikeArticle(@PathVariable("id") long id,
+                                                        final UserSource userSource) throws PlatformException {
+        ArticleUserLikeAction action = articleService.dislike(id, userSource.getId());
+        return new ArticleUserLikeActionResponse(action);
+    }
+
     private void validateDescription(String description) throws PlatformException {
         if (description != null && description.length() > DESCRIPTION_MAX_LENGTH) {
             throw GeneralExceptionFactory.buildInvalidArgumentException(
@@ -269,6 +294,16 @@ public class ArticleAuthorizedController {
 
         @JsonProperty(JSON_ARTICLE_URL)
         private String articleURL;
+    }
+
+    @Data
+    @AllArgsConstructor
+    public static class ArticleUserLikeActionResponse {
+
+        static final String JSON_LIKE_ACTION = "like_action";
+
+        @JsonProperty(JSON_LIKE_ACTION)
+        private ArticleUserLikeAction action;
     }
 
 }

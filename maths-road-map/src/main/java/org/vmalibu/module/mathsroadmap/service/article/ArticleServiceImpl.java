@@ -10,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.vmalibu.module.mathsroadmap.database.dao.ArticleDAO;
 import org.vmalibu.module.mathsroadmap.database.dao.ArticleLatexDAO;
+import org.vmalibu.module.mathsroadmap.database.dao.ArticleUserLikesDAO;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleLatex;
+import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleUserLikes;
 import org.vmalibu.module.mathsroadmap.exception.MathsRoadMapExceptionFactory;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListElement;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
@@ -38,14 +40,19 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleDAO articleDAO;
     private final ArticleLatexDAO articleLatexDAO;
     private final UserDAO userDAO;
+    private final ArticleUserLikesDAO articleUserLikesDAO;
     private final DomainObjectPagination<DBArticle, ArticleListElement> domainObjectPagination;
 
     @Autowired
-    public ArticleServiceImpl(ArticleDAO articleDAO, ArticleLatexDAO articleLatexDAO, UserDAO userDAO) {
+    public ArticleServiceImpl(ArticleDAO articleDAO,
+                              ArticleLatexDAO articleLatexDAO,
+                              UserDAO userDAO,
+                              ArticleUserLikesDAO articleUserLikesDAO) {
         this.articleDAO = articleDAO;
         this.articleLatexDAO = articleLatexDAO;
         this.userDAO = userDAO;
         this.domainObjectPagination = new DomainObjectPaginationImpl<>(articleDAO, ArticleListElement::from);
+        this.articleUserLikesDAO = articleUserLikesDAO;
     }
 
     @Override
@@ -99,6 +106,8 @@ public class ArticleServiceImpl implements ArticleService {
         article.setCreator(user);
         article.setDescription(normalizeDescription(description));
         article.setTitle(title);
+        article.setLikes(0);
+        article.setDislikes(0);
 
         articleDAO.save(article);
         return ArticleDTO.from(article);
@@ -152,6 +161,84 @@ public class ArticleServiceImpl implements ArticleService {
         }
 
         return ArticleDTO.from(article);
+    }
+
+    @Override
+    @Transactional(rollbackFor = PlatformException.class)
+    public @NonNull ArticleUserLikeAction like(long id, long userId) throws PlatformException {
+        return setLikeValue(id, userId, true);
+    }
+
+    @Override
+    @Transactional(rollbackFor = PlatformException.class)
+    public @NonNull ArticleUserLikeAction dislike(long id, long userId) throws PlatformException {
+        return setLikeValue(id, userId, false);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public @NonNull ArticleUserLikeAction findArticleLikeAction(long id, long userId) {
+        Optional<DBArticleUserLikes> oLikeAction = articleUserLikesDAO.findByArticleAndUser(id, userId);
+        if (oLikeAction.isEmpty()) {
+            return ArticleUserLikeAction.NO_ACTION;
+        }
+        DBArticleUserLikes articleUserLikes = oLikeAction.get();
+        return articleUserLikes.isLike() ? ArticleUserLikeAction.LIKED : ArticleUserLikeAction.DISLIKED;
+    }
+
+    private ArticleUserLikeAction setLikeValue(long id, long userId, boolean like) throws PlatformException {
+        if (!userDAO.existsById(userId)) {
+            throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DBUser.class, userId);
+        }
+
+        Optional<Long> articleIdHolder = articleDAO.lockOnPessimisticWrite(id);
+        if (articleIdHolder.isEmpty()) {
+            throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DBArticle.class, id);
+        }
+
+        DBArticleUserLikes.Id artileUserLikeId = DBArticleUserLikes.Id.builder()
+                .article(articleDAO.getReferenceById(id))
+                .user(userDAO.getReferenceById(userId))
+                .build();
+
+        Optional<DBArticleUserLikes> oArticleUserLikes = articleUserLikesDAO.findById(artileUserLikeId);
+        if (oArticleUserLikes.isPresent()) {
+            DBArticleUserLikes articleUserLikes = oArticleUserLikes.get();
+            return modifyExistingLikeAction(id, articleUserLikes, like);
+        } else {
+            DBArticleUserLikes articleUserLikes = new DBArticleUserLikes();
+            articleUserLikes.setId(artileUserLikeId);
+            articleUserLikes.setValue(like);
+            articleUserLikesDAO.save(articleUserLikes);
+            if (like) {
+                articleDAO.incrementLikes(id);
+                return ArticleUserLikeAction.LIKED;
+            } else {
+                articleDAO.incrementDislikes(id);
+                return ArticleUserLikeAction.DISLIKED;
+            }
+        }
+    }
+
+    private ArticleUserLikeAction modifyExistingLikeAction(long id, DBArticleUserLikes articleUserLikes, boolean like) {
+        if (articleUserLikes.getValue() == like) {
+            articleUserLikesDAO.delete(articleUserLikes);
+            if (like) {
+                articleDAO.decrementLikes(id);
+            } else {
+                articleDAO.decrementDislikes(id);
+            }
+            return ArticleUserLikeAction.NO_ACTION;
+        } else {
+            articleUserLikes.setValue(like);
+            if (like) {
+                articleDAO.swapDislikeOnLike(id);
+                return ArticleUserLikeAction.LIKED;
+            } else {
+                articleDAO.swapLikeOnDislike(id);
+                return ArticleUserLikeAction.DISLIKED;
+            }
+        }
     }
 
     private void validateArticleBelongsToUser(DBArticle article, UserSource userSource) throws PlatformException {

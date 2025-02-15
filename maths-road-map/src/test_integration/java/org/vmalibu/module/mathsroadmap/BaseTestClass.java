@@ -15,7 +15,7 @@ import org.vmalibu.modules.entrypoint.AppStarter;
 import java.util.concurrent.ThreadLocalRandom;
 
 @SpringBootTest(classes = AppStarter.class)
-@Import(PostgresConfig.class)
+@Import( { PostgresConfig.class, BaseTestClass.TestConfig.class })
 public class BaseTestClass {
 
     @Autowired
@@ -29,9 +29,9 @@ public class BaseTestClass {
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.jpa.hibernate.ddl-auto", () -> "none");
-//        registry.add("spring.jpa.properties.hibernate.show_sql", () -> "true");
-//        registry.add("spring.jpa.properties.hibernate.use_sql_comments", () -> "true");
 //        registry.add("spring.jpa.properties.hibernate.format_sql", () ->"true");
+        registry.add("spring.jpa.properties.hibernate.show_sql", () -> "false");
+        registry.add("spring.jpa.properties.hibernate.use_sql_comments", () -> "false");
         registry.add("logging.level.liquibase", () -> "DEBUG");
         registry.add("spring.liquibase.verbose", () -> "true");
 

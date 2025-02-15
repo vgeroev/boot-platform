@@ -12,7 +12,9 @@ public record ArticleDTO(long id,
                          Date updatedAt,
                          long userId,
                          String title,
-                         String description) {
+                         String description,
+                         int likes,
+                         int dislikes) {
 
     public static ArticleDTO from(@Nullable DBArticle article) {
         if (article == null) {
@@ -26,6 +28,8 @@ public record ArticleDTO(long id,
                 .userId(article.getCreator().getId())
                 .title(article.getTitle())
                 .description(article.getDescription())
+                .likes(article.getLikes())
+                .dislikes(article.getDislikes())
                 .build();
     }
 

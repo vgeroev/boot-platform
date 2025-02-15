@@ -35,4 +35,9 @@ public interface ArticleService {
                                     OptionalField<@Nullable String> configuration,
                                     @NonNull UserSource userSource) throws PlatformException;
 
+    @NonNull ArticleUserLikeAction like(long id, long userId) throws PlatformException;
+
+    @NonNull ArticleUserLikeAction dislike(long id, long userId) throws PlatformException;
+
+    @NonNull ArticleUserLikeAction findArticleLikeAction(long id, long userId);
 }

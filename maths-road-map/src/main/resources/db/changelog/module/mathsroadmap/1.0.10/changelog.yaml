@@ -1,0 +1,68 @@
+databaseChangeLog:
+
+  - changeSet:
+      id: 1.0.10
+      author: vmalibu
+      changes:
+        - createTable:
+            tableName: maths_road_map_article_user_likes
+            remarks: User likes for articles
+            columns:
+              - column:
+                  name: fk_user
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fk_article
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: boolean
+                  constraints:
+                    nullable: false
+
+        - addPrimaryKey:
+            tableName: maths_road_map_article_user_likes
+            columnNames: fk_user, fk_article
+            constraintName: pk_user_article_like
+
+        - addForeignKeyConstraint:
+            baseTableName: maths_road_map_article_user_likes
+            baseColumnNames: fk_article
+            referencedTableName: maths_road_map_article
+            referencedColumnNames: id
+            constraintName: fk_article_like
+
+        - addForeignKeyConstraint:
+            baseTableName: maths_road_map_article_user_likes
+            baseColumnNames: fk_user
+            referencedTableName: security_users
+            referencedColumnNames: id
+            constraintName: fk_user_like
+
+        - addColumn:
+            tableName: maths_road_map_article
+            columns:
+              - name: likes
+                type: integer
+        - addColumn:
+            tableName: maths_road_map_article
+            columns:
+              - name: dislikes
+                type: integer
+
+        - sql:
+            sql: "UPDATE maths_road_map_article set likes = 0"
+        - sql:
+            sql: "UPDATE maths_road_map_article set dislikes = 0"
+
+        - addNotNullConstraint:
+            tableName: maths_road_map_article
+            columnName: likes
+
+        - addNotNullConstraint:
+            tableName: maths_road_map_article
+            columnName: dislikes

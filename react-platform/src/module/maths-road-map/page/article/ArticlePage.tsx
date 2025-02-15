@@ -1,4 +1,5 @@
-import { Col, Divider, Modal, Row, Spin } from "antd";
+import { DislikeOutlined, LikeFilled, LikeOutlined } from "@ant-design/icons";
+import { Button, Col, Divider, Modal, Row, Spin } from "antd";
 import Title from "antd/es/typography/Title";
 import React, { useContext } from "react";
 import Iframe from "react-iframe";
@@ -6,9 +7,13 @@ import { Link, useParams } from "react-router-dom";
 import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
 import { UserContext } from "../../../../hook/UserContext";
 import { UserModel } from "../../../security/model/UserModel";
+import { ArticleLikeAction } from "../../model/ArticleLikeAction";
 import { GetArticleModel } from "../../model/GetArticleModel";
 import { getUpdateArticleRoute } from "../../route/MathsRoadMapRouteGetter";
+import { GetArticleLikeActionRequest } from "../../service/request/GetArticleLikeActionRequest";
 import { GetArticleRequest } from "../../service/request/GetArticleRequest";
+import { SubmitArticleDislikeRequest } from "../../service/request/SubmitArticleDislikeRequest";
+import { SubmitArticleLikeRequest } from "../../service/request/SubmitArticleLikeRequest";
 import "./styles.css";
 
 const ArticlePage: React.FC<{}> = () => {
@@ -19,8 +24,20 @@ const ArticlePage: React.FC<{}> = () => {
   const [getArticleModel, setGetArticleModel] = React.useState<
     GetArticleModel | undefined
   >(undefined);
+  const [likeAction, setLikeAction] = React.useState<
+    ArticleLikeAction | undefined
+  >(undefined);
+
   const getArticleRequest: GetArticleRequest =
     useHttpRequest(GetArticleRequest);
+  const getArticleLikeActionRequest: GetArticleLikeActionRequest =
+    useHttpRequest(GetArticleLikeActionRequest);
+  const submitLikeRequest: SubmitArticleLikeRequest = useHttpRequest(
+    SubmitArticleLikeRequest,
+  );
+  const submitDislikeRequest: SubmitArticleDislikeRequest = useHttpRequest(
+    SubmitArticleDislikeRequest,
+  );
 
   React.useEffect(() => {
     setLoading(true);
@@ -47,6 +64,17 @@ const ArticlePage: React.FC<{}> = () => {
         setLoading(false);
       },
     });
+
+    if (loggedInUser) {
+      getArticleLikeActionRequest.exec({
+        requestVariables: {
+          id: articleId,
+        },
+        onSuccess: (httpResponse) => {
+          setLikeAction(httpResponse.data.action);
+        },
+      });
+    }
   }, []);
 
   return (
@@ -62,6 +90,42 @@ const ArticlePage: React.FC<{}> = () => {
         {getArticleModel?.article.createdAt.toUTCString()}
       </Title>
       {getArticleModel?.article.description || ""}
+      <Title>
+        <Row justify="start" gutter={16}>
+          <Col>
+            <Button
+              type={
+                likeAction === ArticleLikeAction.LIKED ? "primary" : "default"
+              }
+              icon={<LikeOutlined />}
+              onClick={() =>
+                handleLike(articleId, submitLikeRequest, (action) =>
+                  setLikeAction(action),
+                )
+              }
+            >
+              Like
+            </Button>
+          </Col>
+          <Col>
+            <Button
+              type={
+                likeAction === ArticleLikeAction.DISLIKED
+                  ? "primary"
+                  : "default"
+              }
+              icon={<DislikeOutlined />}
+              onClick={() =>
+                handleDislike(articleId, submitDislikeRequest, (action) =>
+                  setLikeAction(action),
+                )
+              }
+            >
+              Dislike
+            </Button>
+          </Col>
+        </Row>
+      </Title>
       <Divider></Divider>
       {/* <div className="iframe-div"> */}
       <Iframe
@@ -79,6 +143,36 @@ const ArticlePage: React.FC<{}> = () => {
       {/* </div> */}
     </Spin>
   );
+};
+
+const handleLike = (
+  articleId: number,
+  request: SubmitArticleLikeRequest,
+  likeSetter: (action: ArticleLikeAction) => void,
+) => {
+  request.exec({
+    requestVariables: {
+      id: articleId,
+    },
+    onSuccess: (httpResponse) => {
+      likeSetter(httpResponse.data.action);
+    },
+  });
+};
+
+const handleDislike = (
+  articleId: number,
+  request: SubmitArticleDislikeRequest,
+  likeSetter: (action: ArticleLikeAction) => void,
+) => {
+  request.exec({
+    requestVariables: {
+      id: articleId,
+    },
+    onSuccess: (httpResponse) => {
+      likeSetter(httpResponse.data.action);
+    },
+  });
 };
 
 function getEditButton(

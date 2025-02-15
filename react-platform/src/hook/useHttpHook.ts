@@ -5,8 +5,7 @@ import { IModelParser, ModelFactory } from "../model/BaseModel";
 
 type HttpResult = Record<"moduleError" | "data", any>;
 
-const httpCall = <M, D = any>(
-): HttpCaller<M, D> => {
+const httpCall = <M, D = any>(): HttpCaller<M, D> => {
   return {
     exec: async ({
       request,
@@ -56,7 +55,7 @@ const httpCall = <M, D = any>(
         })
         .then((axiosResponse: AxiosResponse<HttpResult>) => {
           const data: HttpResult = axiosResponse.data;
-          if (!data) {
+          if (!data.data || !model) {
             return { httpStatus: axiosResponse.status };
           }
 
@@ -98,7 +97,7 @@ export interface HttpRequest {
 }
 export interface HttpRequestHookProps<D = any> {
   request: HttpRequest;
-  model: IModelParser;
+  model: IModelParser | null;
   data?: D;
 }
 
@@ -115,7 +114,7 @@ export class ModuleError {
     private readonly _code: string,
     private readonly _parameters?: Record<string, unknown>,
     private readonly _message?: string,
-  ) { }
+  ) {}
   public get message(): string | undefined {
     return this._message;
   }

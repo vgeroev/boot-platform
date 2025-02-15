@@ -34,6 +34,8 @@ public class DBArticle extends IdentityGeneratedDomainObject {
     public static final String DB_CREATOR_ID = "creator_id";
     public static final String DB_TITLE = "title";
     public static final String DB_DESCRIPTION = "description";
+    public static final String DB_LIKES = "likes";
+    public static final String DB_DISLIKES = "dislikes";
 
     @OneToOne(mappedBy = DBArticleLatex.Fields.article, cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = false)
     @PrimaryKeyJoinColumn
@@ -56,6 +58,12 @@ public class DBArticle extends IdentityGeneratedDomainObject {
 
     @Column(name = DB_DESCRIPTION)
     private String description;
+
+    @Column(name = DB_LIKES, nullable = false)
+    private int likes;
+
+    @Column(name = DB_DISLIKES, nullable = false)
+    private int dislikes;
 
     public void setArticleLatex(@NonNull DBArticleLatex articleLatex) {
         this.articleLatex = articleLatex;

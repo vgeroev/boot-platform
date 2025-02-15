@@ -9,11 +9,13 @@ import java.util.Date;
 
 @Builder
 public record ArticleListElement(long id,
-                                Date createdAt,
-                                Date updatedAt,
-                                UserDTO creator,
-                                String title,
-                                String description) {
+                                 Date createdAt,
+                                 Date updatedAt,
+                                 UserDTO creator,
+                                 String title,
+                                 String description,
+                                 int likes,
+                                 int dislikes) {
 
     public static ArticleListElement from(@Nullable DBArticle article) {
         if (article == null) {
@@ -27,6 +29,8 @@ public record ArticleListElement(long id,
                 .creator(UserDTO.from(article.getCreator()))
                 .title(article.getTitle())
                 .description(article.getDescription())
+                .likes(article.getLikes())
+                .dislikes(article.getDislikes())
                 .build();
     }
 

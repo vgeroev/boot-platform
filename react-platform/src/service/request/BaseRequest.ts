@@ -7,7 +7,7 @@ import {
   HttpRequestMethod,
   ModuleError,
 } from "../../hook/useHttpHook";
-import { BaseModel, IModelParser } from "../../model/BaseModel";
+import { BaseModel, IModelParser, ModelFactory } from "../../model/BaseModel";
 import { getLoginRoute } from "../../module/security/route/SecurityRoutes";
 
 export interface RequestResult<T extends BaseModel | ModuleError | any> {
@@ -72,10 +72,6 @@ export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
           return;
         }
 
-        if (!response) {
-          throw new Error("No response in " + httpResponse);
-        }
-
         if (response instanceof ModuleError) {
           let errorHandled: boolean = false;
           if (handleModuleError) {
@@ -89,7 +85,12 @@ export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
             Modal.error({ title: response.code, content: response.message });
           }
         } else if (onSuccess) {
-          onSuccess({ status: httpResponse.httpStatus, data: response });
+          if (response) {
+            onSuccess({ status: httpResponse.httpStatus, data: response });
+          } else {
+            let empty: M = new ModelFactory(this.modelParser).getModel({});
+            onSuccess({ status: httpResponse.httpStatus, data: empty });
+          }
         }
       });
 
@@ -118,7 +119,7 @@ export abstract class BaseRequest<M extends BaseModel, D = any, R = any> {
 }
 
 export interface IRequestBuilder {
-  new(...args: any[]): any;
+  new (...args: any[]): any;
   build(httpCallerFactory: HttpCallerFactory): InstanceType<this>;
 }
 
@@ -127,7 +128,7 @@ export class RequestFactory<
   I extends IRequestBuilder,
   R extends BaseRequest<M> = InstanceType<I>,
 > {
-  constructor(private readonly request: I) { }
+  constructor(private readonly request: I) {}
 
   public build(httpCallerFactory: HttpCallerFactory): R {
     return this.request.build(httpCallerFactory);

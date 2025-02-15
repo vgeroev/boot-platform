@@ -1,4 +1,8 @@
-import { LikeOutlined, MessageOutlined } from "@ant-design/icons";
+import {
+  DislikeOutlined,
+  LikeOutlined,
+  MessageOutlined,
+} from "@ant-design/icons";
 import { Button, Col, Divider, List, Row, Space } from "antd";
 import Search from "antd/es/input/Search";
 import React from "react";
@@ -10,8 +14,16 @@ import { ArticleWithCreatorModel } from "../../model/ArticleWithCreatorModel";
 import { getArticleRoute } from "../../route/MathsRoadMapRouteGetter";
 import { GetArticleListRequest } from "../../service/request/GetArticleListRequest";
 
-const IconText = ({ icon, text }: { icon: React.FC; text: string }) => (
-  <Space>
+const IconText = ({
+  icon,
+  text,
+  style,
+}: {
+  icon: React.FC;
+  text: string;
+  style?: React.CSSProperties;
+}) => (
+  <Space style={style}>
     {React.createElement(icon)}
     {text}
   </Space>
@@ -88,8 +100,8 @@ const ArticleListPage: React.FC<{}> = () => {
 
   const loadMore =
     !loading &&
-      pagingFilter.pageSize < (articleListModel?.totalCount || 0) &&
-      pagingFilter.pageSize <= MAX_PAGE_SIZE - INCREMENT_PAGE_SIZE ? (
+    pagingFilter.pageSize < (articleListModel?.totalCount || 0) &&
+    pagingFilter.pageSize <= MAX_PAGE_SIZE - INCREMENT_PAGE_SIZE ? (
       <div
         style={{
           textAlign: "center",
@@ -148,8 +160,25 @@ const ArticleListPage: React.FC<{}> = () => {
                   actions={[
                     <IconText
                       icon={LikeOutlined}
-                      text="0"
+                      text={item.data.likes}
                       key="list-vertical-like-o"
+                      style={{
+                        color: getLikesColor(
+                          item.data.likes,
+                          item.data.dislikes,
+                        ),
+                      }}
+                    />,
+                    <IconText
+                      icon={DislikeOutlined}
+                      text={item.data.dislikes}
+                      key="list-vertical-dislike-o"
+                      style={{
+                        color: getDislikesColor(
+                          item.data.likes,
+                          item.data.dislikes,
+                        ),
+                      }}
                     />,
                     <IconText
                       icon={MessageOutlined}
@@ -177,5 +206,19 @@ const ArticleListPage: React.FC<{}> = () => {
     </>
   );
 };
+
+function getLikesColor(likes: number, dislikes: number): string {
+  if (likes > dislikes) {
+    return "green";
+  }
+  return "grey";
+}
+
+function getDislikesColor(likes: number, dislikes: number): string {
+  if (likes < dislikes) {
+    return "red";
+  }
+  return "grey";
+}
 
 export default ArticleListPage;

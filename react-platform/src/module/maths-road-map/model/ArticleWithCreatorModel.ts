@@ -24,6 +24,14 @@ export class ArticleWithCreatorModel extends BaseModel {
     return this.getDate("updatedAt");
   }
 
+  public get likes(): number {
+    return this.getNumber("likes");
+  }
+
+  public get dislikes(): number {
+    return this.getNumber("dislikes");
+  }
+
   public static parse(data: any): ArticleWithCreatorModel {
     return new ArticleWithCreatorModel(data);
   }
