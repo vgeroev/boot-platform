@@ -82,7 +82,7 @@ const httpCall = <M, D = any>(): HttpCaller<M, D> => {
             };
           }
 
-          throw new Error("Unknown response " + axiosResponse);
+          return { httpStatus: axiosResponse.status };
         });
     },
   };
