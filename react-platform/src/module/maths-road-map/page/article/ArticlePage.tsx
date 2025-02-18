@@ -125,6 +125,7 @@ const ArticlePage: React.FC<{}> = () => {
             </Button>
           </Col>
         </Row>
+        <Row>{getArticlePageButton(getArticleModel)}</Row>
       </Title>
       <Divider></Divider>
       {/* <div className="iframe-div"> */}
@@ -138,7 +139,7 @@ const ArticlePage: React.FC<{}> = () => {
         // scrolling="auto"
         // overflow="auto"
         className="iframe-article"
-        // scrolling="no"
+      // scrolling="no"
       />
       {/* </div> */}
     </Spin>
@@ -191,6 +192,25 @@ function getEditButton(
   }
 
   return <></>;
+}
+
+function getArticlePageButton(getArticleModel: GetArticleModel | undefined) {
+  if (getArticleModel) {
+    return (
+      <Col flex="100px">
+        <Title level={4}>
+          <Button
+            type="default"
+            onClick={() => {
+              window.location.href = getArticleModel.url;
+            }}
+          >
+            Open authentic article
+          </Button>
+        </Title>
+      </Col>
+    );
+  }
 }
 
 export default ArticlePage;
