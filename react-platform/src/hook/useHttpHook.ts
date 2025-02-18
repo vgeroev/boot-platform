@@ -54,11 +54,11 @@ const httpCall = <M, D = any>(): HttpCaller<M, D> => {
           throw new Error(e);
         })
         .then((axiosResponse: AxiosResponse<HttpResult>) => {
-          const data: HttpResult = axiosResponse.data;
-          if (!data.data || !model) {
+          if (!model) {
             return { httpStatus: axiosResponse.status };
           }
 
+          const data: HttpResult = axiosResponse.data;
           if (data.data) {
             return {
               httpStatus: axiosResponse.status,
@@ -114,7 +114,7 @@ export class ModuleError {
     private readonly _code: string,
     private readonly _parameters?: Record<string, unknown>,
     private readonly _message?: string,
-  ) {}
+  ) { }
   public get message(): string | undefined {
     return this._message;
   }

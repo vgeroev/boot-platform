@@ -1,4 +1,4 @@
-import { DislikeOutlined, LikeFilled, LikeOutlined } from "@ant-design/icons";
+import { DislikeOutlined, LikeOutlined } from "@ant-design/icons";
 import { Button, Col, Divider, Modal, Row, Spin } from "antd";
 import Title from "antd/es/typography/Title";
 import React, { useContext } from "react";
