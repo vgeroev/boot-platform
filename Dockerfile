@@ -57,8 +57,8 @@ CMD [ \
     "-Dcom.sun.management.jmxremote.authenticate=true", \
     "-Dcom.sun.management.jmxremote.ssl=false", \
     "-Djava.rmi.server.hostname=45.153.71.68", \
-    "-Dcom.sun.management.jmxremote.access.file=jmxremote.access", \
-    "-Dcom.sun.management.jmxremote.password.file=jmxremote.password", \
+#    "-Dcom.sun.management.jmxremote.access.file=jmxremote.access", \
+#    "-Dcom.sun.management.jmxremote.password.file=jmxremote.password", \
     "-XX:+UseG1GC", \
     "-Xmx512m", \
     "-server", \
