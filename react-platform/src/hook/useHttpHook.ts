@@ -54,7 +54,7 @@ const httpCall = <M, D = any>(): HttpCaller<M, D> => {
           throw new Error(e);
         })
         .then((axiosResponse: AxiosResponse<HttpResult>) => {
-          if (!model) {
+          if (!data || !model) {
             return { httpStatus: axiosResponse.status };
           }
 
