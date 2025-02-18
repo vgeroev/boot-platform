@@ -54,7 +54,7 @@ CMD [ \
     "/var/lib/jdk/bin/java", \
     "-Dcom.sun.management.jmxremote=true", \
     "-Dcom.sun.management.jmxremote.port=1099", \
-    "-Dcom.sun.management.jmxremote.authenticate=true", \
+    "-Dcom.sun.management.jmxremote.authenticate=false", \
     "-Dcom.sun.management.jmxremote.ssl=false", \
     "-Djava.rmi.server.hostname=45.153.71.68", \
 #    "-Dcom.sun.management.jmxremote.access.file=jmxremote.access", \
