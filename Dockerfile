@@ -17,6 +17,7 @@ RUN  ./gradlew clean bootJar --no-daemon
 # Application
 FROM debian:10 AS default
 
+COPY ./docker/jre /var/lib/jre
 COPY ./docker/install-tl-unx.tar.gz /tmp
 
 ENV PATH=/usr/local/texlive/2024/bin/x86_64-linux:$PATH
@@ -44,20 +45,19 @@ COPY jmxremote.access jmxremote.access
 COPY jmxremote.password jmxremote.password
 RUN chmod 600 jmxremote.password
 
-COPY --from=build_stage /opt/src/docker/jdk /var/lib/jdk
 COPY --from=build_stage /opt/src/build/libs/boot-platform.jar /var/lib/boot-platform/jar/boot-platform.jar
 
 # JMX port forwarding
 EXPOSE 1099 1099
 EXPOSE 8078 8078
 CMD [ \
-    "/var/lib/jdk/bin/java", \
+    "/var/lib/jre/bin/java", \
     "-Dcom.sun.management.jmxremote", \
     "-Dcom.sun.management.jmxremote.authenticate=true", \
     "-Dcom.sun.management.jmxremote.ssl=false", \
     "-Dcom.sun.management.jmxremote.port=1099", \
     "-Dcom.sun.management.jmxremote.rmi.port=1099", \
-    "-Djava.rmi.server.hostname=0.0.0.0", \
+    "-Djava.rmi.server.hostname=127.0.0.1", \
     "-Dcom.sun.management.jmxremote.local.only=false", \
     "-Dcom.sun.management.jmxremote.access.file=jmxremote.access", \
     "-Dcom.sun.management.jmxremote.password.file=jmxremote.password", \
