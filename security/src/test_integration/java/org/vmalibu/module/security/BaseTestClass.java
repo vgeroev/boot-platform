@@ -29,6 +29,7 @@ public class BaseTestClass {
         registry.add("spring.jpa.properties.hibernate.use_sql_comments", () -> "false");
 //        registry.add("spring.jpa.properties.hibernate.format_sql", () -> "true");
         registry.add("jwkSetUri", () -> "http://stub");
+        registry.add("server.servlet.session.cookie.domain", () -> "localhost");
     }
 
     @TestConfiguration
