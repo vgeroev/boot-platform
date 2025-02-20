@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_user_access_role_fk_user on security_user_access_role(fk_user);
