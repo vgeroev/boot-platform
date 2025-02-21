@@ -1,0 +1,2 @@
+CREATE INDEX IF NOT EXISTS idx_maths_road_map_article_created_at_desc ON maths_road_map_article (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_maths_road_map_article_creator_id ON maths_road_map_article (creator_id);

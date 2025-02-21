@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.0.14
+      author: vmalibu
+      changes:
+        - sqlFile:
+            path: sql/article_table.sql
+            relativeToChangelogFile: true
