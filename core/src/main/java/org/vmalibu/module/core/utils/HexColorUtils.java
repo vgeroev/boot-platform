@@ -1,6 +1,5 @@
 package org.vmalibu.module.core.utils;
 
-import lombok.NonNull;
 import lombok.experimental.UtilityClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -10,8 +9,8 @@ public class HexColorUtils {
     // Hex number valid segment = [00_00_00, FF_FF_FF]
     private static final int MAX_COLOR_NUMBER = 256 * 256 * 256 - 1;
 
-    public static @Nullable Integer parse(@NonNull String hexColor) {
-        if (hexColor.length() != 6) {
+    public static @Nullable Integer parse(@Nullable String hexColor) {
+        if (hexColor == null || hexColor.length() != 6) {
             return null;
         }
 
