@@ -27,10 +27,11 @@ module org.vmalibu.module.core {
     opens org.vmalibu.module.core.service.tag;
 
     exports org.vmalibu.module.core;
-    exports org.vmalibu.module.core.controller.tag;
+    exports org.vmalibu.module.core.controller.authorized;
     exports org.vmalibu.module.core.database.dao;
     exports org.vmalibu.module.core.database.domainobject;
     exports org.vmalibu.module.core.database.changelog to spring.beans;
     exports org.vmalibu.module.core.service.tag to spring.beans, spring.core, spring.aop;
     exports org.vmalibu.module.core.service.tag.list to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.core.controller.anon;
 }

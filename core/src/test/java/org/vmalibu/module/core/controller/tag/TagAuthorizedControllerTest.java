@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.shaded.org.apache.commons.lang3.RandomStringUtils;
 import org.vmalibu.module.core.CoreConsts;
 import org.vmalibu.module.core.WebMvcTestConfiguration;
+import org.vmalibu.module.core.controller.authorized.TagAuthorizedController;
 import org.vmalibu.module.core.service.tag.TagDTO;
 import org.vmalibu.module.core.service.tag.TagService;
 import org.vmalibu.module.core.utils.HexColorUtils;

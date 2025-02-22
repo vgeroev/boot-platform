@@ -1,4 +1,4 @@
-package org.vmalibu.module.core.controller.tag;
+package org.vmalibu.module.core.controller.anon;
 
 import lombok.AllArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;

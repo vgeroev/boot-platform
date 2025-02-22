@@ -1,4 +1,4 @@
-package org.vmalibu.module.core.controller.tag;
+package org.vmalibu.module.core.controller.authorized;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
