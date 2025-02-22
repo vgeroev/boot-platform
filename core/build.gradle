@@ -1,0 +1,40 @@
+ext.moduleName = 'org.vmalibu.module.core'
+
+sourceSets {
+    main {
+        java.srcDir 'src/main/java'
+        resources {
+            srcDirs "src/main/resources"
+        }
+    }
+    test {
+        java.srcDir 'src/test/java'
+        compileClasspath += main.output
+        runtimeClasspath += main.output
+    }
+    test_integration {
+        java.srcDir 'src/test_integration/java'
+        resources.srcDir 'src/test_integration/resources'
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+    }
+}
+
+configurations {
+    testCompileCompile.extendsFrom mainCompile
+    testCompileRuntime.extendsFrom mainRuntime
+
+    test_integrationCompile.extendsFrom testCompile
+    test_integrationRuntime.extendsFrom testRuntime
+    test_integrationImplementation.extendsFrom testImplementation
+    test_integrationCompileOnly.extendsFrom testCompileOnly
+}
+
+processResources {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
+dependencies {
+    implementation project(":modules")
+    implementation project(":security")
+}

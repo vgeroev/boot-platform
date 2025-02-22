@@ -96,6 +96,7 @@ allprojects {
 dependencies {
     implementation project(':modules')
     implementation project(':security')
+    implementation project(':core')
     implementation project(':maths-road-map')
 //    implementation project(':exercises')
 }

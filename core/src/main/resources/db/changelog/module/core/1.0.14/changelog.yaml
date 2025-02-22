@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1.0.14
+      author: vmalibu
+      changes:
+        - createTable:
+            tableName: core_tag
+            remarks: Tags
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_tag
+                    nullable: false
+              - column:
+                  name: version
+                  type: smallint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: color
+                  type: integer
+                  constraints:
+                    nullable: false
+
+        - sql:
+            sql: "CREATE INDEX IF NOT EXISTS idx_core_tag_name_trgm ON core_tag using gin (name gin_trgm_ops)"
+        - sql:
+            sql: "CREATE UNIQUE INDEX IF NOT EXISTS idx_core_tag_name_unique ON core_tag (name)"
+
+        - createSequence:
+            sequenceName: core_tag_seq
+            dataType: bigint
+            startValue: 1
+            incrementBy: 5
