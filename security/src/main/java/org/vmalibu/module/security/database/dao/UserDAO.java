@@ -23,6 +23,10 @@ public interface UserDAO extends PaginatedDomainObjectRepository<Long, DBUser> {
     Optional<DBUser> findWithAccessRoles(@Param("id") long id);
 
     @EntityGraph(attributePaths = { DBUser.Fields.accessRoles + "." + DBAccessRole.Fields.privileges })
+    @Query("from DBUser where id = :id")
+    Optional<DBUser> findWithPrivileges(@Param("id") long id);
+
+    @EntityGraph(attributePaths = { DBUser.Fields.accessRoles + "." + DBAccessRole.Fields.privileges })
     @Query("from DBUser where username = :username")
     Optional<DBUser> findWithPrivileges(@Param("username") String username);
 

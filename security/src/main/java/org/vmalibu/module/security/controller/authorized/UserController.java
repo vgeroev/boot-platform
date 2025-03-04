@@ -15,8 +15,8 @@ import org.vmalibu.module.security.authorization.controller.privilege.AccessPerm
 import org.vmalibu.module.security.authorization.controller.privilege.PrivilegeAccess;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.module.security.database.domainobject.DBUser;
-import org.vmalibu.module.security.service.user.UserDTO;
 import org.vmalibu.module.security.service.user.UserService;
+import org.vmalibu.module.security.service.user.UserWithPrivilegesDTO;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
@@ -43,9 +43,9 @@ public class UserController {
                     )
             }
     )
-    public UserDTO getLoggedInUser(@Parameter(hidden = true) UserSource userSource) throws PlatformException {
+    public UserWithPrivilegesDTO getLoggedInUser(@Parameter(hidden = true) UserSource userSource) throws PlatformException {
         long id = userSource.getId();
-        UserDTO user = userService.findById(id);
+        UserWithPrivilegesDTO user = userService.findWithPrivileges(id);
         if (user == null) {
             throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DBUser.class, id);
         }

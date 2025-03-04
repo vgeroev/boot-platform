@@ -16,6 +16,7 @@ import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 @Service
 @AllArgsConstructor
@@ -38,16 +39,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
+    public @Nullable UserWithPrivilegesDTO findWithPrivileges(long id) {
+        return getUserWithPrivileges(() -> userDAO.findWithPrivileges(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public @Nullable UserWithPrivilegesDTO findWithPrivileges(@NonNull String username) {
-        Optional<DBUser> oUser = userDAO.findWithPrivileges(username);
-        if (oUser.isEmpty()) {
-            return null;
-        }
-
-        DBUser user = oUser.get();
-        Map<String, Set<AccessOp>> privileges = mergePrivileges(user.getAccessRoles());
-
-        return new UserWithPrivilegesDTO(UserDTO.from(user), privileges);
+        return getUserWithPrivileges(() -> userDAO.findWithPrivileges(username));
     }
 
     @Override
@@ -103,6 +102,18 @@ public class UserServiceImpl implements UserService {
         if (!StringUtils.hasText(value)) {
             throw GeneralExceptionFactory.buildEmptyValueException(DBUser.class, field);
         }
+    }
+
+    private UserWithPrivilegesDTO getUserWithPrivileges(Supplier<Optional<DBUser>> userSupplier) {
+        Optional<DBUser> oUser = userSupplier.get();
+        if (oUser.isEmpty()) {
+            return null;
+        }
+
+        DBUser user = oUser.get();
+        Map<String, Set<AccessOp>> privileges = mergePrivileges(user.getAccessRoles());
+
+        return new UserWithPrivilegesDTO(UserDTO.from(user), privileges);
     }
 
     private Map<String, Set<AccessOp>> mergePrivileges(Set<DBAccessRole> accessRoles) {

@@ -12,6 +12,8 @@ public interface UserService {
 
     @Nullable UserDTO findByUsername(@NonNull String username);
 
+    @Nullable UserWithPrivilegesDTO findWithPrivileges(long id);
+
     @Nullable UserWithPrivilegesDTO findWithPrivileges(@NonNull String username);
 
     @NonNull UserDTO create(@NonNull String username, @NonNull String password) throws PlatformException;
