@@ -2,12 +2,12 @@ import {
   HttpCallerFactory,
   HttpRequestMethod,
 } from "../../../../hook/useHttpHook";
-import { UserModel } from "../../model/UserModel";
+import { UserWithPrivilegesModel } from "../../model/UserModelWithPrivileges";
 import { SecurityBaseRequest } from "./SecurityBaseRequest";
 
-export class GetLoggedInUser extends SecurityBaseRequest<UserModel> {
+export class GetLoggedInUserRequest extends SecurityBaseRequest<UserWithPrivilegesModel> {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(UserModel, httpCallerFactory);
+    super(UserWithPrivilegesModel, httpCallerFactory);
   }
 
   public isAuthorized(): boolean {
@@ -21,7 +21,9 @@ export class GetLoggedInUser extends SecurityBaseRequest<UserModel> {
     return "user/logged-in";
   }
 
-  public static build(httpCallerFactory: HttpCallerFactory): GetLoggedInUser {
-    return new GetLoggedInUser(httpCallerFactory);
+  public static build(
+    httpCallerFactory: HttpCallerFactory,
+  ): GetLoggedInUserRequest {
+    return new GetLoggedInUserRequest(httpCallerFactory);
   }
 }

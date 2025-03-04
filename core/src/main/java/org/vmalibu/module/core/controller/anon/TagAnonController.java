@@ -45,9 +45,5 @@ public class TagAnonController {
             this.searchText = params.getOrDefault(JSON_SEARCH_TEXT, null);
         }
 
-        @Override
-        protected int getMaxPageSize() {
-            return 1024;
-        }
     }
 }

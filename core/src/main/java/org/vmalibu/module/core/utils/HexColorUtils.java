@@ -1,6 +1,7 @@
 package org.vmalibu.module.core.utils;
 
 import lombok.experimental.UtilityClass;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 @UtilityClass
@@ -26,6 +27,16 @@ public class HexColorUtils {
 
     public static boolean isInColorRange(int color) {
         return color >= 0 && color <= MAX_COLOR_NUMBER;
+    }
+
+    public static @NonNull String getPaddedHex(int hex) {
+        String hexString = Integer.toHexString(hex);
+        int cPaddedZeros = 6 - hexString.length();
+        if (cPaddedZeros <= 0) {
+            return hexString;
+        }
+
+        return "0".repeat(cPaddedZeros) + hexString;
     }
 
 }

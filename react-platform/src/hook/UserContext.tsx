@@ -1,9 +1,10 @@
 import React, { createContext } from "react";
-import { UserModel } from "../module/security/model/UserModel";
+import { ModelFactory } from "../model/BaseModel";
+import { UserWithPrivilegesModel } from "../module/security/model/UserModelWithPrivileges";
 
 export interface LoggedInUser {
-  user?: UserModel;
-  setUser: (u: UserModel | undefined) => void;
+  user?: UserWithPrivilegesModel;
+  setUser: (u: UserWithPrivilegesModel | undefined) => void;
 }
 
 export const UserContext = createContext<LoggedInUser>({
@@ -15,12 +16,16 @@ export const UserProvider = ({ children }: any) => {
   const KEY = "loggedInUser";
   const [user, setUser] = React.useState(() => {
     const saved = localStorage.getItem(KEY);
-    return saved ? JSON.parse(saved) : null;
+    return saved
+      ? new ModelFactory(UserWithPrivilegesModel).getModel(
+          JSON.parse(saved).data,
+        )
+      : undefined;
   });
 
   React.useEffect(() => {
     if (user) {
-      localStorage.setItem(KEY, JSON.stringify(user));
+      localStorage.setItem(KEY, JSON.stringify(user.getRawData()));
     } else {
       localStorage.removeItem(KEY);
     }

@@ -5,6 +5,7 @@ import { UserProvider } from "./hook/UserContext";
 import BaseLayout from "./layout/BaseLayout";
 import { moduleRoutes as mathsRoadMapModuleRoutes } from "./module/maths-road-map/route/MathsRoadMapRouteGetter";
 import { moduleRoutes as securityRoutes } from "./module/security/route/SecurityRouteGetter";
+import { moduleRoutes as coreRoutes } from "./module/core/route/CoreRouteGetter";
 import Home from "./page/home/Home";
 import { ModuleRoute } from "./route/ModuleRoute";
 
@@ -31,6 +32,7 @@ function App() {
   );
   routes = routes
     .concat(getModuleRoutes(securityRoutes))
+    .concat(getModuleRoutes(coreRoutes))
     .concat(getModuleRoutes(mathsRoadMapModuleRoutes));
 
   routes.push(

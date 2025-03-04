@@ -5,6 +5,10 @@ export abstract class BaseModel {
     this.data = data;
   }
 
+  public getRawData(): any {
+    return this.data;
+  }
+
   public getStringOptional(fieldName?: string): string | undefined {
     return this.getValue<string>(
       (v) => BaseModel.parsePrimitive<string>(v, "string"),
@@ -195,7 +199,7 @@ export abstract class BaseModel {
 }
 
 export interface IModelParser {
-  new(...args: any[]): any;
+  new (...args: any[]): any;
   parse(data: Record<string, unknown>): InstanceType<this>;
 }
 
@@ -203,7 +207,7 @@ export class ModelFactory<
   I extends IModelParser,
   M extends BaseModel = InstanceType<I>,
 > {
-  constructor(private readonly model: I) { }
+  constructor(private readonly model: I) {}
 
   public getModel(data: any): M {
     return this.model.parse(data);

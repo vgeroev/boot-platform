@@ -46,7 +46,7 @@ public class TagAuthorizedController {
        return tagService.create(request.name.trim(), color);
     }
 
-    @PostMapping("/remove")
+    @DeleteMapping("/remove")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @AccessPermission(
             values = @PrivilegeAccess(privilege = TagManagingPrivilege.class, ops = AccessOp.DELETE)
@@ -59,7 +59,7 @@ public class TagAuthorizedController {
     public static class CreateTagRequest {
 
         static final String JSON_NAME = "name";
-        static final String JSON_HEX_COLOR = "hex_color";
+        static final String JSON_HEX_COLOR = "hexColor";
 
         @JsonProperty(JSON_NAME)
         private String name;

@@ -3,6 +3,7 @@ package org.vmalibu.module.core.service.tag;
 import lombok.Builder;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.vmalibu.module.core.database.domainobject.DBTag;
+import org.vmalibu.module.core.utils.HexColorUtils;
 
 @Builder
 public record TagDTO(long id, @NonNull String name, @NonNull String hexColor) {
@@ -15,7 +16,7 @@ public record TagDTO(long id, @NonNull String name, @NonNull String hexColor) {
         return TagDTO.builder()
                 .id(tag.getId())
                 .name(tag.getName())
-                .hexColor(tag.getHexColor())
+                .hexColor(HexColorUtils.getPaddedHex(tag.getColor()))
                 .build();
     }
 }

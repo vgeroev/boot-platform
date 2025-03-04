@@ -9,6 +9,7 @@ import org.vmalibu.module.core.BaseTestClass;
 import org.vmalibu.module.core.database.dao.TagDAO;
 import org.vmalibu.module.core.database.domainobject.DBTag;
 import org.vmalibu.module.core.service.tag.list.TagPagingRequest;
+import org.vmalibu.module.core.utils.HexColorUtils;
 import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
@@ -41,7 +42,7 @@ class TagServiceImplTest extends BaseTestClass {
         Assertions.assertThat(found).isNotNull()
                 .returns(saved.getId(), TagDTO::id)
                 .returns(name, TagDTO::name)
-                .returns(Integer.toHexString(color), TagDTO::hexColor);
+                .returns(HexColorUtils.getPaddedHex(color), TagDTO::hexColor);
 
         //--------------------------------------------------------------------------------------------------------------
         long incorrectId = 12345L;
@@ -155,13 +156,13 @@ class TagServiceImplTest extends BaseTestClass {
         TagDTO tagDTO = tagService.create(name, color);
         Assertions.assertThat(tagDTO).isNotNull()
                 .returns(name, TagDTO::name)
-                .returns(Integer.toHexString(color), TagDTO::hexColor);
+                .returns(HexColorUtils.getPaddedHex(color), TagDTO::hexColor);
 
         DBTag tag = tagDAO.findById(tagDTO.id()).orElse(null);
         Assertions.assertThat(tag).isNotNull()
                 .returns(tagDTO.id(), DBTag::getId)
                 .returns(name, DBTag::getName)
-                .returns(Integer.toHexString(color), DBTag::getHexColor);
+                .returns(HexColorUtils.getPaddedHex(color), d -> HexColorUtils.getPaddedHex(d.getColor()));
     }
 
     @Test

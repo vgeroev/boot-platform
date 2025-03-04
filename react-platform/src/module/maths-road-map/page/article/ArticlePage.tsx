@@ -83,7 +83,7 @@ const ArticlePage: React.FC<{}> = () => {
         <Col flex="auto">
           <Title level={2}>{getArticleModel?.article.title}</Title>
         </Col>
-        {getEditButton(articleId, loggedInUser, getArticleModel)}
+        {getEditButton(articleId, loggedInUser?.user, getArticleModel)}
       </Row>
       <Title level={5}>{getArticleModel?.article.creator.username}</Title>
       <Title level={5}>
@@ -139,7 +139,7 @@ const ArticlePage: React.FC<{}> = () => {
         // scrolling="auto"
         // overflow="auto"
         className="iframe-article"
-      // scrolling="no"
+        // scrolling="no"
       />
       {/* </div> */}
     </Spin>

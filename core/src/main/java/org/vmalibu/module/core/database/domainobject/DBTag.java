@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldNameConstants;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.id.OptimizableGenerator;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
@@ -50,8 +49,5 @@ public class DBTag extends VersionedDomainObject<Long> {
     @Column(name = DB_COLOR, nullable = false)
     private int color;
 
-    public @NonNull String getHexColor() {
-        return Integer.toHexString(color);
-    }
 }
 

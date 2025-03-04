@@ -1,18 +1,17 @@
-import { Alert, Button } from "antd";
+import { Button } from "antd";
 import React, { useContext } from "react";
 import { Header } from "antd/es/layout/layout";
 import LoggedUserInfo from "./LoggedUserInfo";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import Spinner from "../component/spinner/Spinner";
 import {
   getLoginRoute,
   getRegisterRoute,
 } from "../module/security/route/SecurityRoutes";
 import { useHttpRequest } from "../hook/useHttpRequestHook";
-import { GetLoggedInUser } from "../module/security/service/request/GetLoggedInUserRequest";
-import { UserModel } from "../module/security/model/UserModel";
+import { GetLoggedInUserRequest } from "../module/security/service/request/GetLoggedInUserRequest";
 import { LogoutRequest } from "../module/security/service/request/LogoutRequest";
 import { UserContext } from "../hook/UserContext";
+import { UserWithPrivilegesModel } from "../module/security/model/UserModelWithPrivileges";
 
 const hStyle: React.CSSProperties = {
   textAlign: "center",
@@ -38,17 +37,13 @@ const hStyle: React.CSSProperties = {
 };
 
 function getHeaderTitle(pathname: string): string {
-  if (pathname.startsWith("/exercises")) {
-    return "Exercises";
-  }
-
   return "Boot platform";
 }
 
 const BaseHeader: React.FC<{}> = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const getLoggedInUserRequest = useHttpRequest(GetLoggedInUser);
+  const getLoggedInUserRequest = useHttpRequest(GetLoggedInUserRequest);
   const logoutRequest = useHttpRequest(LogoutRequest);
   const { user, setUser } = useContext(UserContext);
 
@@ -57,7 +52,7 @@ const BaseHeader: React.FC<{}> = () => {
       onCompletion: (response) => {
         const status = response.status;
         if (status === 200) {
-          setUser(UserModel.parse(response.data));
+          setUser(UserWithPrivilegesModel.parse(response.data));
         } else {
           console.log("Failed to fetch user ", response);
           setUser(undefined);
@@ -70,7 +65,7 @@ const BaseHeader: React.FC<{}> = () => {
   if (user) {
     authStatusBar = (
       <LoggedUserInfo
-        username={user.username}
+        username={user.user.username}
         onLogout={() => {
           logoutRequest.exec({
             onCompletion: () => {
