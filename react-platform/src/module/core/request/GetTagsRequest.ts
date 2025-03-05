@@ -18,7 +18,7 @@ export class GetTagListRequest extends CoreBaseRequest<TagListModel> {
     return "get";
   }
   public getRelativeApiPath(): string {
-    return "/tag/list";
+    return "tag/list";
   }
 
   public static build(httpCallerFactory: HttpCallerFactory): GetTagListRequest {

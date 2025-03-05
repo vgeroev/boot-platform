@@ -18,7 +18,7 @@ export class RemoveTagRequest extends CoreBaseRequest<EmptyModel, number[]> {
     return "delete";
   }
   public getRelativeApiPath(): string {
-    return "/tag/remove";
+    return "tag/remove";
   }
 
   public static build(httpCallerFactory: HttpCallerFactory): RemoveTagRequest {

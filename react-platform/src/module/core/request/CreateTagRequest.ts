@@ -23,7 +23,7 @@ export class CreateTagRequest extends CoreBaseRequest<TagModel> {
     return "post";
   }
   public getRelativeApiPath(): string {
-    return "/tag/create";
+    return "tag/create";
   }
 
   public static build(httpCallerFactory: HttpCallerFactory): CreateTagRequest {
