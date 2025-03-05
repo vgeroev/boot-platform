@@ -2,12 +2,12 @@ import {
   HttpCallerFactory,
   HttpRequestMethod,
 } from "../../../../hook/useHttpHook";
-import { ArticleListModel } from "../../model/ArticleListModel";
+import { ArticlePageListModel } from "../../model/ArticlePageListModel";
 import { MathsRoadMapBaseRequest } from "./MathsRoadMapBaseRequest";
 
-export class GetArticleListRequest extends MathsRoadMapBaseRequest<ArticleListModel> {
+export class GetArticleListRequest extends MathsRoadMapBaseRequest<ArticlePageListModel> {
   constructor(httpCallerFactory: HttpCallerFactory) {
-    super(ArticleListModel, httpCallerFactory);
+    super(ArticlePageListModel, httpCallerFactory);
   }
 
   public isAuthorized(): boolean {

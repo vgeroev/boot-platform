@@ -1,13 +1,16 @@
 package org.vmalibu.module.mathsroadmap.service.article;
 
 import jakarta.persistence.criteria.*;
+import lombok.AllArgsConstructor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.vmalibu.module.core.service.tag.TagDTO;
+import org.vmalibu.module.core.service.tag.TagService;
+import org.vmalibu.module.core.service.tag.list.TagPagingRequest;
 import org.vmalibu.module.mathsroadmap.database.dao.ArticleDAO;
 import org.vmalibu.module.mathsroadmap.database.dao.ArticleLatexDAO;
 import org.vmalibu.module.mathsroadmap.database.dao.ArticleUserLikesDAO;
@@ -16,44 +19,30 @@ import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleLatex;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleUserLikes;
 import org.vmalibu.module.mathsroadmap.exception.MathsRoadMapExceptionFactory;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListElement;
+import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListTags;
+import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagination;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.module.security.database.dao.UserDAO;
 import org.vmalibu.module.security.database.domainobject.DBUser;
-import org.vmalibu.modules.database.paging.DomainObjectPagination;
-import org.vmalibu.modules.database.paging.DomainObjectPaginationImpl;
 import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static org.vmalibu.modules.utils.database.DatabaseFunctionNames.*;
 
 @Service
+@AllArgsConstructor
 public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleDAO articleDAO;
     private final ArticleLatexDAO articleLatexDAO;
     private final UserDAO userDAO;
     private final ArticleUserLikesDAO articleUserLikesDAO;
-    private final DomainObjectPagination<DBArticle, ArticleListElement> domainObjectPagination;
-
-    @Autowired
-    public ArticleServiceImpl(ArticleDAO articleDAO,
-                              ArticleLatexDAO articleLatexDAO,
-                              UserDAO userDAO,
-                              ArticleUserLikesDAO articleUserLikesDAO) {
-        this.articleDAO = articleDAO;
-        this.articleLatexDAO = articleLatexDAO;
-        this.userDAO = userDAO;
-        this.domainObjectPagination = new DomainObjectPaginationImpl<>(articleDAO, ArticleListElement::from);
-        this.articleUserLikesDAO = articleUserLikesDAO;
-    }
+    private final TagService tagService;
 
     @Override
     @Transactional(readOnly = true)
@@ -64,20 +53,33 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional(readOnly = true)
-    public @Nullable ArticleWithCreatorDTO findWithCreator(long id) {
-        Optional<DBArticle> oArticle = articleDAO.findArticleWithCreator(id);
-        return oArticle.map(ArticleWithCreatorDTO::from).orElse(null);
+    public @Nullable ArticlePageDTO findArticlePage(long id) {
+        Optional<DBArticle> oArticle = articleDAO.findArticlePage(id);
+        return oArticle.map(ArticlePageDTO::from).orElse(null);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public @NonNull PaginatedDto<ArticleListElement> findAll(@NonNull ArticlePagingRequest pagingRequest) {
-        return domainObjectPagination.findAll(
+    public @NonNull ArticleListTags findAll(@NonNull ArticlePagingRequest pagingRequest) {
+        PaginatedDto<ArticleListElement> articles = new ArticlePagination(articleDAO).findAll(
                 pagingRequest,
                 buildSpecification(
                         pagingRequest.getSearchText()
                 )
         );
+
+        Set<Long> tags = new HashSet<>();
+        for (ArticleListElement element : articles.getResult()) {
+            tags.addAll(element.tagIds());
+        }
+
+        PaginatedDto<TagDTO> tagList = tagService.findAll(
+                new TagPagingRequest.Builder(0, Integer.MAX_VALUE)
+                        .withFilterIds(tags)
+                        .build()
+        );
+
+        return new ArticleListTags(articles, tagList.getResult());
     }
 
     @Override

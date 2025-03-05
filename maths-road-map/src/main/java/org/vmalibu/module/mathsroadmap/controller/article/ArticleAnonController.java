@@ -7,18 +7,17 @@ import org.springframework.web.bind.annotation.*;
 import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
 import org.vmalibu.module.mathsroadmap.service.article.ArticleService;
-import org.vmalibu.module.mathsroadmap.service.article.ArticleWithCreatorDTO;
-import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListElement;
+import org.vmalibu.module.mathsroadmap.service.article.ArticlePageDTO;
+import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListTags;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticleSortField;
 import org.vmalibu.module.mathsroadmap.service.article.pagemanager.ArticlePageManager;
-import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.database.paging.PaginationForm;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.net.URI;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping(MathsRoadMapConsts.REST_ANON_PREFIX)
@@ -30,20 +29,20 @@ public class ArticleAnonController {
 
     @GetMapping("/article/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ArticleWithCreatorResponse getArticle(
+    public ArticlePageResponse getArticle(
             @PathVariable("id") long id
     ) throws PlatformException {
-        ArticleWithCreatorDTO article = articleService.findWithCreator(id);
+        ArticlePageDTO article = articleService.findArticlePage(id);
         if (article == null) {
             throw GeneralExceptionFactory.buildNotFoundDomainObjectException(DBArticle.class, id);
         }
         URI articleURI = articlePageManager.getArticleURI(article.id());
-        return new ArticleWithCreatorResponse(article, articleURI.toString());
+        return new ArticlePageResponse(article, articleURI.toString());
     }
 
     @GetMapping("/article/list")
     @ResponseStatus(HttpStatus.OK)
-    public PaginatedDto<ArticleListElement> list(
+    public ArticleListTags list(
             @RequestParam(required = false) final Map<String, String> params
     ) throws PlatformException {
         ArticlePaginationForm form = new ArticlePaginationForm(params);

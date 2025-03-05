@@ -24,14 +24,18 @@ module org.vmalibu.module.core {
     opens org.vmalibu.module.core to spring.core;
     opens org.vmalibu.module.core.database.domainobject to org.hibernate.orm.core, spring.core, spring.beans;
     opens org.vmalibu.module.core.database.dao to spring.data.commons;
+    opens org.vmalibu.module.core.service.privilege;
     opens org.vmalibu.module.core.service.tag;
+    opens org.vmalibu.module.core.access;
 
     exports org.vmalibu.module.core;
+    exports org.vmalibu.module.core.access;
     exports org.vmalibu.module.core.controller.authorized;
     exports org.vmalibu.module.core.database.dao;
     exports org.vmalibu.module.core.database.domainobject;
     exports org.vmalibu.module.core.database.changelog to spring.beans;
-    exports org.vmalibu.module.core.service.tag to spring.beans, spring.core, spring.aop;
-    exports org.vmalibu.module.core.service.tag.list to spring.beans, spring.core, spring.aop;
+    exports org.vmalibu.module.core.service.privilege;
+    exports org.vmalibu.module.core.service.tag;
+    exports org.vmalibu.module.core.service.tag.list;
     exports org.vmalibu.module.core.controller.anon;
 }

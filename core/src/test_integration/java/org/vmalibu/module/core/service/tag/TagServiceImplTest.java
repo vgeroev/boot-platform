@@ -52,7 +52,7 @@ class TagServiceImplTest extends BaseTestClass {
 
     @Test
     @DisplayName("Test Case: Finding all tags by name.")
-    void findAllTest() {
+    void findAllByNameTest() {
         String name1 = "name1";
         int color1 = generateColor();
 
@@ -110,6 +110,47 @@ class TagServiceImplTest extends BaseTestClass {
         Assertions.assertThat(result.getResult())
                 .map(TagDTO::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(tag1.getId()))
+                .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(tag2.getId()))
+                .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(tag3.getId()));
+    }
+
+    @Test
+    @DisplayName("Test Case: Finding all tags by ids.")
+    void findAllByIdsTest() {
+        String name1 = "name1";
+        int color1 = generateColor();
+
+        DBTag newTag1 = new DBTag();
+        newTag1.setName(name1);
+        newTag1.setColor(color1);
+        tagDAO.save(newTag1);
+
+        String name2 = "name2";
+        int color2 = generateColor();
+
+        DBTag newTag2 = new DBTag();
+        newTag2.setName(name2);
+        newTag2.setColor(color2);
+        DBTag tag2 = tagDAO.save(newTag2);
+
+        String name3 = "name3";
+        int color3 = generateColor();
+
+        DBTag newTag3 = new DBTag();
+        newTag3.setName(name3);
+        newTag3.setColor(color3);
+        DBTag tag3 = tagDAO.save(newTag3);
+
+        //--------------------------------------------------------------------------------------------------------------
+
+        PaginatedDto<TagDTO> result = tagService.findAll(
+                new TagPagingRequest.Builder(0, Integer.MAX_VALUE)
+                        .withFilterIds(Set.of(tag2.getId(), tag3.getId()))
+                        .build()
+        );
+        Assertions.assertThat(result.getTotalCount()).isEqualTo(2);
+        Assertions.assertThat(result.getResult())
+                .map(TagDTO::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(tag2.getId()))
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(tag3.getId()));
     }

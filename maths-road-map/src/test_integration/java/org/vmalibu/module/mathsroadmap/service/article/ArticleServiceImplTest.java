@@ -12,11 +12,11 @@ import org.vmalibu.module.mathsroadmap.database.dao.ArticleUserLikesDAO;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleUserLikes;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListElement;
+import org.vmalibu.module.mathsroadmap.service.article.list.ArticleListTags;
 import org.vmalibu.module.mathsroadmap.service.article.list.ArticlePagingRequest;
 import org.vmalibu.module.security.authorization.source.AppUserSource;
 import org.vmalibu.module.security.service.user.UserDTO;
 import org.vmalibu.module.security.service.user.UserService;
-import org.vmalibu.modules.database.paging.PaginatedDto;
 import org.vmalibu.modules.module.exception.PlatformException;
 
 import java.util.ArrayList;
@@ -124,13 +124,13 @@ class ArticleServiceImplTest extends BaseTestClass {
 
         //--------------------------------------------------------------------------------------------------------------
 
-        PaginatedDto<ArticleListElement> result = articleService.findAll(
+        ArticleListTags result = articleService.findAll(
                 new ArticlePagingRequest.Builder(0, Integer.MAX_VALUE)
                         .withSearchText("title")
                         .build()
         );
-        Assertions.assertThat(result.getTotalCount()).isEqualTo(2);
-        Assertions.assertThat(result.getResult())
+        Assertions.assertThat(result.articles().getTotalCount()).isEqualTo(2);
+        Assertions.assertThat(result.articles().getResult())
                 .map(ArticleListElement::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO1.id()))
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()));
@@ -140,8 +140,8 @@ class ArticleServiceImplTest extends BaseTestClass {
                         .withSearchText("desc")
                         .build()
         );
-        Assertions.assertThat(result.getTotalCount()).isEqualTo(3);
-        Assertions.assertThat(result.getResult())
+        Assertions.assertThat(result.articles().getTotalCount()).isEqualTo(3);
+        Assertions.assertThat(result.articles().getResult())
                 .map(ArticleListElement::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO1.id()))
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()))
@@ -152,8 +152,8 @@ class ArticleServiceImplTest extends BaseTestClass {
                         .withSearchText(description2)
                         .build()
         );
-        Assertions.assertThat(result.getTotalCount()).isEqualTo(3);
-        Assertions.assertThat(result.getResult())
+        Assertions.assertThat(result.articles().getTotalCount()).isEqualTo(3);
+        Assertions.assertThat(result.articles().getResult())
                 .map(ArticleListElement::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()))
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()))
@@ -164,8 +164,8 @@ class ArticleServiceImplTest extends BaseTestClass {
                         .withSearchText(title1)
                         .build()
         );
-        Assertions.assertThat(result.getTotalCount()).isEqualTo(2);
-        Assertions.assertThat(result.getResult())
+        Assertions.assertThat(result.articles().getTotalCount()).isEqualTo(2);
+        Assertions.assertThat(result.articles().getResult())
                 .map(ArticleListElement::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()))
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO2.id()));
@@ -175,8 +175,8 @@ class ArticleServiceImplTest extends BaseTestClass {
                         .withSearchText("alg")
                         .build()
         );
-        Assertions.assertThat(result.getTotalCount()).isEqualTo(1);
-        Assertions.assertThat(result.getResult())
+        Assertions.assertThat(result.articles().getTotalCount()).isEqualTo(1);
+        Assertions.assertThat(result.articles().getResult())
                 .map(ArticleListElement::id)
                 .anySatisfy(id -> Assertions.assertThat(id).isEqualTo(articleDTO3.id()));
     }

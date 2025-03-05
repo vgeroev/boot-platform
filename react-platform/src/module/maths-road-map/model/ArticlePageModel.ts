@@ -1,7 +1,7 @@
 import { BaseModel } from "../../../model/BaseModel";
 import { UserModel } from "../../security/model/UserModel";
 
-export class ArticleWithCreatorModel extends BaseModel {
+export class ArticlePageModel extends BaseModel {
   public get title(): string {
     return this.getString("title");
   }
@@ -32,7 +32,11 @@ export class ArticleWithCreatorModel extends BaseModel {
     return this.getNumber("dislikes");
   }
 
-  public static parse(data: any): ArticleWithCreatorModel {
-    return new ArticleWithCreatorModel(data);
+  public get tagIds(): Array<number> {
+    return this.getNumberArray("tagIds") || [];
+  }
+
+  public static parse(data: any): ArticlePageModel {
+    return new ArticlePageModel(data);
   }
 }

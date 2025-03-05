@@ -1,15 +1,15 @@
 import { BaseModel } from "../../../model/BaseModel";
-import { ArticleWithCreatorModel } from "./ArticleWithCreatorModel";
+import { ArticlePageModel } from "./ArticlePageModel";
 
 export class GetArticleModel extends BaseModel {
-    public get article(): ArticleWithCreatorModel {
-        return this.getModel(ArticleWithCreatorModel, "article");
-    }
-    public get url(): string {
-        return this.getString("url");
-    }
+  public get article(): ArticlePageModel {
+    return this.getModel(ArticlePageModel, "article");
+  }
+  public get url(): string {
+    return this.getString("url");
+  }
 
-    public static parse(data: any): GetArticleModel {
-        return new GetArticleModel(data);
-    }
+  public static parse(data: any): GetArticleModel {
+    return new GetArticleModel(data);
+  }
 }

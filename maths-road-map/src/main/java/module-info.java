@@ -6,6 +6,7 @@ module org.vmalibu.module.mathsroadmap {
 
     requires org.vmalibu.modules;
     requires org.vmalibu.module.security;
+    requires org.vmalibu.module.core;
 
     requires com.google.common;
     requires spring.beans;
@@ -20,6 +21,7 @@ module org.vmalibu.module.mathsroadmap {
     requires org.hibernate.orm.core;
     requires com.fasterxml.jackson.annotation;
     requires xsync;
+    requires spring.security.core;
 
     opens org.vmalibu.module.mathsroadmap to spring.core;
     opens org.vmalibu.module.mathsroadmap.configuration to spring.core;
@@ -52,5 +54,6 @@ module org.vmalibu.module.mathsroadmap {
     exports org.vmalibu.module.mathsroadmap.service.roadmap.list to spring.beans, spring.core, spring.aop;
     exports org.vmalibu.module.mathsroadmap.service.pdflatexconverter to spring.beans, spring.core, spring.aop;
     exports org.vmalibu.module.mathsroadmap.service.latexconverter.tex4ht to spring.aop, spring.beans, spring.core;
+    exports org.vmalibu.module.mathsroadmap.service.tag;
 
 }

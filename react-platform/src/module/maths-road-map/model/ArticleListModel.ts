@@ -1,8 +1,8 @@
 import { IModelParser } from "../../../model/BaseModel";
 import { PaginatedModel } from "../../../model/PaginatedModel";
-import { ArticleWithCreatorModel } from "./ArticleWithCreatorModel";
+import { ArticlePageModel } from "./ArticlePageModel";
 
-export class ArticleListModel extends PaginatedModel<ArticleWithCreatorModel> {
+export class ArticleListModel extends PaginatedModel<ArticlePageModel> {
   public getPaginatedModel(): IModelParser {
     return ArticleListModel;
   }

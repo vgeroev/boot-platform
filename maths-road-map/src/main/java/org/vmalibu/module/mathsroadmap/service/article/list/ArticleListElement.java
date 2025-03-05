@@ -6,6 +6,7 @@ import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticle;
 import org.vmalibu.module.security.service.user.UserDTO;
 
 import java.util.Date;
+import java.util.Set;
 
 @Builder
 public record ArticleListElement(long id,
@@ -15,7 +16,8 @@ public record ArticleListElement(long id,
                                  String title,
                                  String description,
                                  int likes,
-                                 int dislikes) {
+                                 int dislikes,
+                                 Set<Long> tagIds) {
 
     public static ArticleListElement from(@Nullable DBArticle article) {
         if (article == null) {
@@ -31,6 +33,7 @@ public record ArticleListElement(long id,
                 .description(article.getDescription())
                 .likes(article.getLikes())
                 .dislikes(article.getDislikes())
+                .tagIds(Set.of(article.getTagIds()))
                 .build();
     }
 

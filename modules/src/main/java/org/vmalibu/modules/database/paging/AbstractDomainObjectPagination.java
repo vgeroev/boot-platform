@@ -29,7 +29,10 @@ public abstract class AbstractDomainObjectPagination<T extends DomainObject<?>, 
 
         Pageable pageable = result.getPageable();
         return PaginatedDto.<V>builder()
-                .result(result.get().map(mapper).toList())
+                .result(result.get().map(t -> {
+                    onBeforeElementMapping(t);
+                    return mapper.apply(t);
+                }).toList())
                 .page(pageable.getPageNumber())
                 .pageSize(pageable.getPageSize())
                 .totalCount(result.getTotalElements())
@@ -38,5 +41,7 @@ public abstract class AbstractDomainObjectPagination<T extends DomainObject<?>, 
 
     protected abstract @NonNull Page<U> getResult(@Nullable Specification<T> specification,
                                                   @NonNull PageRequest pageRequest);
+
+    protected void onBeforeElementMapping(@NonNull U element) { }
 
 }

@@ -3,14 +3,15 @@ import {
   LikeOutlined,
   MessageOutlined,
 } from "@ant-design/icons";
-import { Button, Col, Divider, List, Row, Space } from "antd";
+import { Button, Col, Divider, List, Row, Space, Tag } from "antd";
 import Search from "antd/es/input/Search";
 import React from "react";
 import { Link } from "react-router-dom";
 import { useHttpRequest } from "../../../../hook/useHttpRequestHook";
+import { TagModel } from "../../../core/model/TagModel";
 import { ArticleListModel } from "../../model/ArticleListModel";
 import { ArticleModel } from "../../model/ArticleModel";
-import { ArticleWithCreatorModel } from "../../model/ArticleWithCreatorModel";
+import { ArticlePageModel } from "../../model/ArticlePageModel";
 import { getArticleRoute } from "../../route/MathsRoadMapRouteGetter";
 import { GetArticleListRequest } from "../../service/request/GetArticleListRequest";
 
@@ -51,7 +52,7 @@ function prettifyDescription(article: ArticleModel): string | null {
   return description.slice(0, 255) + "...";
 }
 
-function getArticleMeta(article: ArticleWithCreatorModel): string {
+function getArticleMeta(article: ArticlePageModel): string {
   const baseMetaMsg: string = `${article.creator.username}, ${article.createdAt.toString().split("T")[0]}`;
   if (article.updatedAt && article.createdAt !== article.updatedAt) {
     return (
@@ -70,6 +71,8 @@ const ArticleListPage: React.FC<{}> = () => {
   const [articleListModel, setArticleListModel] = React.useState<
     ArticleListModel | undefined
   >(undefined);
+  const [tags, setTags] = React.useState<TagModel[]>([]);
+
   const getArticleListRequest: GetArticleListRequest = useHttpRequest(
     GetArticleListRequest,
   );
@@ -90,7 +93,9 @@ const ArticleListPage: React.FC<{}> = () => {
     getArticleListRequest.exec({
       requestParams: requestParams,
       onSuccess: (httpResponse) => {
-        setArticleListModel(httpResponse.data);
+        let result = httpResponse.data;
+        setArticleListModel(result.articles);
+        setTags(result.tags);
       },
       onFinally: () => {
         setLoading(false);
@@ -148,57 +153,51 @@ const ArticleListPage: React.FC<{}> = () => {
             itemLayout="vertical"
             size="large"
             dataSource={articleListModel?.result}
-            // footer={
-            //   <div>
-            //     <b>ant design</b> footer part
-            //   </div>
-            // }
-            renderItem={(item: any) => (
-              <>
-                <List.Item
-                  key={item.data.id}
-                  actions={[
-                    <IconText
-                      icon={LikeOutlined}
-                      text={item.data.likes}
-                      key="list-vertical-like-o"
-                      style={{
-                        color: getLikesColor(
-                          item.data.likes,
-                          item.data.dislikes,
-                        ),
-                      }}
-                    />,
-                    <IconText
-                      icon={DislikeOutlined}
-                      text={item.data.dislikes}
-                      key="list-vertical-dislike-o"
-                      style={{
-                        color: getDislikesColor(
-                          item.data.likes,
-                          item.data.dislikes,
-                        ),
-                      }}
-                    />,
-                    <IconText
-                      icon={MessageOutlined}
-                      text="0"
-                      key="list-vertical-message"
-                    />,
-                  ]}
-                >
-                  <List.Item.Meta
-                    title={
-                      <Link to={getArticleRoute(item.data.id)}>
-                        {item.data.title}
-                      </Link>
-                    }
-                    description={getArticleMeta(item.data)}
-                  />
-                  {prettifyDescription(item.data)}
-                </List.Item>
-              </>
-            )}
+            renderItem={(item: any) => {
+              let actions = [
+                <IconText
+                  icon={LikeOutlined}
+                  text={item.data.likes}
+                  key="list-vertical-like-o"
+                  style={{
+                    color: getLikesColor(item.data.likes, item.data.dislikes),
+                  }}
+                />,
+                <IconText
+                  icon={DislikeOutlined}
+                  text={item.data.dislikes}
+                  key="list-vertical-dislike-o"
+                  style={{
+                    color: getDislikesColor(
+                      item.data.likes,
+                      item.data.dislikes,
+                    ),
+                  }}
+                />,
+                <IconText
+                  icon={MessageOutlined}
+                  text="0"
+                  key="list-vertical-message"
+                />,
+              ];
+
+              actions.push(getTags(tags, item.data.tagIds));
+              return (
+                <>
+                  <List.Item key={item.data.id} actions={actions}>
+                    <List.Item.Meta
+                      title={
+                        <Link to={getArticleRoute(item.data.id)}>
+                          {item.data.title}
+                        </Link>
+                      }
+                      description={getArticleMeta(item.data)}
+                    />
+                    {prettifyDescription(item.data)}
+                  </List.Item>
+                </>
+              );
+            }}
           />
         </Col>
         <Col span={8}></Col>
@@ -219,6 +218,21 @@ function getDislikesColor(likes: number, dislikes: number): string {
     return "red";
   }
   return "grey";
+}
+
+function getTags(tags: TagModel[], filterIds: number[]): React.ReactElement {
+  return (
+    <>
+      {tags
+        .filter((t) => filterIds.includes(t.id))
+        .sort((x, y) => x.name.localeCompare(y.name))
+        .map((t) => (
+          <Tag key={t.id} color={"#" + t.hexColor}>
+            {t.name}
+          </Tag>
+        ))}
+    </>
+  );
 }
 
 export default ArticleListPage;

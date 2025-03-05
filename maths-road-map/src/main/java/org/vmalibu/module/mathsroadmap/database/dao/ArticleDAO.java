@@ -2,6 +2,7 @@ package org.vmalibu.module.mathsroadmap.database.dao;
 
 import jakarta.persistence.LockModeType;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,8 +17,9 @@ import java.util.Optional;
 @Repository
 public interface ArticleDAO extends PaginatedDomainObjectRepository<Long, DBArticle> {
 
-    @Query("from DBArticle a join fetch a.creator where a.id = :id")
-    Optional<DBArticle> findArticleWithCreator(@Param("id") long id);
+    @EntityGraph(attributePaths = { DBArticle.Fields.creator, DBArticle.Fields.tags })
+    @Query("from DBArticle a where a.id = :id")
+    Optional<DBArticle> findArticlePage(@Param("id") long id);
 
     @Lock(value = LockModeType.PESSIMISTIC_WRITE)
     @Query("select a.id from DBArticle a where a.id = :id")

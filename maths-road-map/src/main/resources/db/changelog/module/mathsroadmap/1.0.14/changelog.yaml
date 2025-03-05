@@ -6,3 +6,42 @@ databaseChangeLog:
         - sqlFile:
             path: sql/article_table.sql
             relativeToChangelogFile: true
+
+        - createTable:
+            tableName: maths_road_map_article_tag
+            remarks: Article tags
+            columns:
+              - column:
+                  name: fk_tag
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: fk_article
+                  type: bigint
+                  constraints:
+                    nullable: false
+
+        - addPrimaryKey:
+            tableName: maths_road_map_article_tag
+            columnNames: fk_tag, fk_article
+            constraintName: pk_tag_article
+
+        - addForeignKeyConstraint:
+            baseTableName: maths_road_map_article_tag
+            baseColumnNames: fk_tag
+            referencedTableName: core_tag
+            referencedColumnNames: id
+            constraintName: fk_tag
+
+        - addForeignKeyConstraint:
+            baseTableName: maths_road_map_article_tag
+            baseColumnNames: fk_article
+            referencedTableName: maths_road_map_article
+            referencedColumnNames: id
+            constraintName: fk_article
+
+        - sql:
+            sql: "CREATE INDEX IF NOT EXISTS idx_maths_road_map_article_tag_fk_article ON maths_road_map_article_tag (fk_article)"
+        - sql:
+            sql: "CREATE INDEX IF NOT EXISTS idx_maths_road_map_article_tag_fk_tag ON maths_road_map_article_tag (fk_tag)"

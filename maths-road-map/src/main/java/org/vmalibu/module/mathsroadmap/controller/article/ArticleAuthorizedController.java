@@ -6,12 +6,10 @@ import lombok.Data;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.vmalibu.module.core.service.tag.TagDTO;
 import org.vmalibu.module.mathsroadmap.MathsRoadMapConsts;
 import org.vmalibu.module.mathsroadmap.database.domainobject.DBArticleLatex;
-import org.vmalibu.module.mathsroadmap.service.article.ArticleDTO;
-import org.vmalibu.module.mathsroadmap.service.article.ArticleLatexDTO;
-import org.vmalibu.module.mathsroadmap.service.article.ArticleService;
-import org.vmalibu.module.mathsroadmap.service.article.ArticleUserLikeAction;
+import org.vmalibu.module.mathsroadmap.service.article.*;
 import org.vmalibu.module.mathsroadmap.service.article.pagemanager.ArticlePageManager;
 import org.vmalibu.module.security.authorization.source.UserSource;
 import org.vmalibu.modules.module.exception.GeneralExceptionFactory;
@@ -19,6 +17,7 @@ import org.vmalibu.modules.module.exception.PlatformException;
 import org.vmalibu.modules.utils.OptionalField;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping(MathsRoadMapConsts.REST_AUTHORIZED_PREFIX)
@@ -29,6 +28,7 @@ public class ArticleAuthorizedController {
 
     private final ArticlePageManager articlePageManager;
     private final ArticleService articleService;
+    private final ArticleTagService articleTagService;
 
     @PostMapping("/article/tex4ht/preview")
     @ResponseStatus(HttpStatus.OK)
@@ -200,6 +200,28 @@ public class ArticleAuthorizedController {
                                                         final UserSource userSource) throws PlatformException {
         ArticleUserLikeAction action = articleService.dislike(id, userSource.getId());
         return new ArticleUserLikeActionResponse(action);
+    }
+
+    @GetMapping("/article/{id}/tags")
+    @ResponseStatus(HttpStatus.OK)
+    public ArticleTagResponse findTags(@PathVariable("id") long id) {
+        return new ArticleTagResponse(articleTagService.findTags(id));
+    }
+
+    @PatchMapping("/article/{id}/add-tag/{tagId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void addTag(@PathVariable("id") long id,
+                       @PathVariable("tagId") long tagId,
+                       final UserSource userSource) throws PlatformException {
+        articleTagService.addTag(id, tagId, userSource);
+    }
+
+    @PatchMapping("/article/{id}/remove-tag/{tagId}")
+    @ResponseStatus(HttpStatus.OK)
+    public void removeTag(@PathVariable("id") long id,
+                          @PathVariable("tagId") long tagId,
+                          final UserSource userSource) throws PlatformException {
+        articleTagService.removeTag(id, tagId, userSource);
     }
 
     private void validateDescription(String description) throws PlatformException {

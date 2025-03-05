@@ -20,6 +20,7 @@ import { GetArticleRequest } from "../../service/request/GetArticleRequest";
 import LatexEditorWithRender from "../../component/latex-editor-with-render/LatexEditorWithRender";
 import { GetArticleLatexRequest } from "../../service/request/GetArticleLatexRequest";
 import { UpdateArticleLatexRequest } from "../../service/request/UpdateArticleLatexRequest";
+import UpdateArticleTagsForm from "./UpdateArticleTagsForm";
 
 interface UpdateArticleForm {
   title?: string;
@@ -155,6 +156,7 @@ const UpdateArticlePage: React.FC<{}> = () => {
         <Switch onChange={switchUpdateForm} />
         {!showUpdateLatexForm &&
           getUpdateForm(
+            identifier,
             form,
             submitArticleUpdate,
             (value) =>
@@ -203,6 +205,7 @@ const UpdateArticlePage: React.FC<{}> = () => {
 };
 
 function getUpdateForm(
+  articleId: number,
   form: FormInstance<any>,
   onFinish: () => void,
   onChangeTitle: (a: string) => void,
@@ -250,6 +253,9 @@ function getUpdateForm(
             </Form.Item>
           </Form>
         </Col>
+      </Row>
+      <Row>
+        <UpdateArticleTagsForm articleId={articleId} />
       </Row>
     </>
   );

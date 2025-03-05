@@ -16,11 +16,12 @@ export const UserProvider = ({ children }: any) => {
   const KEY = "loggedInUser";
   const [user, setUser] = React.useState(() => {
     const saved = localStorage.getItem(KEY);
-    return saved
-      ? new ModelFactory(UserWithPrivilegesModel).getModel(
-          JSON.parse(saved).data,
-        )
-      : undefined;
+    if (!saved) {
+      return undefined;
+    }
+    return new ModelFactory(UserWithPrivilegesModel).getModel(
+      JSON.parse(saved).data,
+    );
   });
 
   React.useEffect(() => {

@@ -20,6 +20,7 @@ import org.vmalibu.modules.module.exception.PlatformException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static org.vmalibu.modules.utils.database.DatabaseFunctionNames.PG_TRGM_CONTAINED_BY;
 
@@ -27,10 +28,12 @@ import static org.vmalibu.modules.utils.database.DatabaseFunctionNames.PG_TRGM_C
 public class TagServiceImpl implements TagService {
 
     private final TagDAO tagDAO;
+    private final List<TagActionsListener> tagActionsListeners;
     private final DomainObjectPagination<DBTag, TagDTO> domainObjectPagination;
 
-    public TagServiceImpl(TagDAO tagDAO) {
+    public TagServiceImpl(TagDAO tagDAO, List<TagActionsListener> tagActionsListeners) {
         this.tagDAO = tagDAO;
+        this.tagActionsListeners = tagActionsListeners;
         this.domainObjectPagination = new DomainObjectPaginationImpl<>(tagDAO, TagDTO::from);
     }
 
@@ -46,7 +49,8 @@ public class TagServiceImpl implements TagService {
         return domainObjectPagination.findAll(
                 request,
                 buildSpecification(
-                        request.getSearchText()
+                        request.getSearchText(),
+                        request.getFilterIds()
                 )
         );
     }
@@ -71,6 +75,7 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional
     public void remove(@NonNull Set<@NonNull Long> ids) {
+        onTagAction(listener -> listener.onBeforeRemove(ids));
         tagDAO.deleteAllById(ids);
     }
 
@@ -87,14 +92,16 @@ public class TagServiceImpl implements TagService {
         }
     }
 
-    private static Specification<DBTag> buildSpecification(
-            String searchText
-    ) {
+    private static Specification<DBTag> buildSpecification(String searchText, Set<Long> filterIds) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
             if (searchText != null) {
                 predicates.add(getSearchTextPredicate(root, cb, searchText));
+            }
+
+            if (filterIds != null) {
+                predicates.add(getFilterIdsPredicate(root, filterIds));
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
@@ -109,5 +116,18 @@ public class TagServiceImpl implements TagService {
         Path<String> name = root.get(DBTag.DB_NAME);
         Expression<Boolean> trgm = cb.function(PG_TRGM_CONTAINED_BY, Boolean.class, cb.literal(value), name);
         return cb.equal(trgm, true);
+    }
+
+    private static Predicate getFilterIdsPredicate(
+            Root<DBTag> root,
+            Set<Long> filterIds
+    ) {
+        return root.get("id").in(filterIds);
+    }
+
+    private void onTagAction(Consumer<TagActionsListener> consumer) {
+        for (TagActionsListener tagActionsListener : tagActionsListeners) {
+            consumer.accept(tagActionsListener);
+        }
     }
 }
