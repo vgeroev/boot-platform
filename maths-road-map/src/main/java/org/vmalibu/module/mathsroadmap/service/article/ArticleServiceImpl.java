@@ -68,18 +68,24 @@ public class ArticleServiceImpl implements ArticleService {
                 )
         );
 
-        Set<Long> tags = new HashSet<>();
+        Set<Long> tagIds = new HashSet<>();
         for (ArticleListElement element : articles.getResult()) {
-            tags.addAll(element.tagIds());
+            tagIds.addAll(element.tagIds());
         }
 
-        PaginatedDto<TagDTO> tagList = tagService.findAll(
-                new TagPagingRequest.Builder(0, Integer.MAX_VALUE)
-                        .withFilterIds(tags)
-                        .build()
-        );
+        List<TagDTO> tags;
+        if (tagIds.isEmpty()) {
+            tags = List.of();
+        } else {
+            PaginatedDto<TagDTO> tagList = tagService.findAll(
+                    new TagPagingRequest.Builder(0, Integer.MAX_VALUE)
+                            .withFilterIds(tagIds)
+                            .build()
+            );
+            tags = tagList.getResult();
+        }
 
-        return new ArticleListTags(articles, tagList.getResult());
+        return new ArticleListTags(articles, tags);
     }
 
     @Override
