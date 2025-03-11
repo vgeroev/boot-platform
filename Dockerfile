@@ -20,14 +20,14 @@ FROM debian:10 AS default
 COPY ./docker/jre /var/lib/jre
 COPY ./docker/install-tl-unx.tar.gz /tmp
 
-ENV PATH=/usr/local/texlive/2024/bin/x86_64-linux:$PATH
+ENV PATH=/usr/local/texlive/2025/bin/x86_64-linux:$PATH
 
 RUN apt-get -y update  \
     && apt-get install -y curl \
     && apt-get install -y perl  \
     && cd /tmp \
     && zcat < install-tl-unx.tar.gz | tar xf - \
-    && cd install-tl-20240702 \
+    && cd install-tl-20250310 \
     && perl ./install-tl --scheme=scheme-medium --no-doc-install --no-interaction \
     && apt-get -y install ghostscript \
     && tlmgr install tikz-cd \
@@ -35,7 +35,7 @@ RUN apt-get -y update  \
     && tlmgr install titlesec \
     && tlmgr install collection-langcyrillic \
     && rm -rf /tmp/install-tl-unx.tar.gz \
-    && rm -rf /tmp/install-tl-20240702 \
+    && rm -rf /tmp/install-tl-20250310 \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
