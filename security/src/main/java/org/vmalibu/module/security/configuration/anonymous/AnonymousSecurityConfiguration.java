@@ -11,7 +11,7 @@ public class AnonymousSecurityConfiguration {
 
     @Bean
     public SecurityFilterChain anonFilterChain(HttpSecurity http) throws Exception {
-        http.securityMatcher("/anon/**")
+        http.securityMatcher("/anon/**", "/actuator/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable);
 

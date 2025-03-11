@@ -4,7 +4,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.springframework.stereotype.Component;
 import org.vmalibu.module.security.SecurityModuleConsts;
 import org.vmalibu.module.security.access.AccessRolePrivilege;
-import org.vmalibu.module.security.access.ActuatorPrivilege;
 import org.vmalibu.module.security.access.UserPrivilege;
 import org.vmalibu.module.security.access.struct.AbstractPrivilege;
 
@@ -18,8 +17,7 @@ public class SecurityPrivilegeGetter implements ModulePrivilegeGetter {
     public @NonNull List<AbstractPrivilege> getPrivileges() {
         return List.of(
                 UserPrivilege.INSTANCE,
-                AccessRolePrivilege.INSTANCE,
-                ActuatorPrivilege.INSTANCE
+                AccessRolePrivilege.INSTANCE
         );
     }
 

@@ -7,13 +7,11 @@ import lombok.Getter;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-import org.vmalibu.module.security.access.ActuatorPrivilege;
 import org.vmalibu.module.security.access.struct.AbstractPrivilege;
 import org.vmalibu.module.security.access.struct.AccessOp;
 import org.vmalibu.module.security.authorization.controller.privilege.AccessPermission;
@@ -33,39 +31,20 @@ public class ControllerMappingInfoGetter {
     private Map<Method, ControllerDetails> controllersDetails;
 
     private final List<RequestMappingHandlerMapping> handlerMappings;
-    private final String actuatorBasePath;
-
 
     @Autowired
-    public ControllerMappingInfoGetter(@NonNull List<RequestMappingHandlerMapping> handlerMappings,
-                                       @Value("${management.endpoints.web.base-path}") String actuatorBasePath) {
+    public ControllerMappingInfoGetter(@NonNull List<RequestMappingHandlerMapping> handlerMappings) {
         this.handlerMappings = handlerMappings;
         this.controllersDetails = new HashMap<>();
-        this.actuatorBasePath = actuatorBasePath;
     }
 
     public @Nullable ControllerDetails getControllersDetails(@NonNull HttpServletRequest request) {
         Method handlerMethod = getHandlerMethod(request);
         if (handlerMethod == null) {
-            if (isActuatorRequest(request)) {
-                return getActuatorControllerDetails();
-            }
             return null;
         }
         return controllersDetails.get(handlerMethod);
     }
-
-    private ControllerDetails getActuatorControllerDetails() {
-        ActuatorPrivilege actuator = ActuatorPrivilege.INSTANCE;
-        return ControllerDetails.builder()
-                .authDetails(new ControllerAuthDetails(PrivilegeJoinType.AND, Map.of(actuator.getKey(), actuator.getAccessOps())))
-                .build();
-    }
-
-    private boolean isActuatorRequest(HttpServletRequest request) {
-        return request.getRequestURI().startsWith(actuatorBasePath);
-    }
-
 
     private Method getHandlerMethod(HttpServletRequest request) {
         for (RequestMappingHandlerMapping handlerMapping : handlerMappings) {
