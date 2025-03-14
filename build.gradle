@@ -55,7 +55,7 @@ allprojects {
 
         // Actuator
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
-        implementation 'io.micrometer:micrometer-registry-prometheus'
+        runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
 
         // https://mvnrepository.com/artifact/org.liquibase/liquibase-core
         implementation 'org.liquibase:liquibase-core:4.27.0'

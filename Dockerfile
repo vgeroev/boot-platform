@@ -46,6 +46,7 @@ COPY jmxremote.password jmxremote.password
 RUN chmod 600 jmxremote.password
 
 COPY --from=build_stage /opt/src/build/libs/boot-platform.jar /var/lib/boot-platform/jar/boot-platform.jar
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 CMD curl -f http://localhost:8078/actuator/health/liveness | grep -q '{"status":"UP"}' || exit 1
 
 # JMX port forwarding
 EXPOSE 1099 1099
