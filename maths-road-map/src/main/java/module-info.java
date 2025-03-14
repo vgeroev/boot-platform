@@ -22,6 +22,7 @@ module org.vmalibu.module.mathsroadmap {
     requires com.fasterxml.jackson.annotation;
     requires xsync;
     requires spring.security.core;
+    requires net.bytebuddy;
 
     opens org.vmalibu.module.mathsroadmap to spring.core;
     opens org.vmalibu.module.mathsroadmap.configuration to spring.core;

@@ -3,12 +3,14 @@ package org.vmalibu.module.core.service.tag;
 import jakarta.persistence.criteria.*;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.vmalibu.module.core.database.dao.TagDAO;
 import org.vmalibu.module.core.database.domainobject.DBTag;
+import org.vmalibu.module.core.service.tag.event.BeforeTagsRemoveEvent;
 import org.vmalibu.module.core.service.tag.list.TagPagingRequest;
 import org.vmalibu.module.core.utils.HexColorUtils;
 import org.vmalibu.modules.database.paging.DomainObjectPagination;
@@ -20,7 +22,6 @@ import org.vmalibu.modules.module.exception.PlatformException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 import static org.vmalibu.modules.utils.database.DatabaseFunctionNames.PG_TRGM_CONTAINED_BY;
 
@@ -28,13 +29,13 @@ import static org.vmalibu.modules.utils.database.DatabaseFunctionNames.PG_TRGM_C
 public class TagServiceImpl implements TagService {
 
     private final TagDAO tagDAO;
-    private final List<TagActionsListener> tagActionsListeners;
     private final DomainObjectPagination<DBTag, TagDTO> domainObjectPagination;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public TagServiceImpl(TagDAO tagDAO, List<TagActionsListener> tagActionsListeners) {
+    public TagServiceImpl(TagDAO tagDAO, ApplicationEventPublisher eventPublisher) {
         this.tagDAO = tagDAO;
-        this.tagActionsListeners = tagActionsListeners;
         this.domainObjectPagination = new DomainObjectPaginationImpl<>(tagDAO, TagDTO::from);
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -75,7 +76,7 @@ public class TagServiceImpl implements TagService {
     @Override
     @Transactional
     public void remove(@NonNull Set<@NonNull Long> ids) {
-        onTagAction(listener -> listener.onBeforeRemove(ids));
+        eventPublisher.publishEvent(new BeforeTagsRemoveEvent(ids));
         tagDAO.deleteAllById(ids);
     }
 
@@ -125,9 +126,4 @@ public class TagServiceImpl implements TagService {
         return root.get("id").in(filterIds);
     }
 
-    private void onTagAction(Consumer<TagActionsListener> consumer) {
-        for (TagActionsListener tagActionsListener : tagActionsListeners) {
-            consumer.accept(tagActionsListener);
-        }
-    }
 }

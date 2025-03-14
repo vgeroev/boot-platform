@@ -36,6 +36,7 @@ module org.vmalibu.module.core {
     exports org.vmalibu.module.core.database.changelog to spring.beans;
     exports org.vmalibu.module.core.service.privilege;
     exports org.vmalibu.module.core.service.tag;
+    exports org.vmalibu.module.core.service.tag.event;
     exports org.vmalibu.module.core.service.tag.list;
     exports org.vmalibu.module.core.controller.anon;
 }
